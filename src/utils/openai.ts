@@ -1,46 +1,63 @@
 import { useOpenAIAuth } from '../store/openAIAuthStore';
-import { TopicTree, GenerateOptions } from '../types/openai';
-import { getMindMapPrompt } from './prompts/mindMapPrompts';
+
+export interface TopicTree {
+  label: string;
+  children?: TopicTree[];
+}
+
+interface GenerateOptions {
+  mode: 'quick' | 'detailed';
+  quickType?: 'simple' | 'complex';
+}
 
 export const useOpenAI = () => {
   const { apiKey, openai } = useOpenAIAuth();
 
-  const generateSubTopics = async (topic: string, options?: GenerateOptions): Promise<TopicTree> => {
+  const generateSubTopics = async (prompt: string, options: GenerateOptions): Promise<TopicTree> => {
     if (!openai) {
       throw new Error('OpenAI client not initialized');
     }
 
     try {
-      const prompt = getMindMapPrompt(topic, options?.mode, options);
+      const systemPrompt = `You are an AI assistant that generates mind map topics. Always respond with valid JSON in the following format:
+{
+  "label": "Main Topic",
+  "children": [
+    {
+      "label": "Subtopic 1",
+      "children": [
+        {
+          "label": "Detail 1.1",
+          "children": []
+        }
+      ]
+    }
+  ]
+}`;
+
+      const userPrompt = `Generate a mind map structure for: "${prompt}"
+Rules:
+- Response must be valid JSON
+- Use the exact format shown
+- Generate 3-5 subtopics
+- Each subtopic should have 2-3 child topics
+- Keep labels concise and clear
+- Ensure all "children" arrays exist (empty array if no children)`;
 
       const response = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
-          {
-            role: "system",
-            content: "あなたはマインドマップ作成を支援するAIアシスタントです。与えられたトピックについて、階層的な構造を持つサブトピックを生成します。必ず指定されたJSON形式で応答してください。"
-          },
-          {
-            role: "user",
-            content: prompt
-          }
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
         ],
         temperature: 0.7,
       });
 
       const content = response.choices[0]?.message?.content;
-      if (!content) {
-        throw new Error('No content generated');
-      }
+      if (!content) throw new Error('No content generated');
 
       try {
         const parsedContent = JSON.parse(content);
-        
-        // 応答の構造を検証
-        if (!parsedContent.label || !Array.isArray(parsedContent.children)) {
-          throw new Error('Invalid response structure');
-        }
-
         return parsedContent;
       } catch (e) {
         console.error('Failed to parse response:', content);
@@ -57,5 +74,3 @@ export const useOpenAI = () => {
     apiKey
   };
 };
-
-export type { TopicTree, GenerateOptions };
