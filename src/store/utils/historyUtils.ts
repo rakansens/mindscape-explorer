@@ -1,8 +1,10 @@
-import { SetStateAction } from 'zustand';
+import { StateCreator } from 'zustand';
 import { MindMapStore } from '../types/mindMapTypes';
 
+type SetFunction = StateCreator<MindMapStore, [], [], MindMapStore>;
+
 export const handleHistory = {
-  undo: (set: SetStateAction<any>, get: () => MindMapStore) => {
+  undo: (set: SetFunction, get: () => MindMapStore) => {
     const { history, currentHistoryIndex } = get();
     if (currentHistoryIndex > 0) {
       const newIndex = currentHistoryIndex - 1;
@@ -17,7 +19,7 @@ export const handleHistory = {
     }
   },
 
-  redo: (set: SetStateAction<any>, get: () => MindMapStore) => {
+  redo: (set: SetFunction, get: () => MindMapStore) => {
     const { history, currentHistoryIndex } = get();
     if (currentHistoryIndex < history.length - 1) {
       const newIndex = currentHistoryIndex + 1;

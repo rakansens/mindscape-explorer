@@ -1,4 +1,3 @@
-import { create } from 'zustand';
 import {
   Connection,
   Edge,
@@ -10,8 +9,6 @@ import {
   applyNodeChanges,
 } from 'reactflow';
 import { v4 as uuidv4 } from 'uuid';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
 import { MindMapStore, MindMapState } from './types/mindMapTypes';
 import { handleExport } from './utils/exportUtils';
 import { handleHistory } from './utils/historyUtils';
@@ -109,6 +106,14 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
       ),
     });
   },
+
+  updateNode: (nodeId: string, updates: Partial<Node>) => {
+    set((state) => ({
+      nodes: state.nodes.map((node) =>
+        node.id === nodeId ? { ...node, ...updates } : node
+      ),
+    }));
+  },
   
   selectNode: (id: string) => {
     set({
@@ -146,18 +151,14 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
   },
   
   exportAsImage: () => handleExport.asImage(),
-  
   exportAsPDF: () => handleExport.asPDF(),
-  
   exportAsJSON: () => handleExport.asJSON(get),
-  
   importFromJSON: (jsonString: string) => handleExport.fromJSON(jsonString, set),
 
   removeChildNodes: (nodeId: string) => {
     const edges = get().edges;
     const nodes = get().nodes;
     
-    // 子ノードのIDを再帰的に収集
     const getChildNodeIds = (parentId: string, collected: Set<string> = new Set()): Set<string> => {
       edges.forEach(edge => {
         if (edge.source === parentId) {
