@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useMindMapStore } from '../store/mindMapStore';
 import { Handle, Position } from 'reactflow';
 import { Sparkles, ChevronDown, ChevronRight } from 'lucide-react';
@@ -6,7 +6,6 @@ import { getNodeLevel, getNodeStyle } from '../utils/nodeUtils';
 import { nodeStyles } from '../styles/commonStyles';
 import { useMenuStore } from '../store/menuStore';
 import { GenerateMenu } from './GenerateMenu';
-import { useTypingAnimation } from '../hooks/useTypingAnimation';
 
 interface CustomNodeProps {
   data: {
@@ -28,8 +27,6 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
   const [inputValue, setInputValue] = useState(data.label);
   const [showMenu, setShowMenu] = useState(false);
   
-  const { displayText: displayedDetailedText, startTyping } = useTypingAnimation(data.detailedText || '', 30);
-  
   const { activeMenuNodeId, setActiveMenuNodeId } = useMenuStore();
   const showGenerateMenu = activeMenuNodeId === id;
 
@@ -40,12 +37,6 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
   
   const store = useMindMapStore();
   const level = getNodeLevel(store.edges, id);
-
-  useEffect(() => {
-    if (!isCollapsed && data.detailedText) {
-      startTyping();
-    }
-  }, [isCollapsed, data.detailedText]);
 
   const handleMouseEnter = () => {
     if (hideTimeout.current) {
@@ -94,11 +85,10 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
     <>
       <Handle type="target" position={Position.Left} />
       <div className="relative group">
-        <div 
-          className={`relative min-w-[120px] max-w-[300px] rounded-xl shadow-lg transition-all duration-300 transform
-            ${getNodeStyle(level)}
-            ${data.selected ? 'ring-2 ring-blue-500' : ''}
-            hover:shadow-xl`}
+        <div className={`relative min-w-[120px] max-w-[300px] rounded-xl shadow-lg transition-all duration-300 transform
+          ${getNodeStyle(level)}
+          ${data.selected ? 'ring-2 ring-blue-500' : ''}
+          hover:shadow-xl`}
         >
           <div className="p-4">
             <div className="flex items-center gap-2">
@@ -130,7 +120,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
             {data.detailedText && !isCollapsed && (
               <div className="mt-2 pt-2 border-t border-white/20 text-white/90 text-sm">
                 <div className="max-h-[200px] overflow-y-auto whitespace-pre-wrap break-words" style={{ width: '250px' }}>
-                  {displayedDetailedText}
+                  {data.detailedText}
                 </div>
               </div>
             )}

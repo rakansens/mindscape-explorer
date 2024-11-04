@@ -3,6 +3,7 @@ import { Panel, useReactFlow } from 'reactflow';
 import { Sparkles } from 'lucide-react';
 import { useMindMapStore } from '../store/mindMapStore';
 import { useOpenAI, TopicTree } from '../utils/openai';
+import { useTypingAnimation } from '../hooks/useTypingAnimation';
 
 type LayoutStyle = 'horizontal' | 'radial';
 
@@ -20,6 +21,7 @@ export function AIGenerator() {
   const { addNode, nodes, updateNodeText } = useMindMapStore();
   const { generateSubTopics, apiKey } = useOpenAI();
   const { fitView } = useReactFlow();
+  const { startTyping } = useTypingAnimation('', 30);
 
   const parseTopicTree = (topicTree: TopicTree): HierarchyItem[] => {
     const hierarchy: HierarchyItem[] = [];
@@ -52,7 +54,16 @@ export function AIGenerator() {
   ) => {
     for (const [index, item] of items.entries()) {
       await new Promise(resolve => setTimeout(resolve, 150));
-      const newNode = addNode(parentNode, item.text);
+      const newNode = addNode(parentNode, '');  // 空のテキストで初期化
+      
+      // テキストアニメーション付きでノードのテキストを更新
+      let currentText = '';
+      for (const char of item.text) {
+        currentText += char;
+        updateNodeText(newNode.id, currentText);
+        await new Promise(resolve => setTimeout(resolve, 30));
+      }
+
       if (item.children && item.children.length > 0) {
         await generateNodes(newNode, item.children, level + 1);
       }
