@@ -1,4 +1,5 @@
 import { useColorSchemeStore } from '../store/colorSchemeStore';
+import { Node as ReactFlowNode } from 'reactflow';
 
 export const getNodeStyle = (level: number) => {
   const { currentScheme } = useColorSchemeStore.getState();
@@ -11,4 +12,13 @@ export const getNodeStyle = (level: number) => {
     default:
       return `${currentScheme.accent} hover:brightness-110`;
   }
+};
+
+export const getNodeProperties = (node: ReactFlowNode) => {
+  return {
+    isTask: node.data?.isTask || false,
+    isCompleted: node.data?.isCompleted || false,
+    detailedText: node.data?.detailedText || '',
+    isCollapsed: node.data?.isCollapsed || false,
+  };
 };
