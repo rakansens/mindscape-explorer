@@ -8,11 +8,11 @@ import {
   addEdge,
   applyEdgeChanges,
   applyNodeChanges,
-  ReactFlowInstance
 } from 'reactflow';
 import { v4 as uuidv4 } from 'uuid';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
+import { useViewStore } from './viewStore';
 
 type Theme = 'light' | 'dark';
 
@@ -29,9 +29,6 @@ type RFState = {
   selectNode: (id: string) => void;
   setTheme: (theme: Theme) => void;
   toggleMinimap: () => void;
-  zoomIn: () => void;
-  zoomOut: () => void;
-  fitView: () => void;
   saveMap: () => void;
   loadMap: () => void;
   exportAsImage: () => void;
@@ -41,17 +38,13 @@ type RFState = {
   updateNode: (nodeId: string, updates: Partial<Node>) => void;
 };
 
-const initialNodes: Node[] = [
-  {
+export const useMindMapStore = create<RFState>((set, get) => ({
+  nodes: [{
     id: '1',
     type: 'custom',
     data: { label: 'Main Topic' },
     position: { x: 0, y: 0 },
-  },
-];
-
-export const useMindMapStore = create<RFState>((set, get) => ({
-  nodes: initialNodes,
+  }],
   edges: [],
   theme: 'light',
   showMinimap: false,
@@ -70,7 +63,6 @@ export const useMindMapStore = create<RFState>((set, get) => ({
       edges: addEdge(connection, get().edges),
     });
   },
-
   addNode: (parentNode: Node, label: string, position?: { x: number; y: number }) => {
     const newNode: Node = {
       id: uuidv4(),
@@ -120,15 +112,6 @@ export const useMindMapStore = create<RFState>((set, get) => ({
   },
   toggleMinimap: () => {
     set((state) => ({ showMinimap: !state.showMinimap }));
-  },
-  zoomIn: () => {
-    // ReactFlowインスタンスを通じて実装される
-  },
-  zoomOut: () => {
-    // ReactFlowインスタンスを通じて実装される
-  },
-  fitView: () => {
-    // ReactFlowインスタンスを通じて実装される
   },
   saveMap: () => {
     const state = {

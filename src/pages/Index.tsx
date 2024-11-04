@@ -2,10 +2,12 @@ import React from 'react';
 import ReactFlow, { 
   Background,
   Controls,
-  ReactFlowProvider 
+  ReactFlowProvider,
+  useReactFlow,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { useMindMapStore } from '../store/mindMapStore';
+import { useViewStore } from '../store/viewStore';
 import CustomNode from '../components/CustomNode';
 import CustomEdge from '../components/CustomEdge';
 import { Toolbar } from '../components/Toolbar';
@@ -21,6 +23,12 @@ const edgeTypes = {
 
 const MindMap = () => {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect } = useMindMapStore();
+  const { setInstance } = useViewStore();
+  const reactFlowInstance = useReactFlow();
+
+  React.useEffect(() => {
+    setInstance(reactFlowInstance);
+  }, [reactFlowInstance, setInstance]);
 
   return (
     <div className="w-screen h-screen bg-gray-50 dark:bg-gray-900">
