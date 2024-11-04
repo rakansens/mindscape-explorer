@@ -79,15 +79,9 @@ export default {
           '0%': { transform: 'rotate(0deg)' },
           '100%': { transform: 'rotate(360deg)' }
         },
-        pulse: {
-          '0%, 100%': { 
-            opacity: '1',
-            boxShadow: '0 0 0 0px rgba(59, 130, 246, 0.5)'
-          },
-          '50%': { 
-            opacity: '0.5',
-            boxShadow: '0 0 0 15px rgba(59, 130, 246, 0)'
-          }
+        softPulse: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.7' }
         }
       },
       animation: {
@@ -96,7 +90,7 @@ export default {
         fadeIn: 'fadeIn 0.3s ease-out',
         typing: 'typing 1s steps(20, end)',
         spin: 'spin 2s linear infinite',
-        pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+        softPulse: 'softPulse 2s ease-in-out infinite'
       },
     },
   },
