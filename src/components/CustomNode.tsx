@@ -33,6 +33,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const generateMenuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  let menuTimeout = useRef<NodeJS.Timeout>();
   let hideTimeout = useRef<NodeJS.Timeout>();
   
   const store = useMindMapStore();
@@ -56,10 +57,15 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
     if (hideTimeout.current) {
       clearTimeout(hideTimeout.current);
     }
-    setActiveMenuNodeId(id);
+    menuTimeout.current = setTimeout(() => {
+      setActiveMenuNodeId(id);
+    }, 1000);
   };
 
   const handleMenuMouseLeave = () => {
+    if (menuTimeout.current) {
+      clearTimeout(menuTimeout.current);
+    }
     hideTimeout.current = setTimeout(() => {
       setActiveMenuNodeId(null);
     }, 300);
