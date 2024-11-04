@@ -3,7 +3,6 @@ import { HierarchyItem } from '../types/common';
 import { TopicTree } from '../types/openai';
 import { theme } from '../styles/theme';
 
-// ノードのレベルを計算
 export const getNodeLevel = (edges: Edge[], nodeId: string): number => {
   let level = 0;
   let currentId = nodeId;
@@ -43,7 +42,6 @@ export const parseTopicTree = (topicTree: TopicTree): HierarchyItem[] => {
   return hierarchy;
 };
 
-// ノードの位置を計算
 export const calculateNodePosition = (
   parentNode: ReactFlowNode | null,
   index: number,
@@ -61,26 +59,25 @@ export const calculateNodePosition = (
     case 'vertical':
       return {
         x: parentNode.position.x + ((index - (totalSiblings - 1) / 2) * spacing.node.vertical.sub),
-        y: parentNode.position.y + spacing.node.vertical.main,
+        y: parentNode.position.y + spacing.node.vertical.main + (parentNode.data?.detailedText ? 150 : 0),
       };
     case 'radial':
       const angleStep = (Math.PI * 0.8) / Math.max(totalSiblings - 1, 1);
       const startAngle = -Math.PI * 0.4;
       const angle = startAngle + (index * angleStep);
-      const radius = spacing.node.radial.main;
+      const radius = spacing.node.radial.main + (parentNode.data?.detailedText ? 100 : 0);
       return {
         x: parentNode.position.x + Math.cos(angle) * radius,
         y: parentNode.position.y + Math.sin(angle) * radius,
       };
     default: // horizontal
       return {
-        x: parentNode.position.x + spacing.node.horizontal.main,
+        x: parentNode.position.x + spacing.node.horizontal.main + (parentNode.data?.detailedText ? 100 : 0),
         y: parentNode.position.y + verticalOffset,
       };
   }
 };
 
-// ノードスタイルを取得
 export const getNodeStyle = (level: number): string => {
   switch(level) {
     case 0:

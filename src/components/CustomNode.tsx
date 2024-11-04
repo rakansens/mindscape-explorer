@@ -6,6 +6,7 @@ import { getNodeLevel, getNodeStyle } from '../utils/nodeUtils';
 import { nodeStyles } from '../styles/commonStyles';
 import { useMenuStore } from '../store/menuStore';
 import { GenerateMenu } from './GenerateMenu';
+import { useTypingAnimation } from '../hooks/useTypingAnimation';
 
 interface CustomNodeProps {
   data: {
@@ -27,6 +28,8 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
   const [inputValue, setInputValue] = useState(data.label);
   const [showMenu, setShowMenu] = useState(false);
   
+  const { displayText: displayedDetailedText, startTyping } = useTypingAnimation(data.detailedText || '', 30);
+  
   const { activeMenuNodeId, setActiveMenuNodeId } = useMenuStore();
   const showGenerateMenu = activeMenuNodeId === id;
 
@@ -37,6 +40,12 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
   
   const store = useMindMapStore();
   const level = getNodeLevel(store.edges, id);
+
+  useEffect(() => {
+    if (!isCollapsed && data.detailedText) {
+      startTyping();
+    }
+  }, [isCollapsed, data.detailedText]);
 
   const handleMouseEnter = () => {
     if (hideTimeout.current) {
@@ -121,7 +130,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
             {data.detailedText && !isCollapsed && (
               <div className="mt-2 pt-2 border-t border-white/20 text-white/90 text-sm">
                 <div className="max-h-[200px] overflow-y-auto whitespace-pre-wrap break-words" style={{ width: '250px' }}>
-                  {data.detailedText}
+                  {displayedDetailedText}
                 </div>
               </div>
             )}
