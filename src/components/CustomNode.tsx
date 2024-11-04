@@ -19,9 +19,11 @@ interface CustomNodeProps {
     detailedText?: string;
   };
   id: string;
+  xPos?: number;
+  yPos?: number;
 }
 
-const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
+const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [inputValue, setInputValue] = useState(data.label);
@@ -90,8 +92,8 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
           const parentNode = store.nodes.find(n => n.id === parentId);
           if (parentNode) {
             store.addNode(parentNode, 'New Node', {
-              x: data.position.x,
-              y: data.position.y + 100
+              x: xPos || 0,
+              y: (yPos || 0) + 100
             });
           }
         }
@@ -103,8 +105,8 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
         const currentNode = store.nodes.find(n => n.id === id);
         if (currentNode) {
           store.addNode(currentNode, 'New Node', {
-            x: currentNode.position.x + 250,
-            y: currentNode.position.y
+            x: (xPos || 0) + 250,
+            y: yPos || 0
           });
         }
       }
