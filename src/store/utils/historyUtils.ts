@@ -4,14 +4,14 @@ import { MindMapStore } from '../types/mindMapTypes';
 type SetFunction = (
   setState: StoreApi<MindMapStore>['setState'],
   getState: StoreApi<MindMapStore>['getState'],
-  store: StoreApi<MindMapStore>
+  store: () => MindMapStore
 ) => void;
 
 export const handleHistory = {
   undo: (
     setState: StoreApi<MindMapStore>['setState'],
     getState: StoreApi<MindMapStore>['getState'],
-    store: StoreApi<MindMapStore>
+    store: () => MindMapStore
   ) => {
     const { history, currentHistoryIndex } = getState();
     if (currentHistoryIndex > 0) {
@@ -30,7 +30,7 @@ export const handleHistory = {
   redo: (
     setState: StoreApi<MindMapStore>['setState'],
     getState: StoreApi<MindMapStore>['getState'],
-    store: StoreApi<MindMapStore>
+    store: () => MindMapStore
   ) => {
     const { history, currentHistoryIndex } = getState();
     if (currentHistoryIndex < history.length - 1) {

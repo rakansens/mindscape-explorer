@@ -51,8 +51,8 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
     });
   },
 
-  undo: () => handleHistory.undo(set, get, get()),
-  redo: () => handleHistory.redo(set, get, get()),
+  undo: () => handleHistory.undo(set, get, get),
+  redo: () => handleHistory.redo(set, get, get),
 
   onNodesChange: (changes: NodeChange[]) => {
     const newNodes = applyNodeChanges(changes, get().nodes);
