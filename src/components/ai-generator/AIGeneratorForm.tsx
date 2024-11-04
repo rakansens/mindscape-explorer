@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import { useAIGenerator } from './useAIGenerator';
+import { LayoutStyleSelector } from './LayoutStyleSelector';
 import { Button } from '@/components/ui/button';
 
 interface AIGeneratorFormProps {
@@ -20,6 +21,7 @@ export const AIGeneratorForm = ({ onClose }: AIGeneratorFormProps) => {
 
   return (
     <div className="bg-white rounded-lg">
+      <LayoutStyleSelector />
       <textarea
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}

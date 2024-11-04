@@ -4,7 +4,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AIGenerator } from "./components/AIGenerator";
+import { Toolbar } from "./components/Toolbar";
+import { APIKeyInput } from "./components/APIKeyInput";
 import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
@@ -13,7 +14,8 @@ const App = () => (
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <AIGenerator />
+        <Toolbar />
+        <APIKeyInput />
         <Toaster />
         <Sonner />
         <BrowserRouter>
