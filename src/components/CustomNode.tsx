@@ -25,7 +25,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [inputValue, setInputValue] = useState(data.label);
-  const [showMenu, setShowMenu] = useState(false);
+  const [showButton, setShowButton] = useState(false);
   
   const { activeMenuNodeId, setActiveMenuNodeId } = useMenuStore();
   const showGenerateMenu = activeMenuNodeId === id;
@@ -33,22 +33,42 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const generateMenuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  let showTimeout = useRef<NodeJS.Timeout>();
   let hideTimeout = useRef<NodeJS.Timeout>();
   
   const store = useMindMapStore();
   const level = getNodeLevel(store.edges, id);
 
-  const handleMouseEnter = () => {
+  const handleNodeMouseEnter = () => {
+    if (hideTimeout.current) {
+      clearTimeout(hideTimeout.current);
+    }
+    showTimeout.current = setTimeout(() => {
+      setShowButton(true);
+    }, 1000);
+  };
+
+  const handleNodeMouseLeave = () => {
+    if (showTimeout.current) {
+      clearTimeout(showTimeout.current);
+    }
+    hideTimeout.current = setTimeout(() => {
+      setShowButton(false);
+      setActiveMenuNodeId(null);
+    }, 300);
+  };
+
+  const handleMenuMouseEnter = () => {
     if (hideTimeout.current) {
       clearTimeout(hideTimeout.current);
     }
     setActiveMenuNodeId(id);
   };
 
-  const handleMouseLeave = () => {
+  const handleMenuMouseLeave = () => {
     hideTimeout.current = setTimeout(() => {
       setActiveMenuNodeId(null);
-    }, 1000);
+    }, 300);
   };
 
   const handleClick = (e: React.MouseEvent) => {
@@ -84,7 +104,11 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
   return (
     <>
       <Handle type="target" position={Position.Left} />
-      <div className="relative group">
+      <div 
+        className="relative group"
+        onMouseEnter={handleNodeMouseEnter}
+        onMouseLeave={handleNodeMouseLeave}
+      >
         <div className={`relative min-w-[120px] max-w-[300px] rounded-xl shadow-lg transition-all duration-300 transform
           ${getNodeStyle(level)}
           ${data.selected ? 'ring-2 ring-blue-500' : ''}
@@ -128,9 +152,10 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
         </div>
 
         <div 
-          className="absolute -right-12 top-1/2 -translate-y-1/2"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
+          className={`absolute -right-12 top-1/2 -translate-y-1/2 transition-opacity duration-300
+            ${showButton ? 'opacity-100' : 'opacity-0'}`}
+          onMouseEnter={handleMenuMouseEnter}
+          onMouseLeave={handleMenuMouseLeave}
         >
           <button
             ref={buttonRef}
