@@ -13,6 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { useViewStore } from './viewStore';
+import { useOpenAI } from '../utils/openai';
 
 type Theme = 'light' | 'dark';
 
@@ -36,6 +37,8 @@ type RFState = {
   exportAsJSON: () => void;
   importFromJSON: (jsonString: string) => void;
   updateNode: (nodeId: string, updates: Partial<Node>) => void;
+  regenerateNode: (nodeId: string) => Promise<void>;
+  removeDescendants: (nodeId: string) => void;
 };
 
 export const useMindMapStore = create<RFState>((set, get) => ({
@@ -186,4 +189,74 @@ export const useMindMapStore = create<RFState>((set, get) => ({
       ),
     }));
   },
+  removeDescendants: (nodeId: string) => {
+    const nodes = get().nodes;
+    const edges = get().edges;
+    
+    // Find all descendant nodes recursively
+    const findDescendants = (id: string): string[] => {
+      const childEdges = edges.filter(e => e.source === id);
+      const childIds = childEdges.map(e => e.target);
+      const descendants = [...childIds];
+      
+      childIds.forEach(childId => {
+        descendants.push(...findDescendants(childId));
+      });
+      
+      return descendants;
+    };
+
+    const descendantIds = findDescendants(nodeId);
+    
+    set({
+      nodes: nodes.filter(node => !descendantIds.includes(node.id)),
+      edges: edges.filter(edge => !descendantIds.includes(edge.target))
+    });
+  },
+
+  regenerateNode: async (nodeId: string) => {
+    const { nodes, edges, removeDescendants } = get();
+    const node = nodes.find(n => n.id === nodeId);
+    
+    if (!node) return;
+
+    try {
+      // Remove existing children
+      removeDescendants(nodeId);
+      
+      // Generate new content based on the node's context
+      const { generateSubTopics } = useOpenAI();
+      const response = await generateSubTopics(node.data.label, {
+        mode: node.data.detailedText ? 'detailed' : 'quick',
+        quickType: 'simple'
+      });
+
+      if (response.children) {
+        const baseYOffset = -150 * (response.children.length - 1) / 2;
+        
+        response.children.forEach((child, index) => {
+          const childPosition = {
+            x: node.position.x + 250,
+            y: node.position.y + baseYOffset + index * 150
+          };
+
+          const newNode = get().addNode(node, child.label, childPosition);
+          
+          if (child.description && node.data.detailedText) {
+            get().updateNode(newNode.id, {
+              ...newNode,
+              data: {
+                ...newNode.data,
+                detailedText: child.description,
+                isCollapsed: true
+              }
+            });
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error regenerating node:', error);
+      throw error;
+    }
+  }
 }));
