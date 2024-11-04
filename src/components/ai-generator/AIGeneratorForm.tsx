@@ -14,20 +14,13 @@ export const AIGeneratorForm = ({ onClose }: AIGeneratorFormProps) => {
 
   const onSubmit = async (e: React.MouseEvent) => {
     e.preventDefault();
-    e.stopPropagation();
     await handleGenerate(prompt);
     setPrompt('');
     onClose?.();
   };
 
-  const handleCancel = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onClose?.();
-  };
-
   return (
-    <div className="bg-white rounded-lg" onClick={(e) => e.stopPropagation()}>
+    <div className="bg-white rounded-lg">
       <LayoutStyleSelector />
       <textarea
         value={prompt}
@@ -39,7 +32,7 @@ export const AIGeneratorForm = ({ onClose }: AIGeneratorFormProps) => {
         <Button
           onClick={onSubmit}
           disabled={isLoading}
-          className="flex-1 bg-blue-500 hover:bg-blue-600 text-white"
+          className="flex-1"
         >
           {isLoading ? (
             <>
@@ -54,9 +47,8 @@ export const AIGeneratorForm = ({ onClose }: AIGeneratorFormProps) => {
           )}
         </Button>
         <Button
-          onClick={handleCancel}
+          onClick={onClose}
           variant="outline"
-          className="px-4 py-2"
         >
           キャンセル
         </Button>

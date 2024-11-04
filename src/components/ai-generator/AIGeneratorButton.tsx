@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { AIGeneratorForm } from './AIGeneratorForm';
+import { Button } from "@/components/ui/button";
 
 export const AIGeneratorButton = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,22 +12,21 @@ export const AIGeneratorButton = () => {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-[100]">
+    <div className="fixed bottom-4 right-4 z-50">
       <Popover open={isOpen} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
-          <button 
-            className="p-3 bg-blue-500 rounded-full text-white hover:bg-blue-600 shadow-lg transition-colors duration-200"
+          <Button 
+            size="icon"
+            className="rounded-full w-12 h-12 bg-blue-500 hover:bg-blue-600"
           >
-            <Sparkles size={24} />
-          </button>
+            <Sparkles className="h-6 w-6 text-white" />
+          </Button>
         </PopoverTrigger>
         <PopoverContent 
           className="w-[400px] p-4"
           side="top"
           align="end"
           sideOffset={16}
-          onInteractOutside={() => setIsOpen(false)}
-          onEscapeKeyDown={() => setIsOpen(false)}
         >
           <AIGeneratorForm onClose={() => setIsOpen(false)} />
         </PopoverContent>
