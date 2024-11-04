@@ -33,9 +33,23 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const generateMenuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  let hideTimeout = useRef<NodeJS.Timeout>();
   
   const store = useMindMapStore();
   const level = getNodeLevel(store.edges, id);
+
+  const handleMouseEnter = () => {
+    if (hideTimeout.current) {
+      clearTimeout(hideTimeout.current);
+    }
+    setActiveMenuNodeId(id);
+  };
+
+  const handleMouseLeave = () => {
+    hideTimeout.current = setTimeout(() => {
+      setActiveMenuNodeId(null);
+    }, 1000);
+  };
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -115,14 +129,13 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
         </div>
 
         <div 
-          className="group relative"
-          onMouseEnter={() => setActiveMenuNodeId(id)}
-          onMouseLeave={() => setActiveMenuNodeId(null)}
+          className="absolute -right-12 top-1/2 -translate-y-1/2"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
         >
           <button
             ref={buttonRef}
-            className={`absolute -right-12 top-1/2 -translate-y-1/2 
-              ${nodeStyles.button} ${nodeStyles.generateButton}
+            className={`${nodeStyles.button} ${nodeStyles.generateButton}
               ${showGenerateMenu ? 'bg-blue-50' : ''}`}
             title="AI生成メニューを開く"
           >
