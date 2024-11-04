@@ -3,12 +3,7 @@ import { useOpenAI } from '../utils/openai';
 import { useMindMapStore } from '../store/mindMapStore';
 import { Button } from './ui/button';
 import { useToast } from '../hooks/use-toast';
-import { Loader2, ToggleLeft, List } from 'lucide-react';
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
+import { Loader2 } from 'lucide-react';
 
 interface GenerateMenuProps {
   nodeId: string;
@@ -46,9 +41,9 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
         mode: mode,
         quickType: mode === 'quick' ? 'simple' : 'detailed',
         structure: {
-          level1: 3,
-          level2: 2,
-          level3: 1
+          level1: 3, // 子ノード3つ
+          level2: 2, // 孫ノード2つ
+          level3: 1  // ひ孫ノード1つ
         }
       });
 
@@ -59,10 +54,12 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
       let addedNodes = 0;
       let yOffset = 0;
 
+      // 子ノードの生成
       for (const [index, child] of response.children.entries()) {
         if (!child.label) continue;
 
         try {
+          // 子ノードの位置を計算
           const childPosition = {
             x: currentNode.position.x + 250,
             y: currentNode.position.y + (index - 1) * 150
@@ -81,10 +78,12 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
             });
           }
 
+          // 孫ノードの生成
           if (child.children && Array.isArray(child.children)) {
             for (const [grandChildIndex, grandChild] of child.children.entries()) {
               if (!grandChild.label) continue;
 
+              // 孫ノードの位置を計算
               const grandChildPosition = {
                 x: childPosition.x + 250,
                 y: childPosition.y + (grandChildIndex - 0.5) * 100
@@ -92,10 +91,12 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
 
               const grandChildNode = await addNode(newNode, grandChild.label, grandChildPosition);
 
+              // ひ孫ノードの生成
               if (grandChild.children && Array.isArray(grandChild.children)) {
                 for (const greatGrandChild of grandChild.children) {
                   if (!greatGrandChild.label) continue;
 
+                  // ひ孫ノードの位置を計算
                   const greatGrandChildPosition = {
                     x: grandChildPosition.x + 250,
                     y: grandChildPosition.y
@@ -138,48 +139,27 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
   };
 
   return (
-    <div className="absolute right-0 top-full mt-2 bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-2 min-w-[200px] z-50 flex gap-2">
-      <HoverCard>
-        <HoverCardTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleGenerate('quick')}
-            disabled={isLoading}
-            className="w-9 h-9"
-          >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <ToggleLeft className="h-4 w-4" />
-            )}
-          </Button>
-        </HoverCardTrigger>
-        <HoverCardContent className="w-40">
+    <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg p-2 min-w-[200px] z-50">
+      <div className="space-y-2">
+        <Button
+          variant="ghost"
+          className="w-full justify-start"
+          onClick={() => handleGenerate('quick')}
+          disabled={isLoading}
+        >
+          {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
           クイック生成
-        </HoverCardContent>
-      </HoverCard>
-
-      <HoverCard>
-        <HoverCardTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleGenerate('detailed')}
-            disabled={isLoading}
-            className="w-9 h-9"
-          >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <List className="h-4 w-4" />
-            )}
-          </Button>
-        </HoverCardTrigger>
-        <HoverCardContent className="w-40">
+        </Button>
+        <Button
+          variant="ghost"
+          className="w-full justify-start"
+          onClick={() => handleGenerate('detailed')}
+          disabled={isLoading}
+        >
+          {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
           詳細生成
-        </HoverCardContent>
-      </HoverCard>
+        </Button>
+      </div>
     </div>
   );
 };
