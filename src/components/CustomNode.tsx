@@ -6,6 +6,7 @@ import { getNodeLevel, getNodeStyle } from '../utils/nodeUtils';
 import { nodeStyles } from '../styles/commonStyles';
 import { useMenuStore } from '../store/menuStore';
 import { GenerateMenu } from './GenerateMenu';
+import { useTypingAnimation } from '../hooks/useTypingAnimation';
 
 interface CustomNodeProps {
   data: {
@@ -26,6 +27,8 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [inputValue, setInputValue] = useState(data.label);
   
+  const { displayText, startTyping, isTyping } = useTypingAnimation(data.label, 30);
+  
   const { activeMenuNodeId, setActiveMenuNodeId } = useMenuStore();
   const showGenerateMenu = activeMenuNodeId === id;
 
@@ -34,6 +37,10 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
   
   const store = useMindMapStore();
   const level = getNodeLevel(store.edges, id);
+
+  useEffect(() => {
+    startTyping();
+  }, [data.label, startTyping]);
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -117,8 +124,11 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
                   autoFocus
                 />
               ) : (
-                <div className="text-white cursor-pointer" onClick={handleClick}>
-                  {data.label}
+                <div 
+                  className={`text-white cursor-pointer overflow-hidden ${isTyping ? 'animate-typing' : ''}`} 
+                  onClick={handleClick}
+                >
+                  {displayText}
                 </div>
               )}
             </div>
