@@ -3,7 +3,7 @@ import { useOpenAI } from '../utils/openai';
 import { useMindMapStore } from '../store/mindMapStore';
 import { Button } from './ui/button';
 import { useToast } from '../hooks/use-toast';
-import { Loader2, Zap, BookOpen, HelpCircle, ListTodo } from 'lucide-react';
+import { Loader2, Zap, BookOpen, CircleQuestion, ListTodo } from 'lucide-react';
 
 interface GenerateMenuProps {
   nodeId: string;
@@ -178,7 +178,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
           disabled={isLoading}
           title="WHY分析"
         >
-          {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <HelpCircle className="h-5 w-5" />}
+          {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <CircleQuestion className="h-5 w-5" />}
         </Button>
         <Button
           variant="ghost"
