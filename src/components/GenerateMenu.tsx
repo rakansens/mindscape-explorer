@@ -26,7 +26,14 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
     }
 
     const currentNode = nodes.find(n => n.id === nodeId);
-    if (!currentNode) return;
+    if (!currentNode) {
+      toast({
+        title: "エラー",
+        description: "ノードが見つかりません",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -35,8 +42,15 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
         quickType: mode === 'quick' ? 'simple' : 'detailed'
       });
 
-      if (response.children) {
-        for (const child of response.children) {
+      if (!response || !response.children || !Array.isArray(response.children)) {
+        throw new Error('Invalid response format from API');
+      }
+
+      let addedNodes = 0;
+      for (const child of response.children) {
+        if (!child.label) continue;
+
+        try {
           const newNode = await addNode(currentNode, child.label);
           if (mode === 'detailed' && child.description) {
             updateNode(newNode.id, {
@@ -48,17 +62,29 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
               }
             });
           }
+          addedNodes++;
+        } catch (error) {
+          console.error('Failed to add node:', error);
         }
       }
 
-      toast({
-        title: "生成完了",
-        description: "新しいノードを生成しました",
-      });
+      if (addedNodes > 0) {
+        toast({
+          title: "生成完了",
+          description: `${addedNodes}個のノードを生成しました`,
+        });
+      } else {
+        toast({
+          title: "警告",
+          description: "ノードを生成できませんでした",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
+      console.error('Generation error:', error);
       toast({
         title: "エラー",
-        description: "ノードの生成に失敗しました",
+        description: error instanceof Error ? error.message : "ノードの生成に失敗しました",
         variant: "destructive",
       });
     } finally {
