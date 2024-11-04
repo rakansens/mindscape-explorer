@@ -1,125 +1,201 @@
 import { create } from 'zustand';
-import { Connection, Edge, EdgeChange, Node as ReactFlowNode, NodeChange, addEdge, applyEdgeChanges, applyNodeChanges } from 'reactflow';
-import { MindMapState } from './types/mindMapTypes';
-import { createNodeSlice } from './slices/nodeSlice';
-import { createLayoutSlice } from './slices/layoutSlice';
-import { createExportSlice } from './slices/exportSlice';
-import { HORIZONTAL_SPACING, VERTICAL_SPACING } from './constants/layoutConstants';
+import {
+  Connection,
+  Edge,
+  EdgeChange,
+  Node,
+  NodeChange,
+  addEdge,
+  applyEdgeChanges,
+  applyNodeChanges,
+} from 'reactflow';
+import { v4 as uuidv4 } from 'uuid';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
-const initialState: MindMapState = {
-  nodes: [
-    {
-      id: '1',
-      type: 'mindNode',
-      data: { label: 'Central Topic' },
-      position: { x: window.innerWidth / 2, y: window.innerHeight / 3 },
-    },
-  ],
-  edges: [],
-  layout: 'horizontal',
-  history: {
-    past: [],
-    present: [],
-    future: [],
-  },
-  isEditing: false,
-  copiedNode: null,
-  theme: 'light',
-  showMinimap: false,
-  flowInstance: null,
-  
-  // These will be overwritten by the slices
-  addNode: () => ({ id: '', type: '', data: {}, position: { x: 0, y: 0 } }),
-  updateNodeText: () => {},
-  updateNodePosition: () => {},
-  updateNodeColor: () => {},
-  deleteNode: () => {},
-  toggleCollapse: () => {},
-  selectNode: () => {},
-  onNodesChange: () => {},
-  onEdgesChange: () => {},
-  onConnect: () => {},
-  setFlowInstance: () => {},
-  setLayout: () => {},
-  calculateLayout: () => {},
-  zoomIn: () => {},
-  zoomOut: () => {},
-  fitView: () => {},
-  setTheme: () => {},
-  toggleMinimap: () => {},
-  saveMap: () => {},
-  loadMap: () => {},
-  exportAsImage: async () => {},
-  exportAsPDF: async () => {},
-  exportAsJSON: () => {},
-  importFromJSON: () => {},
-  autoSave: () => {},
+type Theme = 'light' | 'dark';
+
+type RFState = {
+  nodes: Node[];
+  edges: Edge[];
+  theme: Theme;
+  showMinimap: boolean;
+  onNodesChange: (changes: NodeChange[]) => void;
+  onEdgesChange: (changes: EdgeChange[]) => void;
+  onConnect: (connection: Connection) => void;
+  addNode: (parentNode: Node, label: string) => Node;
+  updateNodeText: (id: string, text: string) => void;
+  selectNode: (id: string) => void;
+  setTheme: (theme: Theme) => void;
+  toggleMinimap: () => void;
+  zoomIn: () => void;
+  zoomOut: () => void;
+  fitView: () => void;
+  saveMap: () => void;
+  loadMap: () => void;
+  exportAsImage: () => void;
+  exportAsPDF: () => void;
+  exportAsJSON: () => void;
+  importFromJSON: (jsonString: string) => void;
 };
 
-export const useMindMapStore = create<MindMapState>((set, get) => ({
-  ...initialState,
-  ...createNodeSlice(set, get),
-  ...createLayoutSlice(set, get),
-  ...createExportSlice(set, get),
+const initialNodes: Node[] = [
+  {
+    id: '1',
+    type: 'custom',
+    data: { label: 'Main Topic' },
+    position: { x: 0, y: 0 },
+  },
+];
 
+export const useMindMapStore = create<RFState>((set, get) => ({
+  nodes: initialNodes,
+  edges: [],
+  theme: 'light',
+  showMinimap: false,
   onNodesChange: (changes: NodeChange[]) => {
     set({
       nodes: applyNodeChanges(changes, get().nodes),
     });
   },
-
   onEdgesChange: (changes: EdgeChange[]) => {
     set({
       edges: applyEdgeChanges(changes, get().edges),
     });
   },
-
   onConnect: (connection: Connection) => {
     set({
       edges: addEdge(connection, get().edges),
     });
   },
+  addNode: (parentNode: Node, label: string) => {
+    const newNode: Node = {
+      id: uuidv4(),
+      type: 'custom',
+      data: { label },
+      position: {
+        x: parentNode.position.x + 250,
+        y: parentNode.position.y,
+      },
+    };
 
-  setFlowInstance: (instance: ReactFlowInstance) => {
-    set({ flowInstance: instance });
+    set({
+      nodes: [...get().nodes, newNode],
+      edges: addEdge(
+        {
+          id: uuidv4(),
+          source: parentNode.id,
+          target: newNode.id,
+          type: 'custom',
+        },
+        get().edges
+      ),
+    });
+
+    return newNode;
   },
-
-  setTheme: (theme: 'light' | 'dark' | 'system') => {
+  updateNodeText: (id: string, text: string) => {
+    set({
+      nodes: get().nodes.map((node) =>
+        node.id === id ? { ...node, data: { ...node.data, label: text } } : node
+      ),
+    });
+  },
+  selectNode: (id: string) => {
+    set({
+      nodes: get().nodes.map((node) =>
+        node.id === id
+          ? { ...node, data: { ...node.data, selected: true } }
+          : { ...node, data: { ...node.data, selected: false } }
+      ),
+    });
+  },
+  setTheme: (theme: Theme) => {
     set({ theme });
-    if (theme === 'system') {
-      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      document.documentElement.classList.toggle('dark', isDark);
-    } else {
-      document.documentElement.classList.toggle('dark', theme === 'dark');
-    }
+    document.documentElement.classList.toggle('dark', theme === 'dark');
   },
-
   toggleMinimap: () => {
     set((state) => ({ showMinimap: !state.showMinimap }));
   },
-
   zoomIn: () => {
-    const { flowInstance } = get();
-    if (!flowInstance) return;
-    flowInstance.zoomIn({ duration: 300 });
+    // ReactFlowインスタンスを通じて実装される
   },
-
   zoomOut: () => {
-    const { flowInstance } = get();
-    if (!flowInstance) return;
-    flowInstance.zoomOut({ duration: 300 });
+    // ReactFlowインスタンスを通じて実装される
+  },
+  fitView: () => {
+    // ReactFlowインスタンスを通じて実装される
   },
 
-  fitView: () => {
-    const { flowInstance } = get();
-    if (!flowInstance) return;
-    flowInstance.fitView({ duration: 300, padding: 0.2 });
+  saveMap: () => {
+    const state = {
+      nodes: get().nodes,
+      edges: get().edges,
+    };
+    localStorage.setItem('mindmap-state', JSON.stringify(state));
+  },
+
+  loadMap: () => {
+    const savedState = localStorage.getItem('mindmap-state');
+    if (savedState) {
+      const { nodes, edges } = JSON.parse(savedState);
+      set({ nodes, edges });
+    }
+  },
+
+  exportAsImage: async () => {
+    const element = document.querySelector('.react-flow') as HTMLElement;
+    if (!element) return;
+
+    const canvas = await html2canvas(element, {
+      backgroundColor: null,
+    });
+
+    const link = document.createElement('a');
+    link.download = 'mindmap.png';
+    link.href = canvas.toDataURL();
+    link.click();
+  },
+
+  exportAsPDF: async () => {
+    const element = document.querySelector('.react-flow') as HTMLElement;
+    if (!element) return;
+
+    const canvas = await html2canvas(element, {
+      backgroundColor: null,
+    });
+
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF({
+      orientation: 'landscape',
+      unit: 'px',
+      format: [canvas.width, canvas.height],
+    });
+
+    pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+    pdf.save('mindmap.pdf');
+  },
+
+  exportAsJSON: () => {
+    const state = {
+      nodes: get().nodes,
+      edges: get().edges,
+    };
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'mindmap.json';
+    link.click();
+    URL.revokeObjectURL(url);
+  },
+
+  importFromJSON: (jsonString: string) => {
+    try {
+      const { nodes, edges } = JSON.parse(jsonString);
+      set({ nodes, edges });
+    } catch (error) {
+      console.error('Failed to import JSON:', error);
+    }
   },
 }));
-
-// 自動保存の設定
-if (typeof window !== 'undefined') {
-  setInterval(() => {
-    useMindMapStore.getState().autoSave();
-  }, 60000);
-}
