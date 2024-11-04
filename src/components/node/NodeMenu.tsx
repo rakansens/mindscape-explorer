@@ -30,7 +30,7 @@ export const NodeMenu: React.FC<NodeMenuProps> = ({ id, showButton, setShowButto
     }
   }, [showGenerateMenu, setShowButton]);
 
-  const handleMenuMouseEnter = () => {
+  const handleGenerateButtonMouseEnter = () => {
     if (hideTimeout.current) {
       clearTimeout(hideTimeout.current);
     }
@@ -41,7 +41,7 @@ export const NodeMenu: React.FC<NodeMenuProps> = ({ id, showButton, setShowButto
     setShowButton(true);
   };
 
-  const handleMenuMouseLeave = () => {
+  const handleGenerateButtonMouseLeave = () => {
     menuDisplayTimeout.current = setTimeout(() => {
       setActiveMenuNodeId(null);
       hideTimeout.current = setTimeout(() => {
@@ -64,8 +64,6 @@ export const NodeMenu: React.FC<NodeMenuProps> = ({ id, showButton, setShowButto
     <div 
       className={`absolute -right-12 top-1/2 -translate-y-1/2 transition-opacity duration-300 flex flex-col gap-2
         ${showButton ? 'opacity-100' : 'opacity-0'}`}
-      onMouseEnter={handleMenuMouseEnter}
-      onMouseLeave={handleMenuMouseLeave}
     >
       <button
         onClick={handleAddNode}
@@ -74,13 +72,18 @@ export const NodeMenu: React.FC<NodeMenuProps> = ({ id, showButton, setShowButto
         <Plus size={16} />
       </button>
 
-      <button
-        className={`${nodeStyles.button} ${nodeStyles.generateButton}`}
+      <div
+        onMouseEnter={handleGenerateButtonMouseEnter}
+        onMouseLeave={handleGenerateButtonMouseLeave}
       >
-        <Sparkles size={16} />
-      </button>
+        <button
+          className={`${nodeStyles.button} ${nodeStyles.generateButton}`}
+        >
+          <Sparkles size={16} />
+        </button>
 
-      {showGenerateMenu && <GenerateMenu nodeId={id} />}
+        {showGenerateMenu && <GenerateMenu nodeId={id} />}
+      </div>
     </div>
   );
 };
