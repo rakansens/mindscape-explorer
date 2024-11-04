@@ -3,13 +3,18 @@ import { Sparkles } from 'lucide-react';
 import { useAIGenerator } from './useAIGenerator';
 import { LayoutStyleSelector } from './LayoutStyleSelector';
 
-export const AIGeneratorForm = () => {
+interface AIGeneratorFormProps {
+  onClose?: () => void;
+}
+
+export const AIGeneratorForm = ({ onClose }: AIGeneratorFormProps) => {
   const [prompt, setPrompt] = useState('');
   const { handleGenerate, isLoading } = useAIGenerator();
 
   const onSubmit = async () => {
     await handleGenerate(prompt);
     setPrompt('');
+    onClose?.();
   };
 
   return (
@@ -40,7 +45,7 @@ export const AIGeneratorForm = () => {
           )}
         </button>
         <button
-          onClick={() => setPrompt('')}
+          onClick={onClose}
           className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
         >
           キャンセル
