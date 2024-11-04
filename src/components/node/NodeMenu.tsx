@@ -56,11 +56,10 @@ export const NodeMenu: React.FC<NodeMenuProps> = ({ id, showButton, setShowButto
       onMouseLeave={handleMenuMouseLeave}
     >
       <button
-        className={`${nodeStyles.button} ${nodeStyles.generateButton}
-          ${showGenerateMenu ? 'bg-blue-50 animate-spin' : ''}`}
+        className={`${nodeStyles.button} ${nodeStyles.generateButton}`}
         title="AI生成メニューを開く"
       >
-        <Sparkles size={16} />
+        <Sparkles size={16} className={showGenerateMenu ? 'animate-spin' : ''} />
       </button>
 
       {showGenerateMenu && <GenerateMenu nodeId={id} />}

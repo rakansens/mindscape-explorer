@@ -85,7 +85,7 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
         fadeIn: 'fadeIn 0.3s ease-out',
         typing: 'typing 1s steps(20, end)',
-        spin: 'spin 1s linear infinite'
+        spin: 'spin 2s linear infinite'
       },
     },
   },
