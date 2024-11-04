@@ -116,13 +116,10 @@ export function AIGenerator() {
   return (
     <Panel position="bottom-right" className="mr-4 mb-4">
       <HoverCard openDelay={1000}>
-        <HoverCardTrigger asChild>
-          <button
-            className="p-3 bg-blue-500 rounded-full text-white hover:bg-blue-600 shadow-lg tooltip"
-            title="AIマインドマップを生成"
-          >
+        <HoverCardTrigger>
+          <div className="p-3 bg-blue-500 rounded-full text-white hover:bg-blue-600 shadow-lg cursor-pointer">
             <Sparkles size={24} />
-          </button>
+          </div>
         </HoverCardTrigger>
         <HoverCardContent side="top" align="end" className="w-[400px] p-4">
           <div className="bg-white rounded-lg">
