@@ -49,3 +49,6 @@ export const useOpenAI = () => {
     apiKey
   };
 };
+
+// Re-export the types for convenience
+export type { TopicTree, GenerateOptions };
