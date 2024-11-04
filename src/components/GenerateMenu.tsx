@@ -15,6 +15,12 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
   const { nodes, edges, addNode, updateNode, removeChildNodes } = useMindMapStore();
   const { toast } = useToast();
 
+  // 子ノードの数を取得する関数
+  const getChildNodesCount = (parentId: string): number => {
+    const directChildren = edges.filter(edge => edge.source === parentId);
+    return directChildren.length;
+  };
+
   const handleGenerate = async (mode: 'quick' | 'detailed' | 'why' | 'how' | 'regenerate') => {
     if (!apiKey) {
       toast({
@@ -37,6 +43,9 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
 
     setIsLoading(true);
     try {
+      // 再生成モードの場合、既存の子ノードの数を保存
+      const originalChildCount = mode === 'regenerate' ? getChildNodesCount(nodeId) : 0;
+      
       // 再生成モードの場合、既存の子ノードを削除
       if (mode === 'regenerate') {
         removeChildNodes(nodeId);
@@ -46,7 +55,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
         mode: mode === 'regenerate' ? 'detailed' : mode,
         quickType: mode === 'quick' ? 'simple' : 'detailed',
         structure: {
-          level1: 3,
+          level1: mode === 'regenerate' ? originalChildCount : 3,
           level2: 2,
           level3: 1
         }
@@ -56,10 +65,15 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
         throw new Error('Invalid response format from API');
       }
 
-      let addedNodes = 0;
-      const baseYOffset = -150 * (response.children.length - 1) / 2;
+      // 再生成モードの場合、元の子ノードの数だけ生成
+      const childrenToProcess = mode === 'regenerate' 
+        ? response.children.slice(0, originalChildCount)
+        : response.children;
 
-      for (const [index, child] of response.children.entries()) {
+      let addedNodes = 0;
+      const baseYOffset = -150 * (childrenToProcess.length - 1) / 2;
+
+      for (const [index, child] of childrenToProcess.entries()) {
         if (!child.label) continue;
 
         try {
@@ -95,7 +109,6 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
 
               const grandChildNode = await addNode(newNode, grandChild.label, grandChildPosition);
 
-              // WHYモードの場合、説明ノードとして設定
               if (mode === 'why') {
                 updateNode(grandChildNode.id, {
                   ...grandChildNode,
@@ -106,7 +119,6 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
                   }
                 });
               }
-              // HOWモードの場合、タスクノードとして設定
               else if (mode === 'how') {
                 updateNode(grandChildNode.id, {
                   ...grandChildNode,
