@@ -17,5 +17,4 @@ export interface GenerateOptions {
     level2: number;
     level3: number;
   };
-  context?: string; // Added context property
 }
