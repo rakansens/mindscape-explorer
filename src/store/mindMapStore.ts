@@ -19,6 +19,7 @@ type RFState = {
   onConnect: (connection: Connection) => void;
   addNode: (parentNode: Node, label: string) => Node;
   updateNodeText: (id: string, text: string) => void;
+  selectNode: (id: string) => void;
 };
 
 const initialNodes: Node[] = [
@@ -78,6 +79,15 @@ export const useMindMapStore = create<RFState>((set, get) => ({
     set({
       nodes: get().nodes.map((node) =>
         node.id === id ? { ...node, data: { ...node.data, label: text } } : node
+      ),
+    });
+  },
+  selectNode: (id: string) => {
+    set({
+      nodes: get().nodes.map((node) =>
+        node.id === id
+          ? { ...node, data: { ...node.data, selected: true } }
+          : { ...node, data: { ...node.data, selected: false } }
       ),
     });
   },
