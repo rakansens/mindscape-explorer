@@ -4,6 +4,7 @@ import { useViewStore } from '../store/viewStore';
 import { ZoomControls } from './controls/ZoomControls';
 import { ThemeControls } from './controls/ThemeControls';
 import { MinimapControl } from './controls/MinimapControl';
+import { LayoutControls } from './controls/LayoutControls';
 import { preventEvent } from '../utils/eventUtils';
 
 const ViewControls: React.FC = () => {
@@ -18,6 +19,7 @@ const ViewControls: React.FC = () => {
     zoomIn,
     zoomOut,
     fitView,
+    autoLayout,
   } = useViewStore();
 
   return (
@@ -35,6 +37,10 @@ const ViewControls: React.FC = () => {
             onZoomIn={zoomIn}
             onZoomOut={zoomOut}
             onFitView={fitView}
+          />
+          <div className="w-px h-8 bg-blue-100/50" />
+          <LayoutControls 
+            onAutoLayout={autoLayout}
           />
           <div className="w-px h-8 bg-blue-100/50" />
           <ThemeControls 
