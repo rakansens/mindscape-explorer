@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tooltip } from '../Tooltip';
 import { useOpenAIAuth } from '../../store/openAIAuthStore';
 import { Input } from '../ui/input';
@@ -9,9 +9,15 @@ import { preventEvent } from '../../utils/eventUtils';
 
 export const APIKeyButton = () => {
   const { apiKey, setApiKey } = useOpenAIAuth();
-  const [inputKey, setInputKey] = useState(apiKey || '');
+  const [inputKey, setInputKey] = useState('');
   const [isVisible, setIsVisible] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (apiKey) {
+      setInputKey(apiKey);
+    }
+  }, [apiKey]);
 
   const handleSave = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -21,6 +27,15 @@ export const APIKeyButton = () => {
       toast({
         title: "エラー",
         description: "APIキーを入力してください",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!inputKey.startsWith('sk-')) {
+      toast({
+        title: "エラー",
+        description: "有効なAPIキーを入力してください",
         variant: "destructive",
       });
       return;
@@ -71,6 +86,7 @@ export const APIKeyButton = () => {
               placeholder="sk-..."
               className="flex-1"
               onClick={handleInputClick}
+              onFocus={(e) => e.target.select()}
             />
             <Button
               variant="outline"

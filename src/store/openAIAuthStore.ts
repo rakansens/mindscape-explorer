@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import OpenAI from 'openai';
 
 interface OpenAIAuthStore {
@@ -23,6 +23,7 @@ export const useOpenAIAuth = create<OpenAIAuthStore>()(
     }),
     {
       name: 'openai-auth-storage',
+      storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ apiKey: state.apiKey }),
     }
   )
