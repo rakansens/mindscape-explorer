@@ -53,7 +53,7 @@ export const useMindMapStore = create<RFState>((set, get) => ({
     const newNode: Node = {
       id: uuidv4(),
       type: 'custom',
-      data: { label, isNew: true },
+      data: { label },
       position: {
         x: parentNode.position.x + 250,
         y: parentNode.position.y,
