@@ -91,7 +91,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
       <Handle type="target" position={Position.Left} />
       <div className="relative group">
         <div 
-          className={`relative min-w-[120px] rounded-xl shadow-lg transition-all duration-300 transform
+          className={`relative min-w-[120px] max-w-[300px] rounded-xl shadow-lg transition-all duration-300 transform
             ${getNodeStyle(level)}
             ${data.selected ? 'ring-2 ring-blue-500' : ''}
             hover:shadow-xl`}
@@ -125,7 +125,9 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
             
             {data.detailedText && !isCollapsed && (
               <div className="mt-2 pt-2 border-t border-white/20 text-white/90 text-sm">
-                {data.detailedText}
+                <div className="max-h-[200px] overflow-y-auto whitespace-pre-wrap break-words" style={{ width: '250px' }}>
+                  {data.detailedText}
+                </div>
               </div>
             )}
           </div>
