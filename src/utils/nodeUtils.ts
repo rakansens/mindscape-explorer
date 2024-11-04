@@ -1,5 +1,6 @@
 import { Edge, Node as ReactFlowNode } from 'reactflow';
-import { HierarchyItem, TopicTree } from '../types/common';
+import { HierarchyItem } from '../types/common';
+import { TopicTree } from '../types/openai';
 import { theme } from '../styles/theme';
 
 // ノードのレベルを計算
