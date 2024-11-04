@@ -3,30 +3,63 @@ import { GenerateOptions } from '../../types/openai';
 export const getMindMapPrompt = (topic: string, mode?: string, options?: GenerateOptions): string => {
   if (mode === 'why') {
     return `
-以下のトピックについて、「なぜ？」という視点から簡潔な分析を生成してください。
+以下のトピックについて、「なぜ？」という視点から分析を生成してください。
 
 トピック: "${topic}"
 
 要件:
-1. 3つの本質的な「なぜ？」という質問を生成
-2. 各質問に対して2つの簡潔な回答（2-3行程度）を含める
-3. 回答は具体的で分かりやすい表現を使用
+1. 3つの本質的な「なぜ？」という質問を生成してください
+2. 各質問に対して2つの具体的な回答を含めてください
+3. 各回答には詳細な説明を含めてください
 
-応答は以下のような階層的なJSON形式にしてください:
+応答は以下のようなJSON形式で返してください:
 {
-  "label": "なぜ${topic}なのか？",
+  "label": "${topic}",
   "children": [
     {
-      "label": "質問1：なぜ～なのか？",
+      "label": "なぜ～？（質問1）",
+      "description": "この質問の重要性や背景の説明",
       "children": [
         {
-          "label": "回答1-1",
-          "description": "【結論】\\n[簡潔な回答]\\n\\n【根拠】\\n[具体的な説明（2-3行）]",
+          "label": "回答1-1のタイトル",
+          "description": "回答1-1の詳細な説明（3-4行程度）",
           "children": []
         },
         {
-          "label": "回答1-2",
-          "description": "【結論】\\n[別の視点からの回答]\\n\\n【根拠】\\n[具体的な説明（2-3行）]",
+          "label": "回答1-2のタイトル",
+          "description": "回答1-2の詳細な説明（3-4行程度）",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "なぜ～？（質問2）",
+      "description": "この質問の重要性や背景の説明",
+      "children": [
+        {
+          "label": "回答2-1のタイトル",
+          "description": "回答2-1の詳細な説明（3-4行程度）",
+          "children": []
+        },
+        {
+          "label": "回答2-2のタイトル",
+          "description": "回答2-2の詳細な説明（3-4行程度）",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "なぜ～？（質問3）",
+      "description": "この質問の重要性や背景の説明",
+      "children": [
+        {
+          "label": "回答3-1のタイトル",
+          "description": "回答3-1の詳細な説明（3-4行程度）",
+          "children": []
+        },
+        {
+          "label": "回答3-2のタイトル",
+          "description": "回答3-2の詳細な説明（3-4行程度）",
           "children": []
         }
       ]
