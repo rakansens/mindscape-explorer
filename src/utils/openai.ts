@@ -1,3 +1,5 @@
+import { useOpenAIAuth } from '../store/openAIAuthStore';
+
 export interface TopicTree {
   label: string;
   children?: TopicTree[];
@@ -9,29 +11,42 @@ interface GenerateOptions {
 }
 
 export const useOpenAI = () => {
-  const apiKey = process.env.OPENAI_API_KEY || '';
+  const { apiKey, openai } = useOpenAIAuth();
 
   const generateSubTopics = async (prompt: string, options: GenerateOptions): Promise<TopicTree> => {
-    // This is a mock implementation. In a real application, you would make an API call to OpenAI
-    return {
-      label: prompt,
-      children: [
-        {
-          label: "Sample Topic 1",
-          children: [
-            { label: "Subtopic 1.1" },
-            { label: "Subtopic 1.2" }
-          ]
-        },
-        {
-          label: "Sample Topic 2",
-          children: [
-            { label: "Subtopic 2.1" },
-            { label: "Subtopic 2.2" }
-          ]
-        }
-      ]
-    };
+    if (!openai) {
+      throw new Error('OpenAI client not initialized');
+    }
+
+    try {
+      const response = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: "You are a helpful AI assistant that generates mind map topics."
+          },
+          {
+            role: "user",
+            content: `Generate subtopics for: ${prompt}`
+          }
+        ],
+        temperature: 0.7,
+      });
+
+      const content = response.choices[0]?.message?.content;
+      if (!content) throw new Error('No content generated');
+
+      try {
+        return JSON.parse(content);
+      } catch (e) {
+        console.error('Failed to parse response:', content);
+        throw new Error('Invalid response format');
+      }
+    } catch (error) {
+      console.error('Error generating topics:', error);
+      throw error;
+    }
   };
 
   return {
