@@ -2,13 +2,13 @@ export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, 
 
 export const animateText = async (
   text: string,
-  onUpdate: (text: string) => void,
+  onUpdate: (text: string) => void | Promise<void>,
   speed: number = 30
 ) => {
   let currentText = '';
   for (const char of text) {
     currentText += char;
-    onUpdate(currentText);
+    await onUpdate(currentText);
     await sleep(speed);
   }
 };
