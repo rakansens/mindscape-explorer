@@ -12,6 +12,7 @@ export interface GenerateOptions {
   whichType?: 'simple' | 'detailed';
   quickType?: 'simple' | 'detailed';
   style?: string;
+  nodeContext?: string;
   structure?: {
     level1: number;
     level2: number;

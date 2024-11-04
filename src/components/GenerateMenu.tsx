@@ -42,9 +42,11 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
         removeChildNodes(nodeId);
       }
 
+      // 再生成モードの場合、クイック生成と同じルールを使用
       const response = await generateSubTopics(currentNode.data.label, {
-        mode: mode === 'regenerate' ? 'detailed' : mode,
-        quickType: mode === 'quick' ? 'simple' : 'detailed',
+        mode: mode === 'regenerate' ? 'quick' : mode,
+        quickType: mode === 'quick' || mode === 'regenerate' ? 'simple' : 'detailed',
+        nodeContext: mode === 'regenerate' ? currentNode.data.label : undefined,
         structure: {
           level1: 3,
           level2: 2,
@@ -95,7 +97,6 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
 
               const grandChildNode = await addNode(newNode, grandChild.label, grandChildPosition);
 
-              // WHYモードの場合、説明ノードとして設定
               if (mode === 'why') {
                 updateNode(grandChildNode.id, {
                   ...grandChildNode,
@@ -106,7 +107,6 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
                   }
                 });
               }
-              // HOWモードの場合、タスクノードとして設定
               else if (mode === 'how') {
                 updateNode(grandChildNode.id, {
                   ...grandChildNode,
