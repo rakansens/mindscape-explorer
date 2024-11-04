@@ -114,10 +114,19 @@ export function AIGenerator() {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div 
+      className="fixed bottom-4 right-4" 
+      style={{ 
+        zIndex: 9999,
+        pointerEvents: 'auto'
+      }}
+    >
       <HoverCard>
         <HoverCardTrigger asChild>
-          <button className="p-3 bg-blue-500 rounded-full text-white hover:bg-blue-600 shadow-lg transition-colors duration-200">
+          <button 
+            className="p-3 bg-blue-500 rounded-full text-white hover:bg-blue-600 shadow-lg transition-colors duration-200"
+            style={{ pointerEvents: 'auto' }}
+          >
             <Sparkles size={24} />
           </button>
         </HoverCardTrigger>
@@ -125,6 +134,7 @@ export function AIGenerator() {
           side="top" 
           align="end" 
           className="w-[400px] p-4"
+          style={{ pointerEvents: 'auto' }}
         >
           <div className="bg-white rounded-lg">
             <div className="mb-4">
