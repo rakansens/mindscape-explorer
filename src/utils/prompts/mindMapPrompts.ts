@@ -8,24 +8,22 @@ export const getMindMapPrompt = (topic: string, mode?: string, options?: Generat
 トピック: "${topic}"
 
 要件:
-1. 3つの主要なアプローチを提案してください
-2. 各アプローチに対して2つの具体的なタスクを含めてください
-3. アプローチは2-3行程度の簡潔な文章で記述してください
-4. タスクも2-3行程度の簡潔な文章で記述してください
+1. 3-5個の主要なアプローチを提案してください
+2. 各アプローチに対して2-3個の具体的なタスクを含めてください
+3. タスクは実行可能な粒度まで分解してください
+4. 各タスクには簡潔な説明を含めてください
 
 応答は以下のようなJSON形式で返してください:
 {
   "label": "${topic}",
   "children": [
     {
-      "label": "アプローチ1の内容を2-3行で記述",
+      "label": "アプローチ1",
+      "description": "アプローチ1の説明",
       "children": [
         {
-          "label": "タスク1-1の内容を2-3行で記述",
-          "children": []
-        },
-        {
-          "label": "タスク1-2の内容を2-3行で記述",
+          "label": "タスク1-1",
+          "description": "タスク1-1の説明",
           "children": []
         }
       ]
@@ -35,15 +33,21 @@ export const getMindMapPrompt = (topic: string, mode?: string, options?: Generat
   }
 
   if (mode === 'quick') {
+    const structure = options?.structure || {
+      level1: 3,
+      level2: 2,
+      level3: 1
+    };
+
     return `
 以下のトピックについて、階層的な構造でサブトピックを生成してください。
 
 トピック: "${topic}"
 
 要件:
-1. 最上位レベルに3つの主要なサブトピック
-2. 各主要サブトピックに2つずつの子トピック
-3. 各子トピックに1つずつの孫トピック
+1. 最上位レベルに${structure.level1}個の主要なサブトピック
+2. 各主要サブトピックに${structure.level2}個ずつの子トピック
+3. 各子トピックに${structure.level3}個ずつの孫トピック
 
 応答は以下のようなJSON形式で返してください:
 {
@@ -60,61 +64,6 @@ export const getMindMapPrompt = (topic: string, mode?: string, options?: Generat
               "children": []
             }
           ]
-        },
-        {
-          "label": "子トピック1-2",
-          "children": [
-            {
-              "label": "孫トピック1-2-1",
-              "children": []
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "label": "主要サブトピック2",
-      "children": [
-        {
-          "label": "子トピック2-1",
-          "children": [
-            {
-              "label": "孫トピック2-1-1",
-              "children": []
-            }
-          ]
-        },
-        {
-          "label": "子トピック2-2",
-          "children": [
-            {
-              "label": "孫トピック2-2-1",
-              "children": []
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "label": "主要サブトピック3",
-      "children": [
-        {
-          "label": "子トピック3-1",
-          "children": [
-            {
-              "label": "孫トピック3-1-1",
-              "children": []
-            }
-          ]
-        },
-        {
-          "label": "子トピック3-2",
-          "children": [
-            {
-              "label": "孫トピック3-2-1",
-              "children": []
-            }
-          ]
         }
       ]
     }
@@ -124,9 +73,15 @@ export const getMindMapPrompt = (topic: string, mode?: string, options?: Generat
 
   if (mode === 'detailed') {
     return `
-以下のトピックについて、サブトピックとそれに関連する詳細を提供してください。
+以下のトピックについて、サブトピックとそれに関連する詳細な説明を提供してください。
 
 トピック: "${topic}"
+${options?.nodeContext ? `\n現在のコンテキスト: ${options.nodeContext}` : ''}
+
+要件:
+1. 3-5個の重要なサブトピックを生成
+2. 各サブトピックに詳細な説明（2-3文程度）を含める
+3. 説明は具体的で実用的な内容にする
 
 応答は以下のようなJSON形式で返してください:
 {
@@ -134,12 +89,7 @@ export const getMindMapPrompt = (topic: string, mode?: string, options?: Generat
   "children": [
     {
       "label": "サブトピック1",
-      "description": "詳細1",
-      "children": []
-    },
-    {
-      "label": "サブトピック2",
-      "description": "詳細2",
+      "description": "詳細な説明1",
       "children": []
     }
   ]
@@ -148,14 +98,14 @@ export const getMindMapPrompt = (topic: string, mode?: string, options?: Generat
 
   if (mode === 'why') {
     return `
-以下のトピックについて、「なぜそれが重要か」という観点から3つの質問とその答えを生成してください。
+以下のトピックについて、「なぜそれが重要か」という観点から分析してください。
 
 トピック: "${topic}"
 
 要件:
-1. 3つの「なぜ？」という質問を生成してください
-2. 各質問に対して詳細な説明を提供してください
-3. 質問は子ノードとして、説明は孫ノードとして表示されます
+1. 3-5個の「なぜ？」という質問を生成
+2. 各質問に対して詳細な説明（2-3文程度）を提供
+3. 説明は論理的で説得力のある内容にする
 
 応答は以下のようなJSON形式で返してください:
 {
@@ -170,32 +120,12 @@ export const getMindMapPrompt = (topic: string, mode?: string, options?: Generat
           "children": []
         }
       ]
-    },
-    {
-      "label": "なぜ質問2？",
-      "children": [
-        {
-          "label": "説明2",
-          "description": "詳細な説明文2",
-          "children": []
-        }
-      ]
-    },
-    {
-      "label": "なぜ質問3？",
-      "children": [
-        {
-          "label": "説明3",
-          "description": "詳細な説明文3",
-          "children": []
-        }
-      ]
     }
   ]
 }`;
   }
 
-  // Default case (if mode is not recognized)
+  // Default case
   return `
 以下のトピックについて、サブトピックを生成してください。
 
@@ -204,7 +134,11 @@ export const getMindMapPrompt = (topic: string, mode?: string, options?: Generat
 応答は以下のようなJSON形式で返してください:
 {
   "label": "${topic}",
-  "children": []
+  "children": [
+    {
+      "label": "サブトピック1",
+      "children": []
+    }
+  ]
 }`;
 };
-
