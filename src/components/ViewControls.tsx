@@ -1,5 +1,6 @@
 import React from 'react';
 import { useMindMapStore } from '../store/mindMapStore';
+import { useViewStore } from '../store/viewStore';
 import { ZoomControls } from './controls/ZoomControls';
 import { ThemeControls } from './controls/ThemeControls';
 import { MinimapControl } from './controls/MinimapControl';
@@ -11,10 +12,13 @@ const ViewControls: React.FC = () => {
     setTheme, 
     showMinimap, 
     toggleMinimap,
+  } = useMindMapStore();
+
+  const {
     zoomIn,
     zoomOut,
     fitView,
-  } = useMindMapStore();
+  } = useViewStore();
 
   return (
     <>
