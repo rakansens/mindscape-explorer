@@ -4,6 +4,7 @@ import { Sparkles } from 'lucide-react';
 import { useMindMapStore } from '../store/mindMapStore';
 import { useOpenAI, TopicTree } from '../utils/openai';
 import { useTypingAnimation } from '../hooks/useTypingAnimation';
+import { useToast } from '../hooks/use-toast';
 
 type LayoutStyle = 'horizontal' | 'radial';
 
@@ -21,7 +22,7 @@ export function AIGenerator() {
   const { addNode, nodes, updateNodeText } = useMindMapStore();
   const { generateSubTopics, apiKey } = useOpenAI();
   const { fitView } = useReactFlow();
-  const { startTyping } = useTypingAnimation('', 30);
+  const { toast } = useToast();
 
   const parseTopicTree = (topicTree: TopicTree): HierarchyItem[] => {
     const hierarchy: HierarchyItem[] = [];
@@ -47,23 +48,31 @@ export function AIGenerator() {
     return hierarchy;
   };
 
+  const animateText = async (nodeId: string, text: string) => {
+    let currentText = '';
+    for (const char of text) {
+      currentText += char;
+      updateNodeText(nodeId, currentText);
+      await new Promise(resolve => setTimeout(resolve, 30));
+    }
+  };
+
   const generateNodes = async (
     parentNode: any,
     items: HierarchyItem[],
     level: number = 0
   ) => {
     for (const [index, item] of items.entries()) {
-      await new Promise(resolve => setTimeout(resolve, 150));
-      const newNode = addNode(parentNode, '');  // 空のテキストで初期化
+      // ノードを作成する前に少し待機して、生成の流れを視覚化
+      await new Promise(resolve => setTimeout(resolve, 200));
       
-      // テキストアニメーション付きでノードのテキストを更新
-      let currentText = '';
-      for (const char of item.text) {
-        currentText += char;
-        updateNodeText(newNode.id, currentText);
-        await new Promise(resolve => setTimeout(resolve, 30));
-      }
+      // 空のノードを作成
+      const newNode = addNode(parentNode, '');
+      
+      // テキストをアニメーション付きで表示
+      await animateText(newNode.id, item.text);
 
+      // 子ノードがある場合は再帰的に生成
       if (item.children && item.children.length > 0) {
         await generateNodes(newNode, item.children, level + 1);
       }
@@ -72,12 +81,20 @@ export function AIGenerator() {
 
   const handleGenerate = async () => {
     if (!apiKey) {
-      alert('OpenAI APIキーを設定してください');
+      toast({
+        title: "エラー",
+        description: "OpenAI APIキーを設定してください",
+        variant: "destructive",
+      });
       return;
     }
 
     if (!prompt.trim()) {
-      alert('テーマを入力してください');
+      toast({
+        title: "エラー",
+        description: "テーマを入力してください",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -89,18 +106,21 @@ export function AIGenerator() {
       });
       
       const hierarchy = parseTopicTree(response);
-
       const rootNode = nodes.find(n => n.id === '1');
+      
       if (rootNode) {
-        updateNodeText(rootNode.id, prompt);
+        // ルートノードのテキストをアニメーション付きで更新
+        await animateText(rootNode.id, prompt);
         
         fitView({ 
           duration: 800,
           padding: 0.5,
         });
 
+        // 子ノードを生成
         await generateNodes(rootNode, hierarchy);
 
+        // 生成完了後にビューを調整
         setTimeout(() => {
           fitView({ 
             duration: 800,
@@ -109,13 +129,22 @@ export function AIGenerator() {
             maxZoom: 1,
           });
         }, 1000);
+
+        toast({
+          title: "生成完了",
+          description: "マインドマップが生成されました",
+        });
       }
 
       setPrompt('');
       setIsOpen(false);
     } catch (error) {
       console.error('AI生成エラー:', error);
-      alert('マインドマップの生成に失敗しました。APIキーを確認してください。');
+      toast({
+        title: "エラー",
+        description: "マインドマップの生成に失敗しました。APIキーを確認してください。",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
