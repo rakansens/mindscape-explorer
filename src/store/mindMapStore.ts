@@ -1,3 +1,4 @@
+import { create } from 'zustand';
 import {
   Connection,
   Edge,
@@ -8,7 +9,6 @@ import {
   applyEdgeChanges,
   applyNodeChanges,
 } from 'reactflow';
-import { create } from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -48,7 +48,6 @@ interface MindMapActions {
   removeChildNodes: (nodeId: string) => void;
   undo: () => void;
   redo: () => void;
-  addToHistory: (state: MindMapState) => void;
 }
 
 type MindMapStore = MindMapState & MindMapActions;
@@ -70,6 +69,7 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
   canUndo: false,
   canRedo: false,
 
+  // 履歴を追加する関数
   addToHistory: (state: MindMapState) => {
     const { history, currentHistoryIndex } = get();
     const newHistory = [...history.slice(0, currentHistoryIndex + 1), { nodes: state.nodes, edges: state.edges }];
