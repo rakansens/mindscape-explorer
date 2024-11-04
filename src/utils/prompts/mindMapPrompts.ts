@@ -10,7 +10,7 @@ export const getMindMapPrompt = (topic: string, mode?: string, options?: Generat
 要件:
 1. 3つの本質的な「なぜ？」という質問を生成してください
 2. 各質問に対して2つの具体的な回答を含めてください
-3. 各回答には詳細な説明を含めてください
+3. 質問ノードには説明を含めず、回答ノードにのみ詳細な説明を含めてください
 
 応答は以下のようなJSON形式で返してください:
 {
@@ -18,7 +18,6 @@ export const getMindMapPrompt = (topic: string, mode?: string, options?: Generat
   "children": [
     {
       "label": "なぜ～？（質問1）",
-      "description": "この質問の重要性や背景の説明",
       "children": [
         {
           "label": "回答1-1のタイトル",
@@ -34,7 +33,6 @@ export const getMindMapPrompt = (topic: string, mode?: string, options?: Generat
     },
     {
       "label": "なぜ～？（質問2）",
-      "description": "この質問の重要性や背景の説明",
       "children": [
         {
           "label": "回答2-1のタイトル",
@@ -50,7 +48,6 @@ export const getMindMapPrompt = (topic: string, mode?: string, options?: Generat
     },
     {
       "label": "なぜ～？（質問3）",
-      "description": "この質問の重要性や背景の説明",
       "children": [
         {
           "label": "回答3-1のタイトル",
