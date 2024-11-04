@@ -132,6 +132,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
           className={`relative min-w-[120px] max-w-[300px] rounded-xl shadow-lg transition-all duration-300 transform
             ${getNodeStyle(level)}
             ${data.selected ? 'ring-2 ring-blue-500' : ''}
+            ${data.isGenerating ? 'animate-pulse' : ''}
             hover:shadow-xl`}
           onClick={handleClick}
           onDoubleClick={handleDoubleClick}

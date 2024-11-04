@@ -43,6 +43,12 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
     }
 
     setIsLoading(true);
+    // 生成中のアニメーションを開始
+    updateNode(nodeId, {
+      ...currentNode,
+      data: { ...currentNode.data, isGenerating: true }
+    });
+
     try {
       const childNodes = mode === 'regenerate' ? 
         nodes.filter(node => {
@@ -158,6 +164,12 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
         }
       }
 
+      // 生成完了後、アニメーションを停止
+      updateNode(nodeId, {
+        ...currentNode,
+        data: { ...currentNode.data, isGenerating: false }
+      });
+
       if (addedNodes > 0) {
         toast({
           title: mode === 'regenerate' ? "再生成完了" : "生成完了",
@@ -172,6 +184,11 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
       }
     } catch (error) {
       console.error('Generation error:', error);
+      // エラー時もアニメーションを停止
+      updateNode(nodeId, {
+        ...currentNode,
+        data: { ...currentNode.data, isGenerating: false }
+      });
       toast({
         title: "エラー",
         description: error instanceof Error ? error.message : "ノードの生成に失敗しました",

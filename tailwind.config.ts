@@ -78,6 +78,16 @@ export default {
         spin: {
           '0%': { transform: 'rotate(0deg)' },
           '100%': { transform: 'rotate(360deg)' }
+        },
+        pulse: {
+          '0%, 100%': { 
+            opacity: '1',
+            boxShadow: '0 0 0 0px rgba(59, 130, 246, 0.5)'
+          },
+          '50%': { 
+            opacity: '0.5',
+            boxShadow: '0 0 0 15px rgba(59, 130, 246, 0)'
+          }
         }
       },
       animation: {
@@ -85,7 +95,8 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
         fadeIn: 'fadeIn 0.3s ease-out',
         typing: 'typing 1s steps(20, end)',
-        spin: 'spin 2s linear infinite'
+        spin: 'spin 2s linear infinite',
+        pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
       },
     },
   },
