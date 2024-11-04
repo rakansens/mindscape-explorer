@@ -4,6 +4,7 @@ import { useMindMapStore } from '../store/mindMapStore';
 import { Button } from './ui/button';
 import { useToast } from '../hooks/use-toast';
 import { Loader2, Zap, BookOpen, HelpCircle, ListTodo } from 'lucide-react';
+import { useMenuStore } from '../store/menuStore';
 
 interface GenerateMenuProps {
   nodeId: string;
@@ -14,6 +15,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
   const { generateSubTopics, apiKey } = useOpenAI();
   const { nodes, addNode, updateNode } = useMindMapStore();
   const { toast } = useToast();
+  const { setActiveMenuNodeId } = useMenuStore();
 
   const handleGenerate = async (mode: 'quick' | 'detailed' | 'why' | 'how') => {
     if (!apiKey) {
@@ -132,6 +134,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
       });
     } finally {
       setIsLoading(false);
+      setActiveMenuNodeId(null); // 生成完了後にメニューを閉じる
     }
   };
 
