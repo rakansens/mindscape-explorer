@@ -1,6 +1,8 @@
 import { GenerateOptions } from '../../types/openai';
 
-const whyPrompt = `
+export const getMindMapPrompt = (topic: string, mode?: string, options?: GenerateOptions): string => {
+  if (mode === 'why') {
+    return `
 以下のトピックについて、「なぜ？」という視点から簡潔な分析を生成してください。
 
 トピック: "${topic}"
@@ -31,11 +33,8 @@ const whyPrompt = `
     }
   ]
 }`;
-
-export const getMindMapPrompt = (topic: string, mode?: string, options?: GenerateOptions): string => {
-  if (mode === 'why') {
-    return whyPrompt;
   }
+
   const defaultPrompt = `
 以下のトピックについて、3階層の詳細なマインドマップを生成してください。必ず指定されたJSON形式で応答してください。
 
