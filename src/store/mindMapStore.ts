@@ -12,22 +12,31 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
-import { useViewStore } from './viewStore';
 
-type Theme = 'light' | 'dark';
-
-type RFState = {
+interface HistoryState {
   nodes: Node[];
   edges: Edge[];
-  theme: Theme;
+}
+
+interface MindMapState {
+  nodes: Node[];
+  edges: Edge[];
+  theme: 'light' | 'dark';
   showMinimap: boolean;
+  history: HistoryState[];
+  currentHistoryIndex: number;
+  canUndo: boolean;
+  canRedo: boolean;
+}
+
+interface MindMapActions {
   onNodesChange: (changes: NodeChange[]) => void;
   onEdgesChange: (changes: EdgeChange[]) => void;
   onConnect: (connection: Connection) => void;
   addNode: (parentNode: Node, label: string, position?: { x: number; y: number }) => Node;
   updateNodeText: (id: string, text: string) => void;
   selectNode: (id: string) => void;
-  setTheme: (theme: Theme) => void;
+  setTheme: (theme: 'light' | 'dark') => void;
   toggleMinimap: () => void;
   saveMap: () => void;
   loadMap: () => void;
@@ -37,9 +46,15 @@ type RFState = {
   importFromJSON: (jsonString: string) => void;
   updateNode: (nodeId: string, updates: Partial<Node>) => void;
   removeChildNodes: (nodeId: string) => void;
-};
+  undo: () => void;
+  redo: () => void;
+}
 
-export const useMindMapStore = create<RFState>((set, get) => ({
+type MindMapStore = MindMapState & MindMapActions;
+
+const MAX_HISTORY_LENGTH = 100;
+
+export const useMindMapStore = create<MindMapStore>((set, get) => ({
   nodes: [{
     id: '1',
     type: 'custom',
@@ -49,21 +64,78 @@ export const useMindMapStore = create<RFState>((set, get) => ({
   edges: [],
   theme: 'light',
   showMinimap: false,
+  history: [],
+  currentHistoryIndex: -1,
+  canUndo: false,
+  canRedo: false,
+
+  // 履歴を追加する関数
+  addToHistory: (state: MindMapState) => {
+    const { history, currentHistoryIndex } = get();
+    const newHistory = [...history.slice(0, currentHistoryIndex + 1), { nodes: state.nodes, edges: state.edges }];
+    
+    if (newHistory.length > MAX_HISTORY_LENGTH) {
+      newHistory.shift();
+    }
+
+    set({
+      history: newHistory,
+      currentHistoryIndex: newHistory.length - 1,
+      canUndo: newHistory.length > 1,
+      canRedo: false,
+    });
+  },
+
+  // Undo機能
+  undo: () => {
+    const { history, currentHistoryIndex } = get();
+    if (currentHistoryIndex > 0) {
+      const newIndex = currentHistoryIndex - 1;
+      const previousState = history[newIndex];
+      set({
+        nodes: previousState.nodes,
+        edges: previousState.edges,
+        currentHistoryIndex: newIndex,
+        canUndo: newIndex > 0,
+        canRedo: true,
+      });
+    }
+  },
+
+  // Redo機能
+  redo: () => {
+    const { history, currentHistoryIndex } = get();
+    if (currentHistoryIndex < history.length - 1) {
+      const newIndex = currentHistoryIndex + 1;
+      const nextState = history[newIndex];
+      set({
+        nodes: nextState.nodes,
+        edges: nextState.edges,
+        currentHistoryIndex: newIndex,
+        canUndo: true,
+        canRedo: newIndex < history.length - 1,
+      });
+    }
+  },
+
   onNodesChange: (changes: NodeChange[]) => {
-    set({
-      nodes: applyNodeChanges(changes, get().nodes),
-    });
+    const newNodes = applyNodeChanges(changes, get().nodes);
+    set({ nodes: newNodes });
+    get().addToHistory({ ...get(), nodes: newNodes });
   },
+
   onEdgesChange: (changes: EdgeChange[]) => {
-    set({
-      edges: applyEdgeChanges(changes, get().edges),
-    });
+    const newEdges = applyEdgeChanges(changes, get().edges);
+    set({ edges: newEdges });
+    get().addToHistory({ ...get(), edges: newEdges });
   },
+
   onConnect: (connection: Connection) => {
-    set({
-      edges: addEdge(connection, get().edges),
-    });
+    const newEdges = addEdge(connection, get().edges);
+    set({ edges: newEdges });
+    get().addToHistory({ ...get(), edges: newEdges });
   },
+
   addNode: (parentNode: Node, label: string, position?: { x: number; y: number }) => {
     const newNode: Node = {
       id: uuidv4(),
@@ -88,6 +160,7 @@ export const useMindMapStore = create<RFState>((set, get) => ({
       ),
     });
 
+    get().addToHistory({ ...get(), nodes: [...get().nodes, newNode] });
     return newNode;
   },
 
@@ -107,7 +180,7 @@ export const useMindMapStore = create<RFState>((set, get) => ({
       ),
     });
   },
-  setTheme: (theme: Theme) => {
+  setTheme: (theme: 'light' | 'dark') => {
     set({ theme });
     document.documentElement.classList.toggle('dark', theme === 'dark');
   },
