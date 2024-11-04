@@ -3,6 +3,11 @@ import { Panel, useReactFlow } from 'reactflow';
 import { Sparkles } from 'lucide-react';
 import { useMindMapStore } from '../store/mindMapStore';
 import { useOpenAI, TopicTree } from '../utils/openai';
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 type LayoutStyle = 'horizontal' | 'radial';
 
@@ -112,76 +117,78 @@ export function AIGenerator() {
 
   return (
     <Panel position="bottom-right" className="mr-4 mb-4">
-      {isOpen ? (
-        <div className="bg-white p-4 rounded-lg shadow-lg">
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              レイアウトスタイル
-            </label>
+      <HoverCard openDelay={1000}>
+        <HoverCardTrigger asChild>
+          <button
+            className="p-3 bg-blue-500 rounded-full text-white hover:bg-blue-600 shadow-lg tooltip"
+            title="AIマインドマップを生成"
+          >
+            <Sparkles size={24} />
+          </button>
+        </HoverCardTrigger>
+        <HoverCardContent side="top" align="end" className="w-[400px] p-4">
+          <div className="bg-white rounded-lg">
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                レイアウトスタイル
+              </label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setLayoutStyle('horizontal')}
+                  className={`flex-1 px-3 py-2 rounded border ${
+                    layoutStyle === 'horizontal'
+                      ? 'bg-blue-500 text-white border-blue-500'
+                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  横方向
+                </button>
+                <button
+                  onClick={() => setLayoutStyle('radial')}
+                  className={`flex-1 px-3 py-2 rounded border ${
+                    layoutStyle === 'radial'
+                      ? 'bg-blue-500 text-white border-blue-500'
+                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  放射状
+                </button>
+              </div>
+            </div>
+            <textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="探求したいテーマを入力してください..."
+              className="w-full h-32 p-2 border rounded mb-2 resize-none"
+            />
             <div className="flex gap-2">
               <button
-                onClick={() => setLayoutStyle('horizontal')}
-                className={`flex-1 px-3 py-2 rounded border ${
-                  layoutStyle === 'horizontal'
-                    ? 'bg-blue-500 text-white border-blue-500'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                }`}
+                onClick={handleGenerate}
+                disabled={isLoading}
+                className="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-blue-300 flex items-center justify-center gap-2"
               >
-                横方向
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                    <span>生成中...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={18} />
+                    <span>マインドマップを生成</span>
+                  </>
+                )}
               </button>
               <button
-                onClick={() => setLayoutStyle('radial')}
-                className={`flex-1 px-3 py-2 rounded border ${
-                  layoutStyle === 'radial'
-                    ? 'bg-blue-500 text-white border-blue-500'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                }`}
+                onClick={() => setPrompt('')}
+                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
               >
-                放射状
+                キャンセル
               </button>
             </div>
           </div>
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="探求したいテーマを入力してください..."
-            className="w-80 h-32 p-2 border rounded mb-2 resize-none"
-          />
-          <div className="flex gap-2">
-            <button
-              onClick={handleGenerate}
-              disabled={isLoading}
-              className="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-blue-300 flex items-center justify-center gap-2"
-            >
-              {isLoading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-                  <span>生成中...</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles size={18} />
-                  <span>マインドマップを生成</span>
-                </>
-              )}
-            </button>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-            >
-              キャンセル
-            </button>
-          </div>
-        </div>
-      ) : (
-        <button
-          onClick={() => setIsOpen(true)}
-          className="p-3 bg-blue-500 rounded-full text-white hover:bg-blue-600 shadow-lg tooltip"
-          title="AIマインドマップを生成"
-        >
-          <Sparkles size={24} />
-        </button>
-      )}
+        </HoverCardContent>
+      </HoverCard>
     </Panel>
   );
 }
