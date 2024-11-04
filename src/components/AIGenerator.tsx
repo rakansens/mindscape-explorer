@@ -115,13 +115,18 @@ export function AIGenerator() {
 
   return (
     <Panel position="bottom-right" className="mr-4 mb-4">
-      <HoverCard openDelay={1000}>
+      <HoverCard>
         <HoverCardTrigger>
-          <div className="p-3 bg-blue-500 rounded-full text-white hover:bg-blue-600 shadow-lg cursor-pointer">
+          <div className="p-3 bg-blue-500 rounded-full text-white hover:bg-blue-600 shadow-lg cursor-pointer transition-colors duration-200">
             <Sparkles size={24} />
           </div>
         </HoverCardTrigger>
-        <HoverCardContent side="top" align="end" className="w-[400px] p-4">
+        <HoverCardContent 
+          side="top" 
+          align="end" 
+          className="w-[400px] p-4"
+          forceMount
+        >
           <div className="bg-white rounded-lg">
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
