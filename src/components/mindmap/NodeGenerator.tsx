@@ -11,9 +11,16 @@ export const useNodeGenerator = () => {
     items: HierarchyItem[],
     onNodeGenerated?: () => void
   ) => {
-    // 各階層のノードを順番に生成
-    for (const item of items) {
-      // まず空のノードを作成して表示
+    // 各アイテムを順番に処理
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      
+      // 最初のノード以外は、前のノードとの間に待機時間を設ける
+      if (i > 0) {
+        await sleep(1000);
+      }
+
+      // 空のノードを作成
       const newNode = addNode(parentNode, '');
       
       // ノードが追加された直後にビューを調整
@@ -21,8 +28,8 @@ export const useNodeGenerator = () => {
         onNodeGenerated();
       }
 
-      // 視覚的なフィードバックのための待機
-      await sleep(500);
+      // 視覚的なフィードバックのための短い待機
+      await sleep(300);
       
       // テキストを一文字ずつアニメーション表示
       await animateText(
@@ -34,15 +41,12 @@ export const useNodeGenerator = () => {
             onNodeGenerated();
           }
         },
-        100  // タイピング速度をさらに遅く
+        80  // タイピング速度
       );
 
-      // 次のノード生成前の待機時間
-      await sleep(800);
-
-      // 子ノードがある場合は、さらに待機してから生成
+      // 子ノードがある場合は、親ノードの生成完了後に少し待ってから生成
       if (item.children && item.children.length > 0) {
-        await sleep(1000);
+        await sleep(500);
         await generateNodes(newNode, item.children, onNodeGenerated);
       }
     }
