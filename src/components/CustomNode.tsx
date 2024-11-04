@@ -78,7 +78,12 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
 
   const handleGenerateButtonClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setActiveMenuNodeId(id);
+    // 同じノードをクリックした場合はメニューを閉じる
+    if (activeMenuNodeId === id) {
+      setActiveMenuNodeId(null);
+    } else {
+      setActiveMenuNodeId(id);
+    }
   };
 
   const toggleCollapse = (e: React.MouseEvent) => {
@@ -136,7 +141,8 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
         <button
           onClick={handleGenerateButtonClick}
           className={`absolute -right-12 top-1/2 -translate-y-1/2 
-            ${nodeStyles.button} ${nodeStyles.generateButton}`}
+            ${nodeStyles.button} ${nodeStyles.generateButton}
+            ${showGenerateMenu ? 'bg-blue-50' : ''}`}
           title="AI生成メニューを開く"
         >
           <Sparkles size={16} />
