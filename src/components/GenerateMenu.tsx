@@ -12,7 +12,7 @@ interface GenerateMenuProps {
 export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
   const [isLoading, setIsLoading] = React.useState(false);
   const { generateSubTopics, apiKey } = useOpenAI();
-  const { nodes, addNode } = useMindMapStore();
+  const { nodes, addNode, updateNode } = useMindMapStore();
   const { toast } = useToast();
 
   const handleGenerate = async (mode: 'quick' | 'detailed') => {
@@ -39,17 +39,13 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
         for (const child of response.children) {
           const newNode = await addNode(currentNode, child.label);
           if (mode === 'detailed' && child.description) {
-            // Update the node with detailed text
-            const updatedNode = {
+            updateNode(newNode.id, {
               ...newNode,
               data: {
                 ...newNode.data,
                 detailedText: child.description
               }
-            };
-            // Update the node in the store
-            // Note: This assumes you have an updateNode function in your store
-            // You'll need to implement this if it doesn't exist
+            });
           }
         }
       }

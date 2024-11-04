@@ -18,7 +18,7 @@ export const useOpenAI = () => {
         messages: [
           {
             role: "system",
-            content: "あなたはマインドマップ作成を支援するAIアシスタントです。与えられたトピックについて、階層的な構造を持つサブトピックを生成します。必ず指定されたJSON形式で応答してください。"
+            content: "あなたはマインドマップ作成を支援するAIアシスタントです。与えられたトピックについて、階層的な構造を持つサブトピックを生成します。各トピックには詳細な説明を含めてください。"
           },
           {
             role: "user",
@@ -36,7 +36,6 @@ export const useOpenAI = () => {
       try {
         const parsedContent = JSON.parse(content);
         
-        // 応答の構造を検証
         if (!parsedContent.label || !Array.isArray(parsedContent.children)) {
           throw new Error('Invalid response structure');
         }
