@@ -1,6 +1,6 @@
 import React from 'react';
 import { Sparkles } from 'lucide-react';
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { AIGeneratorForm } from './AIGeneratorForm';
 
 export const AIGeneratorButton = () => {
@@ -13,18 +13,16 @@ export const AIGeneratorButton = () => {
         position: 'relative'
       }}
     >
-      <HoverCard>
-        <HoverCardTrigger asChild>
+      <Popover>
+        <PopoverTrigger asChild>
           <button 
             className="p-3 bg-blue-500 rounded-full text-white hover:bg-blue-600 shadow-lg transition-colors duration-200"
             style={{ pointerEvents: 'auto' }}
           >
             <Sparkles size={24} />
           </button>
-        </HoverCardTrigger>
-        <HoverCardContent 
-          side="top" 
-          align="end" 
+        </PopoverTrigger>
+        <PopoverContent 
           className="w-[400px] p-4"
           style={{ 
             pointerEvents: 'auto',
@@ -35,8 +33,8 @@ export const AIGeneratorButton = () => {
           }}
         >
           <AIGeneratorForm />
-        </HoverCardContent>
-      </HoverCard>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 };
