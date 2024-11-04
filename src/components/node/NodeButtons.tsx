@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Sparkles, ChevronDown, ChevronRight, CheckSquare, Square, RefreshCw } from 'lucide-react';
 import { useMenuStore } from '../../store/menuStore';
 import { nodeStyles } from '../../styles/commonStyles';
@@ -27,6 +27,7 @@ export const NodeButtons: React.FC<NodeButtonsProps> = ({
   onToggleTaskCompletion,
   onRegenerate,
 }) => {
+  const [isRegenerating, setIsRegenerating] = useState(false);
   const { activeMenuNodeId, setActiveMenuNodeId } = useMenuStore();
   const showGenerateMenu = activeMenuNodeId === nodeId;
   let hideTimeout = React.useRef<NodeJS.Timeout>();
@@ -42,6 +43,15 @@ export const NodeButtons: React.FC<NodeButtonsProps> = ({
     hideTimeout.current = setTimeout(() => {
       setActiveMenuNodeId(null);
     }, 1000);
+  };
+
+  const handleRegenerate = async (e: React.MouseEvent) => {
+    setIsRegenerating(true);
+    try {
+      await onRegenerate(e);
+    } finally {
+      setIsRegenerating(false);
+    }
   };
 
   return (
@@ -66,8 +76,10 @@ export const NodeButtons: React.FC<NodeButtonsProps> = ({
         </button>
       )}
       <button
-        onClick={onRegenerate}
-        className="text-white hover:bg-white/10 rounded p-1"
+        onClick={handleRegenerate}
+        disabled={isRegenerating}
+        className={`text-white hover:bg-white/10 rounded p-1 transition-all duration-300
+          ${isRegenerating ? 'animate-spin' : 'hover:animate-regenerate'}`}
         title="AIで再生成"
       >
         <RefreshCw size={16} />
