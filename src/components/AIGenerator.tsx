@@ -3,8 +3,8 @@ import { Panel, useReactFlow } from 'reactflow';
 import { Sparkles } from 'lucide-react';
 import { useMindMapStore } from '../store/mindMapStore';
 import { useOpenAI, TopicTree } from '../utils/openai';
-import { useTypingAnimation } from '../hooks/useTypingAnimation';
 import { useToast } from '../hooks/use-toast';
+import { sleep, animateText } from '../utils/animationUtils';
 
 type LayoutStyle = 'horizontal' | 'radial';
 
@@ -48,32 +48,33 @@ export function AIGenerator() {
     return hierarchy;
   };
 
-  const animateText = async (nodeId: string, text: string) => {
-    let currentText = '';
-    for (const char of text) {
-      currentText += char;
-      updateNodeText(nodeId, currentText);
-      await new Promise(resolve => setTimeout(resolve, 30));
-    }
-  };
-
   const generateNodes = async (
     parentNode: any,
     items: HierarchyItem[],
     level: number = 0
   ) => {
     for (const [index, item] of items.entries()) {
-      // ノードを作成する前に少し待機して、生成の流れを視覚化
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // 各ノードの生成前に待機
+      await sleep(500);
       
       // 空のノードを作成
       const newNode = addNode(parentNode, '');
       
       // テキストをアニメーション付きで表示
-      await animateText(newNode.id, item.text);
+      await animateText(
+        item.text,
+        (text) => updateNodeText(newNode.id, text)
+      );
 
-      // 子ノードがある場合は再帰的に生成
+      // ビューを調整
+      fitView({ 
+        duration: 300,
+        padding: 0.3,
+      });
+
+      // 子ノードがある場合は、親ノードのアニメーション完了後に生成
       if (item.children && item.children.length > 0) {
+        await sleep(300); // 子ノードの生成前に少し待機
         await generateNodes(newNode, item.children, level + 1);
       }
     }
@@ -110,25 +111,16 @@ export function AIGenerator() {
       
       if (rootNode) {
         // ルートノードのテキストをアニメーション付きで更新
-        await animateText(rootNode.id, prompt);
+        await animateText(
+          prompt,
+          (text) => updateNodeText(rootNode.id, text)
+        );
         
-        fitView({ 
-          duration: 800,
-          padding: 0.5,
-        });
-
-        // 子ノードを生成
+        // ルートノードの更新後に少し待機
+        await sleep(500);
+        
+        // 子ノードを順番に生成
         await generateNodes(rootNode, hierarchy);
-
-        // 生成完了後にビューを調整
-        setTimeout(() => {
-          fitView({ 
-            duration: 800,
-            padding: 0.3,
-            minZoom: 0.4,
-            maxZoom: 1,
-          });
-        }, 1000);
 
         toast({
           title: "生成完了",
