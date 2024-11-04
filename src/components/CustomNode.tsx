@@ -52,10 +52,8 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
 
   const handleNodeMouseLeave = () => {
     hideTimeout.current = setTimeout(() => {
-      if (!showGenerateMenu) {
-        setShowButton(false);
-        setActiveMenuNodeId(null);
-      }
+      setShowButton(false);
+      setActiveMenuNodeId(null);
     }, 1000);
   };
 
@@ -68,10 +66,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
 
   const handleMenuMouseLeave = () => {
     hideTimeout.current = setTimeout(() => {
-      if (!showGenerateMenu) {
-        setActiveMenuNodeId(null);
-        setShowButton(false);
-      }
+      setActiveMenuNodeId(null);
     }, 1000);
   };
 
@@ -93,6 +88,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
       if (inputValue.trim() !== '') {
         store.updateNodeText(id, inputValue);
         setIsEditing(false);
+        // 同じ階層に新しいノードを追加
         const parentEdge = store.edges.find(edge => edge.target === id);
         const parentId = parentEdge?.source;
         if (parentId) {
@@ -108,6 +104,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
     } else if (e.key === 'Tab') {
       e.preventDefault();
       if (data.selected) {
+        // 下の階層に新しいノードを追加
         const currentNode = store.nodes.find(n => n.id === id);
         if (currentNode) {
           store.addNode(currentNode, 'New Node', {
