@@ -5,13 +5,13 @@ import { getMindMapPrompt } from './prompts/mindMapPrompts';
 export const useOpenAI = () => {
   const { apiKey, openai } = useOpenAIAuth();
 
-  const generateSubTopics = async (prompt: string, options?: GenerateOptions): Promise<TopicTree> => {
+  const generateSubTopics = async (topic: string, options?: GenerateOptions): Promise<TopicTree> => {
     if (!openai) {
       throw new Error('OpenAI client not initialized');
     }
 
     try {
-      const mindMapPrompt = getMindMapPrompt(prompt, options?.mode, options);
+      const prompt = getMindMapPrompt(topic, options?.mode, options);
 
       const response = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
@@ -22,7 +22,7 @@ export const useOpenAI = () => {
           },
           {
             role: "user",
-            content: mindMapPrompt
+            content: prompt
           }
         ],
         temperature: 0.7,

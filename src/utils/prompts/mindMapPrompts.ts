@@ -1,10 +1,16 @@
-export const getMindMapPrompt = (topic: string, mode?: string, options?: any) => {
+import { GenerateOptions } from '../../types/openai';
+
+export const getMindMapPrompt = (topic: string, mode?: string, options?: GenerateOptions): string => {
   const isHow = mode === 'how';
   const isDetailed = mode === 'detailed';
   const isDetailedHow = isHow && options?.howType === 'detailed';
   const isWhy = mode === 'why';
   const isDetailedWhy = isWhy && options?.whyType === 'detailed';
-  
+  const isWhat = mode === 'what';
+  const isDetailedWhat = isWhat && options?.whatType === 'detailed';
+  const isWhich = mode === 'which';
+  const isDetailedWhich = isWhich && options?.whichType === 'detailed';
+
   if (isWhy) {
     return `
 以下のトピックについて、「なぜ？」という視点から階層的な分析を生成してください。
