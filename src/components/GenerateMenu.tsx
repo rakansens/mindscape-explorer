@@ -15,7 +15,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
   const { nodes, addNode } = useMindMapStore();
   const { toast } = useToast();
 
-  const handleGenerate = async (mode: 'quick' | 'detailed' | 'analysis') => {
+  const handleGenerate = async (mode: 'quick' | 'detailed') => {
     if (!apiKey) {
       toast({
         title: "エラー",
@@ -76,15 +76,6 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
         >
           {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
           Detailed Generate
-        </Button>
-        <Button
-          variant="ghost"
-          className="w-full justify-start"
-          onClick={() => handleGenerate('analysis')}
-          disabled={isLoading}
-        >
-          {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-          Analysis Generate
         </Button>
       </div>
     </div>
