@@ -1,7 +1,13 @@
 import React from 'react';
 import { EdgeProps, getBezierPath } from 'reactflow';
 
-const CustomEdge: React.FC<EdgeProps> = ({
+interface CustomEdgeProps extends EdgeProps {
+  data?: {
+    animated?: boolean;
+  };
+}
+
+const CustomEdge: React.FC<CustomEdgeProps> = ({
   id,
   sourceX,
   sourceY,
@@ -10,6 +16,7 @@ const CustomEdge: React.FC<EdgeProps> = ({
   sourcePosition,
   targetPosition,
   style = {},
+  data,
 }) => {
   const [edgePath] = getBezierPath({
     sourceX,
@@ -28,7 +35,7 @@ const CustomEdge: React.FC<EdgeProps> = ({
         strokeWidth: 2,
         stroke: '#2563eb',
       }}
-      className="react-flow__edge-path"
+      className={`react-flow__edge-path ${data?.animated ? 'animated' : ''}`}
       d={edgePath}
     />
   );
