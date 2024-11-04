@@ -5,6 +5,7 @@ import { useMindMapStore } from '../store/mindMapStore';
 import { useOpenAI, TopicTree } from '../utils/openai';
 import { useToast } from '../hooks/use-toast';
 import { sleep, animateText } from '../utils/animationUtils';
+import { useNodeGenerator } from './mindmap/NodeGenerator';
 
 type LayoutStyle = 'horizontal' | 'radial';
 
@@ -19,10 +20,12 @@ export function AIGenerator() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [layoutStyle, setLayoutStyle] = useState<LayoutStyle>('horizontal');
-  const { addNode, nodes, updateNodeText } = useMindMapStore();
+  
+  const { nodes, updateNodeText } = useMindMapStore();
   const { generateSubTopics, apiKey } = useOpenAI();
   const { fitView } = useReactFlow();
   const { toast } = useToast();
+  const { generateNodes } = useNodeGenerator();
 
   const parseTopicTree = (topicTree: TopicTree): HierarchyItem[] => {
     const hierarchy: HierarchyItem[] = [];
@@ -46,38 +49,6 @@ export function AIGenerator() {
     }
 
     return hierarchy;
-  };
-
-  const generateNodes = async (
-    parentNode: any,
-    items: HierarchyItem[],
-    level: number = 0
-  ) => {
-    for (const [index, item] of items.entries()) {
-      // 各ノードの生成前に待機
-      await sleep(500);
-      
-      // 空のノードを作成
-      const newNode = addNode(parentNode, '');
-      
-      // テキストをアニメーション付きで表示
-      await animateText(
-        item.text,
-        (text) => updateNodeText(newNode.id, text)
-      );
-
-      // ビューを調整
-      fitView({ 
-        duration: 300,
-        padding: 0.3,
-      });
-
-      // 子ノードがある場合は、親ノードのアニメーション完了後に生成
-      if (item.children && item.children.length > 0) {
-        await sleep(300); // 子ノードの生成前に少し待機
-        await generateNodes(newNode, item.children, level + 1);
-      }
-    }
   };
 
   const handleGenerate = async () => {
@@ -113,14 +84,20 @@ export function AIGenerator() {
         // ルートノードのテキストをアニメーション付きで更新
         await animateText(
           prompt,
-          (text) => updateNodeText(rootNode.id, text)
+          (text) => updateNodeText(rootNode.id, text),
+          50  // タイピング速度を遅くする
         );
         
-        // ルートノードの更新後に少し待機
-        await sleep(500);
+        // ルートノードの更新後に待機
+        await sleep(800);
         
-        // 子ノードを順番に生成
-        await generateNodes(rootNode, hierarchy);
+        // 子ノードを順番に生成（ビューの自動調整付き）
+        await generateNodes(rootNode, hierarchy, () => {
+          fitView({ 
+            duration: 300,
+            padding: 0.3,
+          });
+        });
 
         toast({
           title: "生成完了",
