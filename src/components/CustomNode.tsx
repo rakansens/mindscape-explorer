@@ -6,6 +6,7 @@ import { getNodeLevel, getNodeStyle } from '../utils/nodeUtils';
 import { nodeStyles } from '../styles/commonStyles';
 import { useMenuStore } from '../store/menuStore';
 import { GenerateMenu } from './GenerateMenu';
+import { DetailedTextEditor } from './DetailedTextEditor';
 
 interface CustomNodeProps {
   data: {
@@ -200,8 +201,8 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
             
             {data.detailedText && !isCollapsed && (
               <div className="mt-2 pt-2 border-t border-white/20 text-white/90 text-sm">
-                <div className="max-h-[200px] overflow-y-auto whitespace-pre-wrap break-words" style={{ width: '250px' }}>
-                  {data.detailedText}
+                <div className="max-h-[200px] overflow-y-auto" style={{ width: '250px' }}>
+                  <DetailedTextEditor nodeId={id} initialText={data.detailedText} />
                 </div>
               </div>
             )}
