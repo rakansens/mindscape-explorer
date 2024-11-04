@@ -90,7 +90,8 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
 
               const grandChildNode = await addNode(newNode, grandChild.label, grandChildPosition);
 
-              if ((mode === 'detailed' || mode === 'why' || mode === 'how') && grandChild.description) {
+              // 孫ノードの設定を修正
+              if (mode === 'why' || mode === 'how') {
                 updateNode(grandChildNode.id, {
                   ...grandChildNode,
                   data: {
