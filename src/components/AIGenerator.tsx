@@ -19,7 +19,6 @@ interface HierarchyItem {
 
 export function AIGenerator() {
   const [prompt, setPrompt] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [layoutStyle, setLayoutStyle] = useState<LayoutStyle>('horizontal');
   const { addNode, nodes, updateNodeText } = useMindMapStore();
@@ -106,7 +105,6 @@ export function AIGenerator() {
       }
 
       setPrompt('');
-      setIsOpen(false);
     } catch (error) {
       console.error('AI生成エラー:', error);
       alert('マインドマップの生成に失敗しました。APIキーを確認してください。');
