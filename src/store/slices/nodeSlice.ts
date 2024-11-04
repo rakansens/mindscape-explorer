@@ -1,57 +1,8 @@
-import { create } from 'zustand';
-import { Connection, Edge, EdgeChange, Node as ReactFlowNode, NodeChange, addEdge, applyEdgeChanges, applyNodeChanges } from 'reactflow';
-import { MindMapState } from './types/mindMapTypes';
-import { createNodeSlice } from './slices/nodeSlice';
-import { createLayoutSlice } from './slices/layoutSlice';
-import { createExportSlice } from './slices/exportSlice';
+import { ReactFlowNode } from 'reactflow';
+import { HORIZONTAL_SPACING, VERTICAL_SPACING } from '../constants/layoutConstants';
+import { MindMapState } from '../types/mindMapTypes';
 
-const initialState: Partial<MindMapState> = {
-  nodes: [
-    {
-      id: '1',
-      type: 'mindNode',
-      data: { label: 'Central Topic' },
-      position: { x: window.innerWidth / 2, y: window.innerHeight / 3 },
-    },
-  ],
-  edges: [],
-  layout: 'horizontal',
-  history: {
-    past: [],
-    present: [],
-    future: [],
-  },
-  isEditing: false,
-  copiedNode: null,
-  theme: 'light',
-  showMinimap: false,
-  flowInstance: null,
-};
-
-export const useMindMapStore = create<MindMapState>((set, get) => ({
-  ...initialState,
-  ...createNodeSlice(set, get),
-  ...createLayoutSlice(set, get),
-  ...createExportSlice(set, get),
-
-  onNodesChange: (changes: NodeChange[]) => {
-    set({
-      nodes: applyNodeChanges(changes, get().nodes),
-    });
-  },
-
-  onEdgesChange: (changes: EdgeChange[]) => {
-    set({
-      edges: applyEdgeChanges(changes, get().edges),
-    });
-  },
-
-  onConnect: (connection: Connection) => {
-    set({
-      edges: addEdge(connection, get().edges),
-    });
-  },
-
+export const createNodeSlice = (set: any, get: any) => ({
   addNode: (parentNode: ReactFlowNode | null, label: string, index = 0, totalSiblings = 1) => {
     const { layout } = get();
     const spacing = HORIZONTAL_SPACING[layout];
@@ -228,12 +179,4 @@ export const useMindMapStore = create<MindMapState>((set, get) => ({
       return { nodes: finalNodes };
     });
   },
-
-}));
-
-// 自動保存の設定
-if (typeof window !== 'undefined') {
-  setInterval(() => {
-    useMindMapStore.getState().autoSave();
-  }, 60000);
-}
+});
