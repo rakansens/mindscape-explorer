@@ -19,17 +19,36 @@ export const useOpenAI = () => {
     }
 
     try {
+      const systemPrompt = `You are an AI assistant that generates mind map topics. Always respond with valid JSON in the following format:
+{
+  "label": "Main Topic",
+  "children": [
+    {
+      "label": "Subtopic 1",
+      "children": [
+        {
+          "label": "Detail 1.1",
+          "children": []
+        }
+      ]
+    }
+  ]
+}`;
+
+      const userPrompt = `Generate a mind map structure for: "${prompt}"
+Rules:
+- Response must be valid JSON
+- Use the exact format shown
+- Generate 3-5 subtopics
+- Each subtopic should have 2-3 child topics
+- Keep labels concise and clear
+- Ensure all "children" arrays exist (empty array if no children)`;
+
       const response = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
-          {
-            role: "system",
-            content: "You are a helpful AI assistant that generates mind map topics."
-          },
-          {
-            role: "user",
-            content: `Generate subtopics for: ${prompt}`
-          }
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
         ],
         temperature: 0.7,
       });
@@ -38,7 +57,8 @@ export const useOpenAI = () => {
       if (!content) throw new Error('No content generated');
 
       try {
-        return JSON.parse(content);
+        const parsedContent = JSON.parse(content);
+        return parsedContent;
       } catch (e) {
         console.error('Failed to parse response:', content);
         throw new Error('Invalid response format');
