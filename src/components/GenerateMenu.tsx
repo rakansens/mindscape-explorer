@@ -3,7 +3,7 @@ import { useOpenAI } from '../utils/openai';
 import { useMindMapStore } from '../store/mindMapStore';
 import { Button } from './ui/button';
 import { useToast } from '../hooks/use-toast';
-import { Loader2, Zap, BookOpen, HelpCircle, ListTodo, RefreshCw } from 'lucide-react';
+import { Loader2, Zap, BookOpen, HelpCircle, ListTodo, RefreshCw, Lightbulb } from 'lucide-react';
 import { getNodeProperties } from '../utils/nodeUtils';
 import {
   Tooltip,
@@ -22,7 +22,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
   const { nodes, edges, addNode, updateNode, removeChildNodes } = useMindMapStore();
   const { toast } = useToast();
 
-  const handleGenerate = async (mode: 'quick' | 'detailed' | 'why' | 'how' | 'regenerate') => {
+  const handleGenerate = async (mode: 'quick' | 'detailed' | 'why' | 'how' | 'regenerate' | 'ideas') => {
     if (!apiKey) {
       toast({
         title: "エラー",
@@ -68,7 +68,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
         quickType: effectiveMode === 'quick' ? 'simple' : 'detailed',
         nodeContext: currentNode.data.label,
         structure: {
-          level1: childProperties.length || 3,
+          level1: mode === 'ideas' ? 10 : (childProperties.length || 3),
           level2: 2,
           level3: 1
         }
@@ -251,6 +251,23 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
             </TooltipTrigger>
             <TooltipContent>
               <p>HOW分析</p>
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-10 h-10"
+                onClick={() => handleGenerate('ideas')}
+                disabled={isLoading}
+              >
+                {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Lightbulb className="h-5 w-5" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>アイディア生成</p>
             </TooltipContent>
           </Tooltip>
 

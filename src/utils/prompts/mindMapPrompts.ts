@@ -1,6 +1,66 @@
 import { GenerateOptions } from '../../types/openai';
 
 export const getMindMapPrompt = (topic: string, mode?: string, options?: GenerateOptions): string => {
+  if (mode === 'ideas') {
+    return `
+以下のトピックについて、10個のユニークなアイディアを生成してください。
+
+トピック: "${topic}"
+
+要件:
+1. 各アイディアは2-3行の文章で具体的に説明してください
+2. 実現可能で実用的なアイディアを提案してください
+3. 多様な視点からアイディアを生成してください
+4. 各アイディアは独立していて、重複がないようにしてください
+
+応答は以下のようなJSON形式で返してください:
+{
+  "label": "${topic}",
+  "children": [
+    {
+      "label": "アイディア1の内容を2-3行で記述",
+      "children": []
+    },
+    {
+      "label": "アイディア2の内容を2-3行で記述",
+      "children": []
+    },
+    {
+      "label": "アイディア3の内容を2-3行で記述",
+      "children": []
+    },
+    {
+      "label": "アイディア4の内容を2-3行で記述",
+      "children": []
+    },
+    {
+      "label": "アイディア5の内容を2-3行で記述",
+      "children": []
+    },
+    {
+      "label": "アイディア6の内容を2-3行で記述",
+      "children": []
+    },
+    {
+      "label": "アイディア7の内容を2-3行で記述",
+      "children": []
+    },
+    {
+      "label": "アイディア8の内容を2-3行で記述",
+      "children": []
+    },
+    {
+      "label": "アイディア9の内容を2-3行で記述",
+      "children": []
+    },
+    {
+      "label": "アイディア10の内容を2-3行で記述",
+      "children": []
+    }
+  ]
+}`;
+  }
+
   if (mode === 'how') {
     return `
 以下のトピックについて、「どのように実現するか？」という視点からタスクリストを生成してください。
@@ -60,61 +120,6 @@ export const getMindMapPrompt = (topic: string, mode?: string, options?: Generat
               "children": []
             }
           ]
-        },
-        {
-          "label": "子トピック1-2",
-          "children": [
-            {
-              "label": "孫トピック1-2-1",
-              "children": []
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "label": "主要サブトピック2",
-      "children": [
-        {
-          "label": "子トピック2-1",
-          "children": [
-            {
-              "label": "孫トピック2-1-1",
-              "children": []
-            }
-          ]
-        },
-        {
-          "label": "子トピック2-2",
-          "children": [
-            {
-              "label": "孫トピック2-2-1",
-              "children": []
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "label": "主要サブトピック3",
-      "children": [
-        {
-          "label": "子トピック3-1",
-          "children": [
-            {
-              "label": "孫トピック3-1-1",
-              "children": []
-            }
-          ]
-        },
-        {
-          "label": "子トピック3-2",
-          "children": [
-            {
-              "label": "孫トピック3-2-1",
-              "children": []
-            }
-          ]
         }
       ]
     }
@@ -170,26 +175,6 @@ export const getMindMapPrompt = (topic: string, mode?: string, options?: Generat
           "children": []
         }
       ]
-    },
-    {
-      "label": "なぜ質問2？",
-      "children": [
-        {
-          "label": "説明2",
-          "description": "詳細な説明文2",
-          "children": []
-        }
-      ]
-    },
-    {
-      "label": "なぜ質問3？",
-      "children": [
-        {
-          "label": "説明3",
-          "description": "詳細な説明文3",
-          "children": []
-        }
-      ]
     }
   ]
 }`;
@@ -207,4 +192,3 @@ export const getMindMapPrompt = (topic: string, mode?: string, options?: Generat
   "children": []
 }`;
 };
-
