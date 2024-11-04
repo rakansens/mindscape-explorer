@@ -90,15 +90,26 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
 
               const grandChildNode = await addNode(newNode, grandChild.label, grandChildPosition);
 
-              // 孫ノードの設定を修正
-              if (mode === 'why' || mode === 'how') {
+              // WHYモードの場合、説明ノードとして設定
+              if (mode === 'why') {
+                updateNode(grandChildNode.id, {
+                  ...grandChildNode,
+                  data: {
+                    ...grandChildNode.data,
+                    detailedText: grandChild.description,
+                    isCollapsed: true
+                  }
+                });
+              }
+              // HOWモードの場合、タスクノードとして設定
+              else if (mode === 'how') {
                 updateNode(grandChildNode.id, {
                   ...grandChildNode,
                   data: {
                     ...grandChildNode.data,
                     detailedText: grandChild.description,
                     isCollapsed: true,
-                    isTask: mode === 'how',
+                    isTask: true,
                     isCompleted: false
                   }
                 });
