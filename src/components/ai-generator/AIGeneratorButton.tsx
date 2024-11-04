@@ -10,15 +10,10 @@ export const AIGeneratorButton = () => {
     setIsOpen(open);
   };
 
-  const handleClose = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsOpen(false);
-  };
-
   return (
     <div className="fixed bottom-4 right-4 z-[100]">
       <Popover open={isOpen} onOpenChange={handleOpenChange}>
-        <PopoverTrigger>
+        <PopoverTrigger asChild>
           <button 
             className="p-3 bg-blue-500 rounded-full text-white hover:bg-blue-600 shadow-lg transition-colors duration-200"
           >
@@ -26,20 +21,14 @@ export const AIGeneratorButton = () => {
           </button>
         </PopoverTrigger>
         <PopoverContent 
-          className="w-[400px] p-4 z-[101]"
+          className="w-[400px] p-4"
           side="top"
           align="end"
           sideOffset={16}
+          onInteractOutside={() => setIsOpen(false)}
+          onEscapeKeyDown={() => setIsOpen(false)}
         >
-          <div className="relative">
-            <button
-              onClick={handleClose}
-              className="absolute top-0 right-0 p-2 text-gray-500 hover:text-gray-700"
-            >
-              ✕
-            </button>
-            <AIGeneratorForm onClose={() => setIsOpen(false)} />
-          </div>
+          <AIGeneratorForm onClose={() => setIsOpen(false)} />
         </PopoverContent>
       </Popover>
     </div>
