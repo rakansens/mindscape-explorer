@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useMindMapStore } from '../store/mindMapStore';
 import { Handle, Position } from 'reactflow';
-import { Sparkles, ChevronDown, ChevronRight } from 'lucide-react';
+import { Sparkles, ChevronDown, ChevronRight, CheckSquare, Square } from 'lucide-react';
 import { getNodeLevel, getNodeStyle } from '../utils/nodeUtils';
 import { nodeStyles } from '../styles/commonStyles';
 import { useMenuStore } from '../store/menuStore';
@@ -17,6 +17,8 @@ interface CustomNodeProps {
     description?: string;
     selected?: boolean;
     detailedText?: string;
+    isTask?: boolean;
+    isCompleted?: boolean;
   };
   id: string;
   xPos?: number;
@@ -130,6 +132,16 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
     setIsCollapsed(!isCollapsed);
   };
 
+  const toggleTaskCompletion = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    store.updateNode(id, {
+      data: {
+        ...data,
+        isCompleted: !data.isCompleted
+      }
+    });
+  };
+
   return (
     <>
       <Handle type="target" position={Position.Left} />
@@ -158,6 +170,17 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
                   {isCollapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
                 </button>
               )}
+              {data.isTask && (
+                <button
+                  onClick={toggleTaskCompletion}
+                  className="text-white hover:bg-white/10 rounded p-1"
+                >
+                  {data.isCompleted ? 
+                    <CheckSquare size={16} className="text-green-300" /> : 
+                    <Square size={16} />
+                  }
+                </button>
+              )}
               {isEditing ? (
                 <input
                   ref={inputRef}
@@ -169,7 +192,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
                   autoFocus
                 />
               ) : (
-                <div className="text-white cursor-pointer">
+                <div className={`text-white cursor-pointer ${data.isCompleted ? 'line-through opacity-70' : ''}`}>
                   {data.label}
                 </div>
               )}

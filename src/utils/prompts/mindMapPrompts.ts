@@ -1,6 +1,41 @@
 import { GenerateOptions } from '../../types/openai';
 
 export const getMindMapPrompt = (topic: string, mode?: string, options?: GenerateOptions): string => {
+  if (mode === 'how') {
+    return `
+以下のトピックについて、「どのように実現するか？」という視点からタスクリストを生成してください。
+
+トピック: "${topic}"
+
+要件:
+1. 3つの主要なアプローチを提案してください
+2. 各アプローチに対して2つの具体的なタスクを含めてください
+3. アプローチには説明を含め、タスクには具体的な実行手順を含めてください
+
+応答は以下のようなJSON形式で返してください:
+{
+  "label": "${topic}",
+  "children": [
+    {
+      "label": "アプローチ1",
+      "description": "このアプローチの説明（2-3行）",
+      "children": [
+        {
+          "label": "タスク1-1",
+          "description": "タスク1-1の具体的な実行手順（2-3行）",
+          "children": []
+        },
+        {
+          "label": "タスク1-2",
+          "description": "タスク1-2の具体的な実行手順（2-3行）",
+          "children": []
+        }
+      ]
+    }
+  ]
+}`;
+  }
+
   if (mode === 'why') {
     return `
 以下のトピックについて、「なぜ？」という視点から分析を生成してください。

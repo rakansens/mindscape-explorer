@@ -3,7 +3,7 @@ import { useOpenAI } from '../utils/openai';
 import { useMindMapStore } from '../store/mindMapStore';
 import { Button } from './ui/button';
 import { useToast } from '../hooks/use-toast';
-import { Loader2, Zap, BookOpen, HelpCircle } from 'lucide-react';
+import { Loader2, Zap, BookOpen, HelpCircle, ListTodo } from 'lucide-react';
 
 interface GenerateMenuProps {
   nodeId: string;
@@ -15,7 +15,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
   const { nodes, addNode, updateNode } = useMindMapStore();
   const { toast } = useToast();
 
-  const handleGenerate = async (mode: 'quick' | 'detailed' | 'why') => {
+  const handleGenerate = async (mode: 'quick' | 'detailed' | 'why' | 'how') => {
     if (!apiKey) {
       toast({
         title: "エラー",
@@ -65,13 +65,14 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
 
           const newNode = await addNode(currentNode, child.label, childPosition);
           
-          if ((mode === 'detailed' || mode === 'why') && child.description) {
+          if ((mode === 'detailed' || mode === 'why' || mode === 'how') && child.description) {
             updateNode(newNode.id, {
               ...newNode,
               data: {
                 ...newNode.data,
                 detailedText: child.description,
-                isCollapsed: true
+                isCollapsed: true,
+                isTask: mode === 'how'
               }
             });
           }
@@ -89,13 +90,15 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
 
               const grandChildNode = await addNode(newNode, grandChild.label, grandChildPosition);
 
-              if ((mode === 'detailed' || mode === 'why') && grandChild.description) {
+              if ((mode === 'detailed' || mode === 'why' || mode === 'how') && grandChild.description) {
                 updateNode(grandChildNode.id, {
                   ...grandChildNode,
                   data: {
                     ...grandChildNode.data,
                     detailedText: grandChild.description,
-                    isCollapsed: true
+                    isCollapsed: true,
+                    isTask: mode === 'how',
+                    isCompleted: false
                   }
                 });
               }
@@ -164,6 +167,16 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
           title="WHY分析"
         >
           {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <HelpCircle className="h-5 w-5" />}
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="w-10 h-10"
+          onClick={() => handleGenerate('how')}
+          disabled={isLoading}
+          title="HOW分析"
+        >
+          {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <ListTodo className="h-5 w-5" />}
         </Button>
       </div>
     </div>
