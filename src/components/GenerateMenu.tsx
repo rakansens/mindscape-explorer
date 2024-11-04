@@ -3,7 +3,7 @@ import { useOpenAI } from '../utils/openai';
 import { useMindMapStore } from '../store/mindMapStore';
 import { Button } from './ui/button';
 import { useToast } from '../hooks/use-toast';
-import { Loader2, Zap, BookOpen, HelpCircle, ListTodo } from 'lucide-react';
+import { Loader2, Zap, BookOpen, HelpCircle, ListTodo, RefreshCw } from 'lucide-react';
 
 interface GenerateMenuProps {
   nodeId: string;
@@ -12,10 +12,10 @@ interface GenerateMenuProps {
 export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
   const [isLoading, setIsLoading] = React.useState(false);
   const { generateSubTopics, apiKey } = useOpenAI();
-  const { nodes, addNode, updateNode } = useMindMapStore();
+  const { nodes, edges, addNode, updateNode, removeChildNodes } = useMindMapStore();
   const { toast } = useToast();
 
-  const handleGenerate = async (mode: 'quick' | 'detailed' | 'why' | 'how') => {
+  const handleGenerate = async (mode: 'quick' | 'detailed' | 'why' | 'how' | 'regenerate') => {
     if (!apiKey) {
       toast({
         title: "エラー",
@@ -37,8 +37,13 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
 
     setIsLoading(true);
     try {
+      // 再生成モードの場合、既存の子ノードを削除
+      if (mode === 'regenerate') {
+        removeChildNodes(nodeId);
+      }
+
       const response = await generateSubTopics(currentNode.data.label, {
-        mode: mode,
+        mode: mode === 'regenerate' ? 'detailed' : mode,
         quickType: mode === 'quick' ? 'simple' : 'detailed',
         structure: {
           level1: 3,
@@ -125,7 +130,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
 
       if (addedNodes > 0) {
         toast({
-          title: "生成完了",
+          title: mode === 'regenerate' ? "再生成完了" : "生成完了",
           description: `${addedNodes}個のノードを生成しました`,
         });
       } else {
@@ -189,6 +194,16 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
           title="HOW分析"
         >
           {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <ListTodo className="h-5 w-5" />}
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="w-10 h-10"
+          onClick={() => handleGenerate('regenerate')}
+          disabled={isLoading}
+          title="子ノードを再生成"
+        >
+          {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <RefreshCw className="h-5 w-5" />}
         </Button>
       </div>
     </div>

@@ -36,6 +36,7 @@ type RFState = {
   exportAsJSON: () => void;
   importFromJSON: (jsonString: string) => void;
   updateNode: (nodeId: string, updates: Partial<Node>) => void;
+  removeChildNodes: (nodeId: string) => void;
 };
 
 export const useMindMapStore = create<RFState>((set, get) => ({
@@ -185,5 +186,28 @@ export const useMindMapStore = create<RFState>((set, get) => ({
         node.id === nodeId ? { ...node, ...updates } : node
       ),
     }));
+  },
+
+  removeChildNodes: (nodeId: string) => {
+    const edges = get().edges;
+    const nodes = get().nodes;
+    
+    // 子ノードのIDを再帰的に収集
+    const getChildNodeIds = (parentId: string, collected: Set<string> = new Set()): Set<string> => {
+      edges.forEach(edge => {
+        if (edge.source === parentId) {
+          collected.add(edge.target);
+          getChildNodeIds(edge.target, collected);
+        }
+      });
+      return collected;
+    };
+
+    const childNodeIds = getChildNodeIds(nodeId);
+    
+    set({
+      nodes: nodes.filter(node => !childNodeIds.has(node.id)),
+      edges: edges.filter(edge => !childNodeIds.has(edge.target) && !childNodeIds.has(edge.source))
+    });
   },
 }));
