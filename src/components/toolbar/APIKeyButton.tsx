@@ -4,7 +4,7 @@ import { useOpenAIAuth } from '../../store/openAIAuthStore';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Key, Lock, Save } from 'lucide-react';
-import { useToast } from '../ui/use-toast';
+import { useToast } from '../../hooks/use-toast';
 import { preventEvent } from '../../utils/eventUtils';
 
 export const APIKeyButton = () => {
