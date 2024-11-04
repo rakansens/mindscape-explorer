@@ -3,7 +3,6 @@ import { Sparkles, Plus } from 'lucide-react';
 import { useMenuStore } from '../../store/menuStore';
 import { GenerateMenu } from '../GenerateMenu';
 import { nodeStyles } from '../../styles/commonStyles';
-import { Tooltip } from '../Tooltip';
 import { useMindMapStore } from '../../store/mindMapStore';
 
 interface NodeMenuProps {
@@ -68,24 +67,20 @@ export const NodeMenu: React.FC<NodeMenuProps> = ({ id, showButton, setShowButto
       onMouseEnter={handleMenuMouseEnter}
       onMouseLeave={handleMenuMouseLeave}
     >
-      <Tooltip text="新規ノード追加" position="left">
-        <button
-          onClick={handleAddNode}
-          className={`${nodeStyles.button} ${nodeStyles.generateButton}`}
-          title="新規ノード追加"
-        >
-          <Plus size={16} />
-        </button>
-      </Tooltip>
+      <button
+        onClick={handleAddNode}
+        className={`${nodeStyles.button} ${nodeStyles.generateButton}`}
+        title="新規ノード追加"
+      >
+        <Plus size={16} />
+      </button>
 
-      <Tooltip text="AI生成" position="left">
-        <button
-          className={`${nodeStyles.button} ${nodeStyles.generateButton}`}
-          title="AI生成メニューを開く"
-        >
-          <Sparkles size={16} />
-        </button>
-      </Tooltip>
+      <button
+        className={`${nodeStyles.button} ${nodeStyles.generateButton}`}
+        title="AI生成メニューを開く"
+      >
+        <Sparkles size={16} />
+      </button>
 
       {showGenerateMenu && <GenerateMenu nodeId={id} />}
     </div>
