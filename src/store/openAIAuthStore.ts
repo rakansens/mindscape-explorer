@@ -23,6 +23,7 @@ export const useOpenAIAuth = create<OpenAIAuthStore>()(
     }),
     {
       name: 'openai-auth-storage',
+      partialize: (state) => ({ apiKey: state.apiKey }),
     }
   )
 );

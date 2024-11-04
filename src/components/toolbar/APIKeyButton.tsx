@@ -14,7 +14,9 @@ export const APIKeyButton = () => {
   const { toast } = useToast();
 
   const handleSave = (e: React.MouseEvent) => {
-    preventEvent(e);
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (!inputKey.trim()) {
       toast({
         title: "エラー",
@@ -23,6 +25,7 @@ export const APIKeyButton = () => {
       });
       return;
     }
+
     setApiKey(inputKey);
     setIsVisible(false);
     toast({
@@ -31,12 +34,18 @@ export const APIKeyButton = () => {
     });
   };
 
+  const handleInputClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   return (
-    <div className="relative">
+    <div className="relative" onClick={preventEvent}>
       <Tooltip text="OpenAI APIキー設定" position="bottom">
         <button
           onClick={(e) => {
-            preventEvent(e);
+            e.preventDefault();
+            e.stopPropagation();
             setIsVisible(!isVisible);
           }}
           className="p-2 rounded-lg hover:bg-purple-100/50 text-purple-500 transition-colors"
@@ -46,7 +55,10 @@ export const APIKeyButton = () => {
       </Tooltip>
 
       {isVisible && (
-        <div className="absolute right-0 mt-2 p-4 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg border border-gray-200 w-80 z-50">
+        <div 
+          className="absolute right-0 mt-2 p-4 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg border border-gray-200 w-80 z-50"
+          onClick={handleInputClick}
+        >
           <div className="flex gap-2 items-center mb-2">
             <Lock className="h-4 w-4 text-gray-500" />
             <h3 className="text-sm font-medium">OpenAI APIキー</h3>
@@ -58,6 +70,7 @@ export const APIKeyButton = () => {
               onChange={(e) => setInputKey(e.target.value)}
               placeholder="sk-..."
               className="flex-1"
+              onClick={handleInputClick}
             />
             <Button
               variant="outline"
