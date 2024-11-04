@@ -52,7 +52,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
       }
 
       let addedNodes = 0;
-      let yOffset = 0;
+      const baseYOffset = -150 * (response.children.length - 1) / 2;
 
       for (const [index, child] of response.children.entries()) {
         if (!child.label) continue;
@@ -60,7 +60,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
         try {
           const childPosition = {
             x: currentNode.position.x + 250,
-            y: currentNode.position.y + (index - 1) * 150
+            y: currentNode.position.y + baseYOffset + index * 150
           };
 
           const newNode = await addNode(currentNode, child.label, childPosition);
@@ -77,27 +77,27 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
           }
 
           if (child.children && Array.isArray(child.children)) {
+            const childBaseYOffset = -100 * (child.children.length - 1) / 2;
+            
             for (const [grandChildIndex, grandChild] of child.children.entries()) {
               if (!grandChild.label) continue;
 
               const grandChildPosition = {
                 x: childPosition.x + 250,
-                y: childPosition.y + (grandChildIndex - 0.5) * 100
+                y: childPosition.y + childBaseYOffset + grandChildIndex * 100
               };
 
               const grandChildNode = await addNode(newNode, grandChild.label, grandChildPosition);
 
-              if (grandChild.children && Array.isArray(grandChild.children)) {
-                for (const greatGrandChild of grandChild.children) {
-                  if (!greatGrandChild.label) continue;
-
-                  const greatGrandChildPosition = {
-                    x: grandChildPosition.x + 250,
-                    y: grandChildPosition.y
-                  };
-
-                  await addNode(grandChildNode, greatGrandChild.label, greatGrandChildPosition);
-                }
+              if ((mode === 'detailed' || mode === 'why') && grandChild.description) {
+                updateNode(grandChildNode.id, {
+                  ...grandChildNode,
+                  data: {
+                    ...grandChildNode.data,
+                    detailedText: grandChild.description,
+                    isCollapsed: true
+                  }
+                });
               }
             }
           }
