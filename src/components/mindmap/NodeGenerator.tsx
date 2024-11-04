@@ -15,9 +15,9 @@ export const useNodeGenerator = () => {
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       
-      // 最初のノード以外は、前のノードとの間に待機時間を設ける
+      // 最初のノード以外は、前のノードとの間に十分な待機時間を設ける
       if (i > 0) {
-        await sleep(1000);
+        await sleep(800);
       }
 
       // 空のノードを作成
@@ -28,10 +28,10 @@ export const useNodeGenerator = () => {
         onNodeGenerated();
       }
 
-      // 視覚的なフィードバックのための短い待機
-      await sleep(300);
+      // 視覚的なフィードバックのための待機
+      await sleep(500);
       
-      // テキストを一文字ずつアニメーション表示
+      // テキストを一文字ずつアニメーション表示（タイピング速度を遅く）
       await animateText(
         item.text,
         async (text) => {
@@ -41,12 +41,15 @@ export const useNodeGenerator = () => {
             onNodeGenerated();
           }
         },
-        80  // タイピング速度
+        100  // タイピング速度を遅く設定
       );
 
-      // 子ノードがある場合は、親ノードの生成完了後に少し待ってから生成
+      // テキスト表示完了後の待機
+      await sleep(500);
+
+      // 子ノードがある場合は、親ノードの生成完了後に十分待ってから生成
       if (item.children && item.children.length > 0) {
-        await sleep(500);
+        await sleep(800);
         await generateNodes(newNode, item.children, onNodeGenerated);
       }
     }
