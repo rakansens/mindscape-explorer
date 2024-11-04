@@ -1,12 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { useMindMapStore } from '../store/mindMapStore';
 import { Handle, Position } from 'reactflow';
-import { Sparkles, ChevronDown, ChevronRight, CheckSquare, Square } from 'lucide-react';
+import { ChevronDown, ChevronRight, CheckSquare, Square } from 'lucide-react';
 import { getNodeLevel, getNodeStyle } from '../utils/nodeUtils';
-import { nodeStyles } from '../styles/commonStyles';
-import { useMenuStore } from '../store/menuStore';
-import { GenerateMenu } from './GenerateMenu';
 import { DetailedTextEditor } from './DetailedTextEditor';
+import { NodeMenu } from './node/NodeMenu';
 
 interface CustomNodeProps {
   data: {
@@ -32,12 +30,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
   const [inputValue, setInputValue] = useState(data.label);
   const [showButton, setShowButton] = useState(false);
   
-  const { activeMenuNodeId, setActiveMenuNodeId } = useMenuStore();
-  const showGenerateMenu = activeMenuNodeId === id;
-
   const inputRef = useRef<HTMLInputElement>(null);
-  const generateMenuRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
   let hideTimeout = useRef<NodeJS.Timeout>();
   
   const store = useMindMapStore();
@@ -53,20 +46,6 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
   const handleNodeMouseLeave = () => {
     hideTimeout.current = setTimeout(() => {
       setShowButton(false);
-      setActiveMenuNodeId(null);
-    }, 1000);
-  };
-
-  const handleMenuMouseEnter = () => {
-    if (hideTimeout.current) {
-      clearTimeout(hideTimeout.current);
-    }
-    setActiveMenuNodeId(id);
-  };
-
-  const handleMenuMouseLeave = () => {
-    hideTimeout.current = setTimeout(() => {
-      setActiveMenuNodeId(null);
     }, 1000);
   };
 
@@ -88,7 +67,6 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
       if (inputValue.trim() !== '') {
         store.updateNodeText(id, inputValue);
         setIsEditing(false);
-        // 同じ階層に新しいノードを追加
         const parentEdge = store.edges.find(edge => edge.target === id);
         const parentId = parentEdge?.source;
         if (parentId) {
@@ -104,7 +82,6 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
     } else if (e.key === 'Tab') {
       e.preventDefault();
       if (data.selected) {
-        // 下の階層に新しいノードを追加
         const currentNode = store.nodes.find(n => n.id === id);
         if (currentNode) {
           store.addNode(currentNode, 'New Node', {
@@ -209,23 +186,11 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
           </div>
         </div>
 
-        <div 
-          className={`absolute -right-12 top-1/2 -translate-y-1/2 transition-opacity duration-300
-            ${showButton ? 'opacity-100' : 'opacity-0'}`}
-          onMouseEnter={handleMenuMouseEnter}
-          onMouseLeave={handleMenuMouseLeave}
-        >
-          <button
-            ref={buttonRef}
-            className={`${nodeStyles.button} ${nodeStyles.generateButton}
-              ${showGenerateMenu ? 'bg-blue-50' : ''}`}
-            title="AI生成メニューを開く"
-          >
-            <Sparkles size={16} />
-          </button>
-
-          {showGenerateMenu && <GenerateMenu nodeId={id} />}
-        </div>
+        <NodeMenu 
+          id={id}
+          showButton={showButton}
+          setShowButton={setShowButton}
+        />
       </div>
       <Handle type="source" position={Position.Right} />
     </>
