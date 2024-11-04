@@ -40,7 +40,12 @@ export const getMindMapPrompt = (topic: string, mode?: string, options?: Generat
       "label": "なぜ～なのか？（本質的な質問1）",
       "children": [
         {
-          "label": "主要な回答",
+          "label": "回答1：[具体的な回答のタイトル]",
+          "description": "【結論】\\n[簡潔な回答の要約]\\n\\n【詳細説明】\\n[詳細な分析と根拠]\\n\\n【具体例・補足】\\n[具体的な事例や補足情報]",
+          "children": []
+        },
+        {
+          "label": "回答2：[別の視点からの回答タイトル]",
           "description": "【結論】\\n[簡潔な回答の要約]\\n\\n【詳細説明】\\n[詳細な分析と根拠]\\n\\n【具体例・補足】\\n[具体的な事例や補足情報]",
           "children": []
         }
