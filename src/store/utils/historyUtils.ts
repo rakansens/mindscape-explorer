@@ -1,15 +1,23 @@
-import { StateCreator } from 'zustand';
+import { StoreApi } from 'zustand';
 import { MindMapStore } from '../types/mindMapTypes';
 
-type SetFunction = StateCreator<MindMapStore, [], [], MindMapStore>;
+type SetFunction = (
+  setState: StoreApi<MindMapStore>['setState'],
+  getState: StoreApi<MindMapStore>['getState'],
+  store: StoreApi<MindMapStore>
+) => void;
 
 export const handleHistory = {
-  undo: (set: SetFunction, get: () => MindMapStore) => {
-    const { history, currentHistoryIndex } = get();
+  undo: (
+    setState: StoreApi<MindMapStore>['setState'],
+    getState: StoreApi<MindMapStore>['getState'],
+    store: StoreApi<MindMapStore>
+  ) => {
+    const { history, currentHistoryIndex } = getState();
     if (currentHistoryIndex > 0) {
       const newIndex = currentHistoryIndex - 1;
       const previousState = history[newIndex];
-      set({
+      setState({
         nodes: previousState.nodes,
         edges: previousState.edges,
         currentHistoryIndex: newIndex,
@@ -19,12 +27,16 @@ export const handleHistory = {
     }
   },
 
-  redo: (set: SetFunction, get: () => MindMapStore) => {
-    const { history, currentHistoryIndex } = get();
+  redo: (
+    setState: StoreApi<MindMapStore>['setState'],
+    getState: StoreApi<MindMapStore>['getState'],
+    store: StoreApi<MindMapStore>
+  ) => {
+    const { history, currentHistoryIndex } = getState();
     if (currentHistoryIndex < history.length - 1) {
       const newIndex = currentHistoryIndex + 1;
       const nextState = history[newIndex];
-      set({
+      setState({
         nodes: nextState.nodes,
         edges: nextState.edges,
         currentHistoryIndex: newIndex,
