@@ -1,4 +1,4 @@
-import { ReactFlowNode } from 'reactflow';
+import { Node as ReactFlowNode } from 'reactflow';
 import { HORIZONTAL_SPACING, VERTICAL_SPACING } from '../constants/layoutConstants';
 import { MindMapState } from '../types/mindMapTypes';
 
