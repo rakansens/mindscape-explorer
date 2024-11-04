@@ -25,12 +25,14 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [inputValue, setInputValue] = useState(data.label);
+  const [showMenu, setShowMenu] = useState(false);
   
   const { activeMenuNodeId, setActiveMenuNodeId } = useMenuStore();
   const showGenerateMenu = activeMenuNodeId === id;
 
   const inputRef = useRef<HTMLInputElement>(null);
   const generateMenuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   
   const store = useMindMapStore();
   const level = getNodeLevel(store.edges, id);
@@ -57,32 +59,6 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
     } else if (e.key === 'Escape') {
       setInputValue(data.label);
       setIsEditing(false);
-    }
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        generateMenuRef.current && 
-        !generateMenuRef.current.contains(event.target as Node)
-      ) {
-        setActiveMenuNodeId(null);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [setActiveMenuNodeId]);
-
-  const handleGenerateButtonClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    // 同じノードをクリックした場合はメニューを閉じる
-    if (activeMenuNodeId === id) {
-      setActiveMenuNodeId(null);
-    } else {
-      setActiveMenuNodeId(id);
     }
   };
 
@@ -138,17 +114,23 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
           </div>
         </div>
 
-        <button
-          onClick={handleGenerateButtonClick}
-          className={`absolute -right-12 top-1/2 -translate-y-1/2 
-            ${nodeStyles.button} ${nodeStyles.generateButton}
-            ${showGenerateMenu ? 'bg-blue-50' : ''}`}
-          title="AI生成メニューを開く"
+        <div 
+          className="group relative"
+          onMouseEnter={() => setActiveMenuNodeId(id)}
+          onMouseLeave={() => setActiveMenuNodeId(null)}
         >
-          <Sparkles size={16} />
-        </button>
+          <button
+            ref={buttonRef}
+            className={`absolute -right-12 top-1/2 -translate-y-1/2 
+              ${nodeStyles.button} ${nodeStyles.generateButton}
+              ${showGenerateMenu ? 'bg-blue-50' : ''}`}
+            title="AI生成メニューを開く"
+          >
+            <Sparkles size={16} />
+          </button>
 
-        {showGenerateMenu && <GenerateMenu nodeId={id} />}
+          {showGenerateMenu && <GenerateMenu nodeId={id} />}
+        </div>
       </div>
       <Handle type="source" position={Position.Right} />
     </>
