@@ -1,8 +1,10 @@
 import React, { useRef, useEffect } from 'react';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Plus } from 'lucide-react';
 import { useMenuStore } from '../../store/menuStore';
 import { GenerateMenu } from '../GenerateMenu';
 import { nodeStyles } from '../../styles/commonStyles';
+import { Tooltip } from '../Tooltip';
+import { useMindMapStore } from '../../store/mindMapStore';
 
 interface NodeMenuProps {
   id: string;
@@ -12,6 +14,7 @@ interface NodeMenuProps {
 
 export const NodeMenu: React.FC<NodeMenuProps> = ({ id, showButton, setShowButton }) => {
   const { activeMenuNodeId, setActiveMenuNodeId } = useMenuStore();
+  const { addNode, nodes } = useMindMapStore();
   const showGenerateMenu = activeMenuNodeId === id;
   const hideTimeout = useRef<NodeJS.Timeout>();
   const menuDisplayTimeout = useRef<NodeJS.Timeout>();
@@ -48,19 +51,41 @@ export const NodeMenu: React.FC<NodeMenuProps> = ({ id, showButton, setShowButto
     }, 1000);
   };
 
+  const handleAddNode = () => {
+    const currentNode = nodes.find(n => n.id === id);
+    if (currentNode) {
+      addNode(currentNode, 'New Node', {
+        x: currentNode.position.x + 250,
+        y: currentNode.position.y
+      });
+    }
+  };
+
   return (
     <div 
-      className={`absolute -right-12 top-1/2 -translate-y-1/2 transition-opacity duration-300
+      className={`absolute -right-12 top-1/2 -translate-y-1/2 transition-opacity duration-300 flex flex-col gap-2
         ${showButton ? 'opacity-100' : 'opacity-0'}`}
       onMouseEnter={handleMenuMouseEnter}
       onMouseLeave={handleMenuMouseLeave}
     >
-      <button
-        className={`${nodeStyles.button} ${nodeStyles.generateButton}`}
-        title="AI生成メニューを開く"
-      >
-        <Sparkles size={16} />
-      </button>
+      <Tooltip text="新規ノード追加" position="left">
+        <button
+          onClick={handleAddNode}
+          className={`${nodeStyles.button} ${nodeStyles.generateButton}`}
+          title="新規ノード追加"
+        >
+          <Plus size={16} />
+        </button>
+      </Tooltip>
+
+      <Tooltip text="AI生成" position="left">
+        <button
+          className={`${nodeStyles.button} ${nodeStyles.generateButton}`}
+          title="AI生成メニューを開く"
+        >
+          <Sparkles size={16} />
+        </button>
+      </Tooltip>
 
       {showGenerateMenu && <GenerateMenu nodeId={id} />}
     </div>
