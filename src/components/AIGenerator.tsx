@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Panel, useReactFlow } from 'reactflow';
+import { useReactFlow } from 'reactflow';
 import { Sparkles } from 'lucide-react';
 import { useMindMapStore } from '../store/mindMapStore';
 import { useOpenAI, TopicTree } from '../utils/openai';
@@ -114,12 +114,12 @@ export function AIGenerator() {
   };
 
   return (
-    <Panel position="bottom-right" className="mr-4 mb-4">
+    <div className="fixed bottom-4 right-4 z-50">
       <HoverCard>
-        <HoverCardTrigger>
-          <div className="p-3 bg-blue-500 rounded-full text-white hover:bg-blue-600 shadow-lg transition-colors duration-200">
+        <HoverCardTrigger asChild>
+          <button className="p-3 bg-blue-500 rounded-full text-white hover:bg-blue-600 shadow-lg transition-colors duration-200">
             <Sparkles size={24} />
-          </div>
+          </button>
         </HoverCardTrigger>
         <HoverCardContent 
           side="top" 
@@ -188,6 +188,6 @@ export function AIGenerator() {
           </div>
         </HoverCardContent>
       </HoverCard>
-    </Panel>
+    </div>
   );
 }
