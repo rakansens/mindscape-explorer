@@ -51,7 +51,6 @@ export function AIGenerator() {
     return hierarchy;
   };
 
-  // ビューを中央に調整する関数
   const adjustView = () => {
     fitView({
       duration: 500,
@@ -91,24 +90,21 @@ export function AIGenerator() {
       const rootNode = nodes.find(n => n.id === '1');
       
       if (rootNode) {
-        // ルートノードのテキストをアニメーション付きで更新
         await animateText(
           prompt,
           async (text) => {
             updateNodeText(rootNode.id, text);
-            adjustView(); // テキスト更新時にビューを調整
+            adjustView();
           },
           50
         );
         
         await sleep(500);
         
-        // 子ノードを順番に生成（ビューの自動調整付き）
         await generateNodes(rootNode, hierarchy, () => {
-          adjustView(); // 各ノード生成時にビューを調整
+          adjustView();
         });
 
-        // 最終的なビュー調整
         await sleep(500);
         adjustView();
 
@@ -198,8 +194,7 @@ export function AIGenerator() {
       ) : (
         <button
           onClick={() => setIsOpen(true)}
-          className="p-3 bg-blue-500 rounded-full text-white hover:bg-blue-600 shadow-lg tooltip"
-          title="AIマインドマップを生成"
+          className="p-3 bg-blue-500 rounded-full text-white hover:bg-blue-600 shadow-lg"
         >
           <Sparkles size={24} />
         </button>
