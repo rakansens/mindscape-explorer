@@ -3,7 +3,7 @@ import { useOpenAI } from '../utils/openai';
 import { useMindMapStore } from '../store/mindMapStore';
 import { Button } from './ui/button';
 import { useToast } from '../hooks/use-toast';
-import { Loader2, Zap, BookOpen, HelpCircle, ListTodo, RefreshCw } from 'lucide-react';
+import { Loader2, Zap, BookOpen, HelpCircle, ListTodo, RefreshCw, sparkle } from 'lucide-react'; // Updated import
 import { getNodeProperties } from '../utils/nodeUtils';
 
 interface GenerateMenuProps {
@@ -187,7 +187,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
           disabled={isLoading}
           title="クイック生成"
         >
-          {isLoading ? <Sparkles className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5" />}
+          {isLoading ? <sparkle className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5" />}
         </Button>
         <Button
           variant="ghost"
@@ -197,7 +197,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
           disabled={isLoading}
           title="詳細生成"
         >
-          {isLoading ? <Sparkles className="h-5 w-5 animate-spin" /> : <BookOpen className="h-5 w-5" />}
+          {isLoading ? <sparkle className="h-5 w-5 animate-spin" /> : <BookOpen className="h-5 w-5" />}
         </Button>
         <Button
           variant="ghost"
@@ -207,7 +207,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
           disabled={isLoading}
           title="WHY分析"
         >
-          {isLoading ? <Sparkles className="h-5 w-5 animate-spin" /> : <HelpCircle className="h-5 w-5" />}
+          {isLoading ? <sparkle className="h-5 w-5 animate-spin" /> : <HelpCircle className="h-5 w-5" />}
         </Button>
         <Button
           variant="ghost"
@@ -217,7 +217,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
           disabled={isLoading}
           title="HOW分析"
         >
-          {isLoading ? <Sparkles className="h-5 w-5 animate-spin" /> : <ListTodo className="h-5 w-5" />}
+          {isLoading ? <sparkle className="h-5 w-5 animate-spin" /> : <ListTodo className="h-5 w-5" />}
         </Button>
         <Button
           variant="ghost"
@@ -227,7 +227,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
           disabled={isLoading}
           title="子ノードを再生成"
         >
-          {isLoading ? <Sparkles className="h-5 w-5 animate-spin" /> : <RefreshCw className="h-5 w-5" />}
+          {isLoading ? <sparkle className="h-5 w-5 animate-spin" /> : <RefreshCw className="h-5 w-5" />}
         </Button>
       </div>
     </div>
