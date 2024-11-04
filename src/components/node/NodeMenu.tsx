@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Sparkles } from 'lucide-react';
 import { useMenuStore } from '../../store/menuStore';
 import { GenerateMenu } from '../GenerateMenu';
@@ -14,16 +14,39 @@ export const NodeMenu: React.FC<NodeMenuProps> = ({ id, showButton, setShowButto
   const { activeMenuNodeId, setActiveMenuNodeId } = useMenuStore();
   const showGenerateMenu = activeMenuNodeId === id;
   const hideTimeout = useRef<NodeJS.Timeout>();
+  const menuDisplayTimeout = useRef<NodeJS.Timeout>();
+
+  useEffect(() => {
+    // メニューが表示された時
+    if (showGenerateMenu) {
+      if (hideTimeout.current) {
+        clearTimeout(hideTimeout.current);
+      }
+      if (menuDisplayTimeout.current) {
+        clearTimeout(menuDisplayTimeout.current);
+      }
+      setShowButton(true);
+    }
+  }, [showGenerateMenu, setShowButton]);
 
   const handleMenuMouseEnter = () => {
     if (hideTimeout.current) {
       clearTimeout(hideTimeout.current);
     }
+    if (menuDisplayTimeout.current) {
+      clearTimeout(menuDisplayTimeout.current);
+    }
     setActiveMenuNodeId(id);
+    setShowButton(true);
   };
 
   const handleMenuMouseLeave = () => {
-    setActiveMenuNodeId(null);
+    menuDisplayTimeout.current = setTimeout(() => {
+      setActiveMenuNodeId(null);
+      hideTimeout.current = setTimeout(() => {
+        setShowButton(false);
+      }, 1000);
+    }, 1000);
   };
 
   return (
