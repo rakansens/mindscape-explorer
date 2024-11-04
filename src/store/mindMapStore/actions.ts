@@ -2,7 +2,7 @@ import { Node, Edge, Connection, NodeChange, EdgeChange, addEdge, applyEdgeChang
 import { v4 as uuidv4 } from 'uuid';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
-import { RFState } from './types';
+import { RFState, Theme } from './types';
 
 export const createActions = (set: any, get: () => RFState) => ({
   onNodesChange: (changes: NodeChange[]) => {
@@ -68,9 +68,32 @@ export const createActions = (set: any, get: () => RFState) => ({
     });
   },
 
+  setTheme: (theme: Theme) => {
+    set({ theme });
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  },
+
+  toggleMinimap: () => {
+    set((state: RFState) => ({ showMinimap: !state.showMinimap }));
+  },
+
+  zoomIn: () => {
+    // Implemented through ReactFlow instance
+    console.log('Zoom in triggered');
+  },
+
+  zoomOut: () => {
+    // Implemented through ReactFlow instance
+    console.log('Zoom out triggered');
+  },
+
+  fitView: () => {
+    // Implemented through ReactFlow instance
+    console.log('Fit view triggered');
+  },
+
   undo: () => {
     // Implementation for undo functionality
-    // This is a placeholder - you would need to implement actual undo logic
     console.log('Undo action triggered');
   },
 

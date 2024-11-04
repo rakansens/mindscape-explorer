@@ -16,5 +16,13 @@ export const useMindMapStore = create<RFState>((set, get) => ({
   edges: [],
   theme: 'light',
   showMinimap: false,
+  setTheme: (theme) => {
+    set({ theme });
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  },
+  toggleMinimap: () => set((state) => ({ showMinimap: !state.showMinimap })),
+  zoomIn: () => console.log('Zoom in triggered'),
+  zoomOut: () => console.log('Zoom out triggered'),
+  fitView: () => console.log('Fit view triggered'),
   ...createActions(set, get),
 }));
