@@ -51,6 +51,16 @@ export function AIGenerator() {
     return hierarchy;
   };
 
+  // ビューを中央に調整する関数
+  const adjustView = () => {
+    fitView({
+      duration: 500,
+      padding: 0.5,
+      minZoom: 0.5,
+      maxZoom: 1.5
+    });
+  };
+
   const handleGenerate = async () => {
     if (!apiKey) {
       toast({
@@ -84,20 +94,23 @@ export function AIGenerator() {
         // ルートノードのテキストをアニメーション付きで更新
         await animateText(
           prompt,
-          (text) => updateNodeText(rootNode.id, text),
-          50  // タイピング速度を遅くする
+          async (text) => {
+            updateNodeText(rootNode.id, text);
+            adjustView(); // テキスト更新時にビューを調整
+          },
+          50
         );
         
-        // ルートノードの更新後に待機
-        await sleep(800);
+        await sleep(500);
         
         // 子ノードを順番に生成（ビューの自動調整付き）
         await generateNodes(rootNode, hierarchy, () => {
-          fitView({ 
-            duration: 300,
-            padding: 0.3,
-          });
+          adjustView(); // 各ノード生成時にビューを調整
         });
+
+        // 最終的なビュー調整
+        await sleep(500);
+        adjustView();
 
         toast({
           title: "生成完了",
