@@ -20,7 +20,7 @@ export const AIGeneratorForm = ({ onClose }: AIGeneratorFormProps) => {
   };
 
   return (
-    <div className="bg-white rounded-lg">
+    <div className="bg-white rounded-lg" onMouseDown={(e) => e.stopPropagation()}>
       <LayoutStyleSelector />
       <textarea
         value={prompt}

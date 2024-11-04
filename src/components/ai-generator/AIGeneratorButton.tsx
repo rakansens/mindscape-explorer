@@ -7,13 +7,13 @@ import { Button } from "@/components/ui/button";
 export const AIGeneratorButton = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleOpenChange = (open: boolean) => {
-    setIsOpen(open);
-  };
-
   return (
     <div className="fixed bottom-4 right-4 z-50">
-      <Popover open={isOpen} onOpenChange={handleOpenChange}>
+      <Popover 
+        open={isOpen} 
+        onOpenChange={setIsOpen}
+        modal={true}
+      >
         <PopoverTrigger asChild>
           <Button 
             size="icon"
@@ -27,6 +27,7 @@ export const AIGeneratorButton = () => {
           side="top"
           align="end"
           sideOffset={16}
+          forceMount
         >
           <AIGeneratorForm onClose={() => setIsOpen(false)} />
         </PopoverContent>
