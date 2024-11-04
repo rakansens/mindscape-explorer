@@ -8,6 +8,7 @@ import {
   addEdge,
   applyEdgeChanges,
   applyNodeChanges,
+  ReactFlowInstance
 } from 'reactflow';
 import { v4 as uuidv4 } from 'uuid';
 import html2canvas from 'html2canvas';
