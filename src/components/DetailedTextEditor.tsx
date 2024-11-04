@@ -17,11 +17,16 @@ export const DetailedTextEditor: React.FC<DetailedTextEditorProps> = ({ nodeId, 
   };
 
   const handleBlur = () => {
-    store.updateNode(nodeId, {
-      data: {
-        detailedText: text
-      }
-    });
+    const node = store.nodes.find(n => n.id === nodeId);
+    if (node) {
+      store.updateNode(nodeId, {
+        ...node,
+        data: {
+          ...node.data,
+          detailedText: text
+        }
+      });
+    }
     setIsEditing(false);
   };
 
