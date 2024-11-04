@@ -68,8 +68,50 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsEditing(true);
     store.selectNode(id);
+  };
+
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsEditing(true);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (inputValue.trim() !== '') {
+        store.updateNodeText(id, inputValue);
+        setIsEditing(false);
+        // 同じ階層に新しいノードを追加
+        const parentEdge = store.edges.find(edge => edge.target === id);
+        const parentId = parentEdge?.source;
+        if (parentId) {
+          const parentNode = store.nodes.find(n => n.id === parentId);
+          if (parentNode) {
+            store.addNode(parentNode, 'New Node', {
+              x: data.position.x,
+              y: data.position.y + 100
+            });
+          }
+        }
+      }
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      if (data.selected) {
+        // 下の階層に新しいノードを追加
+        const currentNode = store.nodes.find(n => n.id === id);
+        if (currentNode) {
+          store.addNode(currentNode, 'New Node', {
+            x: currentNode.position.x + 250,
+            y: currentNode.position.y
+          });
+        }
+      }
+    } else if (e.key === 'Escape') {
+      setInputValue(data.label);
+      setIsEditing(false);
+    }
   };
 
   const handleBlur = () => {
@@ -79,15 +121,6 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
       setInputValue(data.label);
     }
     setIsEditing(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleBlur();
-    } else if (e.key === 'Escape') {
-      setInputValue(data.label);
-      setIsEditing(false);
-    }
   };
 
   const toggleCollapse = (e: React.MouseEvent) => {
@@ -103,10 +136,15 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
         onMouseEnter={handleNodeMouseEnter}
         onMouseLeave={handleNodeMouseLeave}
       >
-        <div className={`relative min-w-[120px] max-w-[300px] rounded-xl shadow-lg transition-all duration-300 transform
-          ${getNodeStyle(level)}
-          ${data.selected ? 'ring-2 ring-blue-500' : ''}
-          hover:shadow-xl`}
+        <div 
+          className={`relative min-w-[120px] max-w-[300px] rounded-xl shadow-lg transition-all duration-300 transform
+            ${getNodeStyle(level)}
+            ${data.selected ? 'ring-2 ring-blue-500' : ''}
+            hover:shadow-xl`}
+          onClick={handleClick}
+          onDoubleClick={handleDoubleClick}
+          onKeyDown={handleKeyDown}
+          tabIndex={0}
         >
           <div className="p-4">
             <div className="flex items-center gap-2">
@@ -129,7 +167,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
                   autoFocus
                 />
               ) : (
-                <div className="text-white cursor-pointer" onClick={handleClick}>
+                <div className="text-white cursor-pointer">
                   {data.label}
                 </div>
               )}
