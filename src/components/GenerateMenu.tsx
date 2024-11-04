@@ -32,12 +32,25 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
     try {
       const response = await generateSubTopics(currentNode.data.label, {
         mode: mode,
-        quickType: 'simple'
+        quickType: mode === 'quick' ? 'simple' : 'detailed'
       });
 
       if (response.children) {
         for (const child of response.children) {
-          await addNode(currentNode, child.label);
+          const newNode = await addNode(currentNode, child.label);
+          if (mode === 'detailed' && child.description) {
+            // Update the node with detailed text
+            const updatedNode = {
+              ...newNode,
+              data: {
+                ...newNode.data,
+                detailedText: child.description
+              }
+            };
+            // Update the node in the store
+            // Note: This assumes you have an updateNode function in your store
+            // You'll need to implement this if it doesn't exist
+          }
         }
       }
 
@@ -66,7 +79,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
           disabled={isLoading}
         >
           {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-          Quick Generate
+          クイック生成
         </Button>
         <Button
           variant="ghost"
@@ -75,7 +88,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
           disabled={isLoading}
         >
           {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-          Detailed Generate
+          詳細生成
         </Button>
       </div>
     </div>

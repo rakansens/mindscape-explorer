@@ -38,6 +38,7 @@ type RFState = {
   exportAsPDF: () => void;
   exportAsJSON: () => void;
   importFromJSON: (jsonString: string) => void;
+  updateNode: (nodeId: string, updates: Partial<Node>) => void;
 };
 
 const initialNodes: Node[] = [
@@ -127,7 +128,6 @@ export const useMindMapStore = create<RFState>((set, get) => ({
   fitView: () => {
     // ReactFlowインスタンスを通じて実装される
   },
-
   saveMap: () => {
     const state = {
       nodes: get().nodes,
@@ -135,7 +135,6 @@ export const useMindMapStore = create<RFState>((set, get) => ({
     };
     localStorage.setItem('mindmap-state', JSON.stringify(state));
   },
-
   loadMap: () => {
     const savedState = localStorage.getItem('mindmap-state');
     if (savedState) {
@@ -143,7 +142,6 @@ export const useMindMapStore = create<RFState>((set, get) => ({
       set({ nodes, edges });
     }
   },
-
   exportAsImage: async () => {
     const element = document.querySelector('.react-flow') as HTMLElement;
     if (!element) return;
@@ -157,7 +155,6 @@ export const useMindMapStore = create<RFState>((set, get) => ({
     link.href = canvas.toDataURL();
     link.click();
   },
-
   exportAsPDF: async () => {
     const element = document.querySelector('.react-flow') as HTMLElement;
     if (!element) return;
@@ -176,7 +173,6 @@ export const useMindMapStore = create<RFState>((set, get) => ({
     pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
     pdf.save('mindmap.pdf');
   },
-
   exportAsJSON: () => {
     const state = {
       nodes: get().nodes,
@@ -190,7 +186,6 @@ export const useMindMapStore = create<RFState>((set, get) => ({
     link.click();
     URL.revokeObjectURL(url);
   },
-
   importFromJSON: (jsonString: string) => {
     try {
       const { nodes, edges } = JSON.parse(jsonString);
@@ -198,5 +193,12 @@ export const useMindMapStore = create<RFState>((set, get) => ({
     } catch (error) {
       console.error('Failed to import JSON:', error);
     }
+  },
+  updateNode: (nodeId: string, updates: Partial<Node>) => {
+    set((state) => ({
+      nodes: state.nodes.map((node) =>
+        node.id === nodeId ? { ...node, ...updates } : node
+      ),
+    }));
   },
 }));
