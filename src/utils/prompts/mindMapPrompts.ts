@@ -1,6 +1,47 @@
 import { GenerateOptions } from '../../types/openai';
 
 export const getMindMapPrompt = (topic: string, mode?: string, options?: GenerateOptions): string => {
+  if (mode === 'detailed') {
+    return `
+以下のトピックについて、詳細な説明付きのマインドマップを生成してください。
+
+トピック: "${topic}"
+
+要件:
+1. 3-4個の主要なサブトピックを生成
+2. 各サブトピックには必ず以下を含めてください：
+   - 簡潔なタイトル（30文字以内）
+   - 詳細な説明文（200-300文字程度）
+3. 説明文は以下の要素を含めてください：
+   - 定義や概要
+   - 重要なポイントや特徴
+   - 具体例や応用例
+4. 専門的かつ分かりやすい文体で記述
+
+応答は必ず以下のJSON形式で返してください:
+{
+  "label": "${topic}",
+  "children": [
+    {
+      "label": "サブトピック1のタイトル",
+      "description": "サブトピック1の詳細な説明...",
+      "children": []
+    },
+    {
+      "label": "サブトピック2のタイトル",
+      "description": "サブトピック2の詳細な説明...",
+      "children": []
+    }
+  ]
+}
+
+注意:
+- 各サブトピックのlabelは簡潔で分かりやすいタイトルにしてください
+- descriptionには詳細な説明を必ず含めてください
+- 説明は論理的で体系的な構成にしてください
+`;
+  }
+
   const isHow = mode === 'how';
   const isDetailed = mode === 'detailed';
   const isDetailedHow = isHow && options?.howType === 'detailed';

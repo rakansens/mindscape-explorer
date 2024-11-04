@@ -43,7 +43,8 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
               ...newNode,
               data: {
                 ...newNode.data,
-                detailedText: child.description
+                detailedText: child.description,
+                isCollapsed: true
               }
             });
           }
