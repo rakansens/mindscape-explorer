@@ -148,21 +148,48 @@ export const getMindMapPrompt = (topic: string, mode?: string, options?: Generat
 
   if (mode === 'why') {
     return `
-以下のトピックについて、なぜそれが重要かの理由を提供してください。
+以下のトピックについて、「なぜそれが重要か」という観点から3つの質問とその答えを生成してください。
 
 トピック: "${topic}"
+
+要件:
+1. 3つの「なぜ？」という質問を生成してください
+2. 各質問に対して詳細な説明を提供してください
+3. 質問は子ノードとして、説明は孫ノードとして表示されます
 
 応答は以下のようなJSON形式で返してください:
 {
   "label": "${topic}",
   "children": [
     {
-      "label": "理由1",
-      "children": []
+      "label": "なぜ質問1？",
+      "children": [
+        {
+          "label": "説明1",
+          "description": "詳細な説明文1",
+          "children": []
+        }
+      ]
     },
     {
-      "label": "理由2",
-      "children": []
+      "label": "なぜ質問2？",
+      "children": [
+        {
+          "label": "説明2",
+          "description": "詳細な説明文2",
+          "children": []
+        }
+      ]
+    },
+    {
+      "label": "なぜ質問3？",
+      "children": [
+        {
+          "label": "説明3",
+          "description": "詳細な説明文3",
+          "children": []
+        }
+      ]
     }
   ]
 }`;
@@ -180,3 +207,4 @@ export const getMindMapPrompt = (topic: string, mode?: string, options?: Generat
   "children": []
 }`;
 };
+
