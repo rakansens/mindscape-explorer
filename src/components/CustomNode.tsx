@@ -1,12 +1,12 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useMindMapStore } from '../store/mindMapStore';
 import { Handle, Position } from 'reactflow';
-import { Sparkles, ChevronDown, ChevronRight, CheckSquare, Square } from 'lucide-react';
+import { ChevronDown, ChevronRight, CheckSquare, Square } from 'lucide-react';
 import { getNodeLevel, getNodeStyle } from '../utils/nodeUtils';
-import { nodeStyles } from '../styles/commonStyles';
-import { useMenuStore } from '../store/menuStore';
-import { GenerateMenu } from './GenerateMenu';
 import { DetailedTextEditor } from './DetailedTextEditor';
+import { NodeButtons } from './node/NodeButtons';
+import { useOpenAI } from '../utils/openai';
+import { useToast } from '../hooks/use-toast';
 
 interface CustomNodeProps {
   data: {
@@ -26,48 +26,24 @@ interface CustomNodeProps {
   yPos?: number;
 }
 
-const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
+const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [inputValue, setInputValue] = useState(data.label);
   const [showButton, setShowButton] = useState(false);
-  
-  const { activeMenuNodeId, setActiveMenuNodeId } = useMenuStore();
-  const showGenerateMenu = activeMenuNodeId === id;
-
-  const inputRef = useRef<HTMLInputElement>(null);
-  const generateMenuRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  let hideTimeout = useRef<NodeJS.Timeout>();
+  const [isRegenerating, setIsRegenerating] = useState(false);
   
   const store = useMindMapStore();
   const level = getNodeLevel(store.edges, id);
+  const { generateSubTopics, apiKey } = useOpenAI();
+  const { toast } = useToast();
 
   const handleNodeMouseEnter = () => {
-    if (hideTimeout.current) {
-      clearTimeout(hideTimeout.current);
-    }
     setShowButton(true);
   };
 
   const handleNodeMouseLeave = () => {
-    hideTimeout.current = setTimeout(() => {
-      setShowButton(false);
-      setActiveMenuNodeId(null);
-    }, 1000);
-  };
-
-  const handleMenuMouseEnter = () => {
-    if (hideTimeout.current) {
-      clearTimeout(hideTimeout.current);
-    }
-    setActiveMenuNodeId(id);
-  };
-
-  const handleMenuMouseLeave = () => {
-    hideTimeout.current = setTimeout(() => {
-      setActiveMenuNodeId(null);
-    }, 1000);
+    setShowButton(false);
   };
 
   const handleClick = (e: React.MouseEvent) => {
@@ -88,30 +64,6 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
       if (inputValue.trim() !== '') {
         store.updateNodeText(id, inputValue);
         setIsEditing(false);
-        // 同じ階層に新しいノードを追加
-        const parentEdge = store.edges.find(edge => edge.target === id);
-        const parentId = parentEdge?.source;
-        if (parentId) {
-          const parentNode = store.nodes.find(n => n.id === parentId);
-          if (parentNode) {
-            store.addNode(parentNode, 'New Node', {
-              x: xPos || 0,
-              y: (yPos || 0) + 100
-            });
-          }
-        }
-      }
-    } else if (e.key === 'Tab') {
-      e.preventDefault();
-      if (data.selected) {
-        // 下の階層に新しいノードを追加
-        const currentNode = store.nodes.find(n => n.id === id);
-        if (currentNode) {
-          store.addNode(currentNode, 'New Node', {
-            x: (xPos || 0) + 250,
-            y: yPos || 0
-          });
-        }
       }
     } else if (e.key === 'Escape') {
       setInputValue(data.label);
@@ -141,6 +93,80 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
         isCompleted: !data.isCompleted
       }
     });
+  };
+
+  const handleRegenerate = async () => {
+    if (!apiKey) {
+      toast({
+        title: "エラー",
+        description: "OpenAI APIキーを設定してください",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsRegenerating(true);
+
+      // 既存の子ノードを削除
+      const childEdges = store.edges.filter(edge => edge.source === id);
+      const childNodeIds = childEdges.map(edge => edge.target);
+      
+      childNodeIds.forEach(nodeId => {
+        const grandChildEdges = store.edges.filter(edge => edge.source === nodeId);
+        const grandChildNodeIds = grandChildEdges.map(edge => edge.target);
+        
+        // 孫ノードを削除
+        grandChildNodeIds.forEach(id => store.removeNode(id));
+        // 子ノードを削除
+        store.removeNode(nodeId);
+      });
+
+      // 新しい内容を生成
+      const response = await generateSubTopics(data.label, {
+        mode: data.detailedText ? 'detailed' : 'quick',
+        quickType: 'simple'
+      });
+
+      if (response.children) {
+        for (const [index, child] of response.children.entries()) {
+          const position = {
+            x: store.nodes.find(n => n.id === id)?.position.x || 0 + 250,
+            y: store.nodes.find(n => n.id === id)?.position.y || 0 + (index - 1) * 150
+          };
+
+          const newNode = store.addNode(
+            store.nodes.find(n => n.id === id)!,
+            child.label,
+            position
+          );
+
+          if (child.description) {
+            store.updateNode(newNode.id, {
+              data: {
+                ...newNode.data,
+                detailedText: child.description,
+                isCollapsed: true
+              }
+            });
+          }
+        }
+      }
+
+      toast({
+        title: "再生成完了",
+        description: "ノードの内容を更新しました",
+      });
+    } catch (error) {
+      console.error('再生成エラー:', error);
+      toast({
+        title: "エラー",
+        description: "ノードの再生成に失敗しました",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRegenerating(false);
+    }
   };
 
   return (
@@ -184,7 +210,6 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
               )}
               {isEditing ? (
                 <input
-                  ref={inputRef}
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onBlur={handleBlur}
@@ -209,23 +234,12 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
           </div>
         </div>
 
-        <div 
-          className={`absolute -right-12 top-1/2 -translate-y-1/2 transition-opacity duration-300
-            ${showButton ? 'opacity-100' : 'opacity-0'}`}
-          onMouseEnter={handleMenuMouseEnter}
-          onMouseLeave={handleMenuMouseLeave}
-        >
-          <button
-            ref={buttonRef}
-            className={`${nodeStyles.button} ${nodeStyles.generateButton}
-              ${showGenerateMenu ? 'bg-blue-50' : ''}`}
-            title="AI生成メニューを開く"
-          >
-            <Sparkles size={16} />
-          </button>
-
-          {showGenerateMenu && <GenerateMenu nodeId={id} />}
-        </div>
+        <NodeButtons
+          id={id}
+          showButton={showButton}
+          onRegenerateClick={handleRegenerate}
+          isRegenerating={isRegenerating}
+        />
       </div>
       <Handle type="source" position={Position.Right} />
     </>
