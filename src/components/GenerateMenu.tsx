@@ -43,30 +43,37 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
 
     setIsLoading(true);
     try {
+      // 再生成モードの場合、既存の子ノードの数を保存
+      const originalChildCount = mode === 'regenerate' ? getChildNodesCount(nodeId) : 0;
+      
       // 再生成モードの場合、既存の子ノードを削除
       if (mode === 'regenerate') {
         removeChildNodes(nodeId);
       }
 
       const response = await generateSubTopics(currentNode.data.label, {
-        mode: mode === 'regenerate' ? 'quick' : mode,
-        quickType: mode === 'quick' || mode === 'regenerate' ? 'simple' : 'detailed',
+        mode: mode === 'regenerate' ? 'detailed' : mode,
+        quickType: mode === 'quick' ? 'simple' : 'detailed',
         structure: {
-          level1: 3,
+          level1: mode === 'regenerate' ? originalChildCount : 3,
           level2: 2,
           level3: 1
-        },
-        context: currentNode.data.label // コンテキストとしてノードのラベルを使用
+        }
       });
 
       if (!response || !response.children || !Array.isArray(response.children)) {
         throw new Error('Invalid response format from API');
       }
 
-      let addedNodes = 0;
-      const baseYOffset = -150 * (response.children.length - 1) / 2;
+      // 再生成モードの場合、元の子ノードの数だけ生成
+      const childrenToProcess = mode === 'regenerate' 
+        ? response.children.slice(0, originalChildCount)
+        : response.children;
 
-      for (const [index, child] of response.children.entries()) {
+      let addedNodes = 0;
+      const baseYOffset = -150 * (childrenToProcess.length - 1) / 2;
+
+      for (const [index, child] of childrenToProcess.entries()) {
         if (!child.label) continue;
 
         try {
