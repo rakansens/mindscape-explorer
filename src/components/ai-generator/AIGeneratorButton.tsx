@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Sparkles } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { AIGeneratorForm } from './AIGeneratorForm';
 import { Button } from "@/components/ui/button";
 
@@ -9,29 +9,19 @@ export const AIGeneratorButton = () => {
 
   return (
     <div className="fixed bottom-4 right-4 z-[100]">
-      <Popover 
-        open={isOpen} 
-        onOpenChange={setIsOpen}
-        modal={true}
-      >
-        <PopoverTrigger asChild>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
           <Button 
             size="icon"
             className="rounded-full w-12 h-12 bg-blue-500 hover:bg-blue-600 shadow-lg"
           >
             <Sparkles className="h-6 w-6 text-white" />
           </Button>
-        </PopoverTrigger>
-        <PopoverContent 
-          className="w-[400px] p-4 shadow-xl"
-          side="top"
-          align="end"
-          sideOffset={16}
-          forceMount
-        >
+        </DialogTrigger>
+        <DialogContent className="w-[400px] p-4">
           <AIGeneratorForm onClose={() => setIsOpen(false)} />
-        </PopoverContent>
-      </Popover>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

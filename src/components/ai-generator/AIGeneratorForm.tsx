@@ -19,17 +19,8 @@ export const AIGeneratorForm = ({ onClose }: AIGeneratorFormProps) => {
     onClose?.();
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
   return (
-    <div 
-      className="bg-white rounded-lg" 
-      onMouseDown={handleMouseDown}
-      onClick={(e) => e.stopPropagation()}
-    >
+    <div className="bg-white rounded-lg">
       <LayoutStyleSelector />
       <textarea
         value={prompt}
