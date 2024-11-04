@@ -38,7 +38,6 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
 
     setIsLoading(true);
     try {
-      // 再生成モードの場合、既存の子ノードのプロパティを保存
       const childNodes = mode === 'regenerate' ? 
         nodes.filter(node => {
           const parentEdge = edges.find(edge => edge.target === node.id);
@@ -50,12 +49,10 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
         properties: getNodeProperties(node)
       }));
 
-      // 再生成モードの場合、既存の子ノードを削除
       if (mode === 'regenerate') {
         removeChildNodes(nodeId);
       }
 
-      // 再生成モードの場合、元のノードの性質に基づいて生成モードを決定
       const effectiveMode = mode === 'regenerate' ? 
         (currentNode.data.isTask ? 'how' : 
          currentNode.data.detailedText ? 'detailed' : 'quick') : mode;
@@ -89,7 +86,6 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
 
           const newNode = await addNode(currentNode, child.label, childPosition);
           
-          // 再生成モードの場合、元のノードのプロパティを継承
           if (mode === 'regenerate' && childProperties[index]) {
             const originalProperties = childProperties[index].properties;
             updateNode(newNode.id, {
@@ -191,7 +187,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
           disabled={isLoading}
           title="クイック生成"
         >
-          {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5" />}
+          {isLoading ? <Sparkles className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5" />}
         </Button>
         <Button
           variant="ghost"
@@ -201,7 +197,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
           disabled={isLoading}
           title="詳細生成"
         >
-          {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <BookOpen className="h-5 w-5" />}
+          {isLoading ? <Sparkles className="h-5 w-5 animate-spin" /> : <BookOpen className="h-5 w-5" />}
         </Button>
         <Button
           variant="ghost"
@@ -211,7 +207,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
           disabled={isLoading}
           title="WHY分析"
         >
-          {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <HelpCircle className="h-5 w-5" />}
+          {isLoading ? <Sparkles className="h-5 w-5 animate-spin" /> : <HelpCircle className="h-5 w-5" />}
         </Button>
         <Button
           variant="ghost"
@@ -221,7 +217,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
           disabled={isLoading}
           title="HOW分析"
         >
-          {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <ListTodo className="h-5 w-5" />}
+          {isLoading ? <Sparkles className="h-5 w-5 animate-spin" /> : <ListTodo className="h-5 w-5" />}
         </Button>
         <Button
           variant="ghost"
@@ -231,7 +227,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
           disabled={isLoading}
           title="子ノードを再生成"
         >
-          {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <RefreshCw className="h-5 w-5" />}
+          {isLoading ? <Sparkles className="h-5 w-5 animate-spin" /> : <RefreshCw className="h-5 w-5" />}
         </Button>
       </div>
     </div>
