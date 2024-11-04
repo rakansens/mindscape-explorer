@@ -22,9 +22,9 @@ export const Toolbar: React.FC = () => {
           onClick={() => setIsOpen(!isOpen)}
           className={`
             p-3 rounded-full bg-white/80 backdrop-blur-sm shadow-lg
-            border border-blue-100 hover:border-blue-300 hover:bg-blue-50
+            border border-blue-100 hover:border-blue-300
             transform transition-all duration-300
-            ${isOpen ? 'rotate-90 bg-blue-50' : ''}
+            ${isOpen ? 'bg-blue-50 border-blue-300' : ''}
           `}
           style={{ pointerEvents: 'auto', cursor: 'pointer' }}
         >
