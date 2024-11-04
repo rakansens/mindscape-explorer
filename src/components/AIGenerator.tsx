@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Panel, useReactFlow } from 'reactflow';
 import { Sparkles } from 'lucide-react';
 import { useMindMapStore } from '../store/mindMapStore';
-import { useOpenAI } from '../utils/openai';
+import { useOpenAI, TopicTree } from '../utils/openai';
 
 type LayoutStyle = 'horizontal' | 'radial';
 
