@@ -35,7 +35,7 @@ export const getMindMapPrompt = (topic: string, mode?: string, options?: Generat
 }`;
   }
 
-  const defaultPrompt = `
+  return `
 以下のトピックについて、3階層の詳細なマインドマップを生成してください。必ず指定されたJSON形式で応答してください。
 
 トピック: "${topic}"
@@ -72,6 +72,4 @@ export const getMindMapPrompt = (topic: string, mode?: string, options?: Generat
 - childrenは必ず配列として返してください
 - 末端ノードのchildrenは空配列[]としてください
 `;
-
-  return defaultPrompt;
 };
