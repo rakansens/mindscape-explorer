@@ -17,7 +17,6 @@ export const NodeMenu: React.FC<NodeMenuProps> = ({ id, showButton, setShowButto
   const menuDisplayTimeout = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
-    // メニューが表示された時
     if (showGenerateMenu) {
       if (hideTimeout.current) {
         clearTimeout(hideTimeout.current);
@@ -58,7 +57,7 @@ export const NodeMenu: React.FC<NodeMenuProps> = ({ id, showButton, setShowButto
     >
       <button
         className={`${nodeStyles.button} ${nodeStyles.generateButton}
-          ${showGenerateMenu ? 'bg-blue-50' : ''}`}
+          ${showGenerateMenu ? 'bg-blue-50 animate-spin' : ''}`}
         title="AI生成メニューを開く"
       >
         <Sparkles size={16} />

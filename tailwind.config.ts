@@ -74,6 +74,10 @@ export default {
         typing: {
           '0%': { width: '0' },
           '100%': { width: '100%' },
+        },
+        spin: {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' }
         }
       },
       animation: {
@@ -81,6 +85,7 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
         fadeIn: 'fadeIn 0.3s ease-out',
         typing: 'typing 1s steps(20, end)',
+        spin: 'spin 1s linear infinite'
       },
     },
   },
