@@ -29,10 +29,18 @@ export const useOpenAI = () => {
       });
 
       const content = response.choices[0]?.message?.content;
-      if (!content) throw new Error('No content generated');
+      if (!content) {
+        throw new Error('No content generated');
+      }
 
       try {
         const parsedContent = JSON.parse(content);
+        
+        // 応答の構造を検証
+        if (!parsedContent.label || !Array.isArray(parsedContent.children)) {
+          throw new Error('Invalid response structure');
+        }
+
         return parsedContent;
       } catch (e) {
         console.error('Failed to parse response:', content);
@@ -50,5 +58,4 @@ export const useOpenAI = () => {
   };
 };
 
-// Re-export the types for convenience
 export type { TopicTree, GenerateOptions };
