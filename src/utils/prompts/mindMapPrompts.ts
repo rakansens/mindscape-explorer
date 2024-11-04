@@ -36,25 +36,87 @@ export const getMindMapPrompt = (topic: string, mode?: string, options?: Generat
 
   if (mode === 'quick') {
     return `
-以下のトピックについて、サブトピックを3つ生成してください。
+以下のトピックについて、階層的な構造でサブトピックを生成してください。
 
 トピック: "${topic}"
+
+要件:
+1. 最上位レベルに3つの主要なサブトピック
+2. 各主要サブトピックに2つずつの子トピック
+3. 各子トピックに1つずつの孫トピック
 
 応答は以下のようなJSON形式で返してください:
 {
   "label": "${topic}",
   "children": [
     {
-      "label": "サブトピック1",
-      "children": []
+      "label": "主要サブトピック1",
+      "children": [
+        {
+          "label": "子トピック1-1",
+          "children": [
+            {
+              "label": "孫トピック1-1-1",
+              "children": []
+            }
+          ]
+        },
+        {
+          "label": "子トピック1-2",
+          "children": [
+            {
+              "label": "孫トピック1-2-1",
+              "children": []
+            }
+          ]
+        }
+      ]
     },
     {
-      "label": "サブトピック2",
-      "children": []
+      "label": "主要サブトピック2",
+      "children": [
+        {
+          "label": "子トピック2-1",
+          "children": [
+            {
+              "label": "孫トピック2-1-1",
+              "children": []
+            }
+          ]
+        },
+        {
+          "label": "子トピック2-2",
+          "children": [
+            {
+              "label": "孫トピック2-2-1",
+              "children": []
+            }
+          ]
+        }
+      ]
     },
     {
-      "label": "サブトピック3",
-      "children": []
+      "label": "主要サブトピック3",
+      "children": [
+        {
+          "label": "子トピック3-1",
+          "children": [
+            {
+              "label": "孫トピック3-1-1",
+              "children": []
+            }
+          ]
+        },
+        {
+          "label": "子トピック3-2",
+          "children": [
+            {
+              "label": "孫トピック3-2-1",
+              "children": []
+            }
+          ]
+        }
+      ]
     }
   ]
 }`;
