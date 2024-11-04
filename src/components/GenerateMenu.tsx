@@ -4,6 +4,7 @@ import { useMindMapStore } from '../store/mindMapStore';
 import { Button } from './ui/button';
 import { useToast } from '../hooks/use-toast';
 import { Loader2, Zap, BookOpen, HelpCircle, ListTodo, RefreshCw } from 'lucide-react';
+import { getNodeProperties } from '../utils/nodeUtils';
 
 interface GenerateMenuProps {
   nodeId: string;
@@ -37,18 +38,34 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
 
     setIsLoading(true);
     try {
+      // 再生成モードの場合、既存の子ノードのプロパティを保存
+      const childNodes = mode === 'regenerate' ? 
+        nodes.filter(node => {
+          const parentEdge = edges.find(edge => edge.target === node.id);
+          return parentEdge?.source === nodeId;
+        }) : [];
+
+      const childProperties = childNodes.map(node => ({
+        id: node.id,
+        properties: getNodeProperties(node)
+      }));
+
       // 再生成モードの場合、既存の子ノードを削除
       if (mode === 'regenerate') {
         removeChildNodes(nodeId);
       }
 
-      // 再生成モードの場合、クイック生成と同じルールを使用
+      // 再生成モードの場合、元のノードの性質に基づいて生成モードを決定
+      const effectiveMode = mode === 'regenerate' ? 
+        (currentNode.data.isTask ? 'how' : 
+         currentNode.data.detailedText ? 'detailed' : 'quick') : mode;
+
       const response = await generateSubTopics(currentNode.data.label, {
-        mode: mode === 'regenerate' ? 'quick' : mode,
-        quickType: mode === 'quick' || mode === 'regenerate' ? 'simple' : 'detailed',
-        nodeContext: mode === 'regenerate' ? currentNode.data.label : undefined,
+        mode: effectiveMode,
+        quickType: effectiveMode === 'quick' ? 'simple' : 'detailed',
+        nodeContext: currentNode.data.label,
         structure: {
-          level1: 3,
+          level1: childProperties.length || 3,
           level2: 2,
           level3: 1
         }
@@ -72,14 +89,25 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
 
           const newNode = await addNode(currentNode, child.label, childPosition);
           
-          if ((mode === 'detailed' || mode === 'why' || mode === 'how') && child.description) {
+          // 再生成モードの場合、元のノードのプロパティを継承
+          if (mode === 'regenerate' && childProperties[index]) {
+            const originalProperties = childProperties[index].properties;
+            updateNode(newNode.id, {
+              ...newNode,
+              data: {
+                ...newNode.data,
+                ...originalProperties,
+                detailedText: child.description || originalProperties.detailedText
+              }
+            });
+          } else if ((effectiveMode === 'detailed' || effectiveMode === 'why' || effectiveMode === 'how') && child.description) {
             updateNode(newNode.id, {
               ...newNode,
               data: {
                 ...newNode.data,
                 detailedText: child.description,
                 isCollapsed: true,
-                isTask: mode === 'how'
+                isTask: effectiveMode === 'how'
               }
             });
           }

@@ -110,3 +110,12 @@ export const preventEvent = (e: React.MouseEvent | React.PointerEvent): void => 
     e.target.style.pointerEvents = 'auto';
   }
 };
+
+export const getNodeProperties = (node: ReactFlowNode) => {
+  return {
+    isTask: node.data?.isTask || false,
+    isCompleted: node.data?.isCompleted || false,
+    detailedText: node.data?.detailedText || '',
+    isCollapsed: node.data?.isCollapsed || false,
+  };
+};
