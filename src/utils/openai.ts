@@ -26,6 +26,8 @@ export const useOpenAI = () => {
           }
         ],
         temperature: 0.7,
+        max_tokens: 2000,
+        timeout: 30000,
       });
 
       const content = response.choices[0]?.message?.content;
@@ -36,12 +38,10 @@ export const useOpenAI = () => {
       try {
         const parsedContent = JSON.parse(content);
         
-        // レスポンスの構造を検証
         if (!parsedContent.label || !Array.isArray(parsedContent.children)) {
           throw new Error('Invalid response structure');
         }
 
-        // 各子ノードの構造を検証
         parsedContent.children = parsedContent.children.filter(child => {
           return child && typeof child.label === 'string' && 
                  (!child.description || typeof child.description === 'string') &&
@@ -55,6 +55,9 @@ export const useOpenAI = () => {
       }
     } catch (error) {
       console.error('Error generating topics:', error);
+      if (error instanceof Error) {
+        throw new Error(`OpenAI API Error: ${error.message}`);
+      }
       throw error;
     }
   };

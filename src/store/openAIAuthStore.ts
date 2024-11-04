@@ -17,6 +17,7 @@ export const useOpenAIAuth = create<OpenAIAuthStore>()(
         const openai = new OpenAI({
           apiKey: key,
           dangerouslyAllowBrowser: true,
+          timeout: 30000,
         });
         set({ apiKey: key, openai });
       },
