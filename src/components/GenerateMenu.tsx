@@ -118,6 +118,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
           title: "生成完了",
           description: `${addedNodes}個のノードを生成しました`,
         });
+        setActiveMenuNodeId(null); // 生成が成功した時のみメニューを閉じる
       } else {
         toast({
           title: "警告",
@@ -134,7 +135,6 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
       });
     } finally {
       setIsLoading(false);
-      setActiveMenuNodeId(null); // 生成完了後にメニューを閉じる
     }
   };
 
