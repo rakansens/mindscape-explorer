@@ -38,36 +38,31 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const generateMenuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  let hideTimeout = useRef<NodeJS.Timeout>();
   
   const store = useMindMapStore();
   const level = getNodeLevel(store.edges, id);
 
   const handleNodeMouseEnter = () => {
-    if (hideTimeout.current) {
-      clearTimeout(hideTimeout.current);
-    }
     setShowButton(true);
   };
 
   const handleNodeMouseLeave = () => {
-    hideTimeout.current = setTimeout(() => {
+    // ホバーが外れてもメニューを表示し続ける
+    if (!showGenerateMenu) {
       setShowButton(false);
-      setActiveMenuNodeId(null);
-    }, 1000);
+    }
   };
 
   const handleMenuMouseEnter = () => {
-    if (hideTimeout.current) {
-      clearTimeout(hideTimeout.current);
-    }
     setActiveMenuNodeId(id);
   };
 
   const handleMenuMouseLeave = () => {
-    hideTimeout.current = setTimeout(() => {
+    // メニューからホバーが外れても、生成中は表示し続ける
+    if (!showGenerateMenu) {
       setActiveMenuNodeId(null);
-    }, 1000);
+      setShowButton(false);
+    }
   };
 
   const handleClick = (e: React.MouseEvent) => {
