@@ -1,48 +1,14 @@
 import { create } from 'zustand';
-import OpenAI from 'openai';
+import { useOpenAIAuth } from './openAIAuthStore';
+import { TopicTree, GenerateOptions } from '../types/openai';
 
 interface OpenAIStore {
-  apiKey: string | null;
-  openai: OpenAI | null;
-  setApiKey: (key: string) => void;
   generateSubTopics: (topic: string, options?: GenerateOptions) => Promise<TopicTree>;
 }
 
-export interface TopicTree {
-  label: string;
-  children: TopicTree[];
-  description?: string;
-}
-
-export interface GenerateOptions {
-  mode?: 'what' | 'why' | 'how' | 'which' | 'quick' | 'detailed';
-  whatType?: 'simple' | 'detailed';
-  whyType?: 'simple' | 'detailed';
-  howType?: 'simple' | 'detailed';
-  whichType?: 'simple' | 'detailed';
-  quickType?: 'simple' | 'detailed';
-  style?: string;
-  structure?: {
-    level1: number;
-    level2: number;
-    level3: number;
-  };
-}
-
-export const useOpenAI = create<OpenAIStore>((set, get) => ({
-  apiKey: null,
-  openai: null,
-
-  setApiKey: (key: string) => {
-    const openai = new OpenAI({
-      apiKey: key,
-      dangerouslyAllowBrowser: true,
-    });
-    set({ apiKey: key, openai });
-  },
-
+export const useOpenAI = create<OpenAIStore>(() => ({
   generateSubTopics: async (topic: string, options?: GenerateOptions) => {
-    const { openai } = get();
+    const { openai } = useOpenAIAuth.getState();
     if (!openai) throw new Error('OpenAI API key not set');
 
     try {
@@ -272,7 +238,6 @@ export const useOpenAI = create<OpenAIStore>((set, get) => ({
   ]
 }`;
       } else {
-        // デフォルトのクイック生成
         prompt = `
 以下のトピックについて、3階層の詳細なマインドマップを生成してください。
 
@@ -325,8 +290,7 @@ export const useOpenAI = create<OpenAIStore>((set, get) => ({
       if (!content) throw new Error('No content generated');
 
       try {
-        const topicTree = JSON.parse(content);
-        return topicTree;
+        return JSON.parse(content);
       } catch (e) {
         console.error('Failed to parse response:', content);
         throw new Error('Invalid response format');
