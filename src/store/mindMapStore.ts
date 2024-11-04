@@ -70,12 +70,13 @@ export const useMindMapStore = create<RFState>((set, get) => ({
       edges: addEdge(connection, get().edges),
     });
   },
-  addNode: (parentNode: Node, label: string) => {
+
+  addNode: (parentNode: Node, label: string, position?: { x: number; y: number }) => {
     const newNode: Node = {
       id: uuidv4(),
       type: 'custom',
       data: { label },
-      position: {
+      position: position || {
         x: parentNode.position.x + 250,
         y: parentNode.position.y,
       },
@@ -96,6 +97,7 @@ export const useMindMapStore = create<RFState>((set, get) => ({
 
     return newNode;
   },
+
   updateNodeText: (id: string, text: string) => {
     set({
       nodes: get().nodes.map((node) =>

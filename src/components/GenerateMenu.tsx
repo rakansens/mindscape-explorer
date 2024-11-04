@@ -39,7 +39,12 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
     try {
       const response = await generateSubTopics(currentNode.data.label, {
         mode: mode,
-        quickType: mode === 'quick' ? 'simple' : 'detailed'
+        quickType: mode === 'quick' ? 'simple' : 'detailed',
+        structure: {
+          level1: 3, // 子ノード3つ
+          level2: 2, // 孫ノード2つ
+          level3: 1  // ひ孫ノード1つ
+        }
       });
 
       if (!response || !response.children || !Array.isArray(response.children)) {
@@ -47,11 +52,21 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
       }
 
       let addedNodes = 0;
-      for (const child of response.children) {
+      let yOffset = 0;
+
+      // 子ノードの生成
+      for (const [index, child] of response.children.entries()) {
         if (!child.label) continue;
 
         try {
-          const newNode = await addNode(currentNode, child.label);
+          // 子ノードの位置を計算
+          const childPosition = {
+            x: currentNode.position.x + 250,
+            y: currentNode.position.y + (index - 1) * 150
+          };
+
+          const newNode = await addNode(currentNode, child.label, childPosition);
+          
           if (mode === 'detailed' && child.description) {
             updateNode(newNode.id, {
               ...newNode,
@@ -62,6 +77,37 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
               }
             });
           }
+
+          // 孫ノードの生成
+          if (child.children && Array.isArray(child.children)) {
+            for (const [grandChildIndex, grandChild] of child.children.entries()) {
+              if (!grandChild.label) continue;
+
+              // 孫ノードの位置を計算
+              const grandChildPosition = {
+                x: childPosition.x + 250,
+                y: childPosition.y + (grandChildIndex - 0.5) * 100
+              };
+
+              const grandChildNode = await addNode(newNode, grandChild.label, grandChildPosition);
+
+              // ひ孫ノードの生成
+              if (grandChild.children && Array.isArray(grandChild.children)) {
+                for (const greatGrandChild of grandChild.children) {
+                  if (!greatGrandChild.label) continue;
+
+                  // ひ孫ノードの位置を計算
+                  const greatGrandChildPosition = {
+                    x: grandChildPosition.x + 250,
+                    y: grandChildPosition.y
+                  };
+
+                  await addNode(grandChildNode, greatGrandChild.label, greatGrandChildPosition);
+                }
+              }
+            }
+          }
+
           addedNodes++;
         } catch (error) {
           console.error('Failed to add node:', error);
