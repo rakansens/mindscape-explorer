@@ -9,6 +9,7 @@ import { useMindMapStore } from '../store/mindMapStore';
 import CustomNode from '../components/CustomNode';
 import CustomEdge from '../components/CustomEdge';
 import { Toolbar } from '../components/Toolbar';
+import ViewControls from '../components/ViewControls';
 
 const nodeTypes = {
   custom: CustomNode,
@@ -22,7 +23,7 @@ const MindMap = () => {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect } = useMindMapStore();
 
   return (
-    <div className="w-screen h-screen bg-gray-50">
+    <div className="w-screen h-screen bg-gray-50 dark:bg-gray-900">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -40,6 +41,7 @@ const MindMap = () => {
       >
         <Background />
         <Controls />
+        <ViewControls />
       </ReactFlow>
       <Toolbar />
     </div>
