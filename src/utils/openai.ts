@@ -26,8 +26,7 @@ export const useOpenAI = () => {
           }
         ],
         temperature: 0.7,
-        max_tokens: 2000,
-        timeout: 30000,
+        max_tokens: 2000
       });
 
       const content = response.choices[0]?.message?.content;
