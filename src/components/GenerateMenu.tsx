@@ -4,7 +4,7 @@ import { useMindMapStore } from '../store/mindMapStore';
 import { Button } from './ui/button';
 import { useToast } from '../hooks/use-toast';
 import { Loader2, Zap, BookOpen, HelpCircle, ListTodo, RefreshCw } from 'lucide-react';
-import { getNodeProperties } from '../utils/nodeUtils';
+import { getNodeProperties, getNodeContext } from '../utils/nodeUtils';
 
 interface GenerateMenuProps {
   nodeId: string;
@@ -60,10 +60,13 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
         (currentNode.data.isTask ? 'how' : 
          currentNode.data.detailedText ? 'detailed' : 'quick') : mode;
 
+      // ノードのコンテキストを取得（ラベル、説明文、子ノードの情報を含む）
+      const nodeContext = getNodeContext(currentNode, childNodes);
+
       const response = await generateSubTopics(currentNode.data.label, {
         mode: effectiveMode,
         quickType: effectiveMode === 'quick' ? 'simple' : 'detailed',
-        nodeContext: currentNode.data.label,
+        nodeContext: nodeContext,
         structure: {
           level1: childProperties.length || 3,
           level2: 2,
@@ -110,44 +113,6 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
                 isTask: effectiveMode === 'how'
               }
             });
-          }
-
-          if (child.children && Array.isArray(child.children)) {
-            const childBaseYOffset = -100 * (child.children.length - 1) / 2;
-            
-            for (const [grandChildIndex, grandChild] of child.children.entries()) {
-              if (!grandChild.label) continue;
-
-              const grandChildPosition = {
-                x: childPosition.x + 250,
-                y: childPosition.y + childBaseYOffset + grandChildIndex * 100
-              };
-
-              const grandChildNode = await addNode(newNode, grandChild.label, grandChildPosition);
-
-              if (mode === 'why') {
-                updateNode(grandChildNode.id, {
-                  ...grandChildNode,
-                  data: {
-                    ...grandChildNode.data,
-                    detailedText: grandChild.description,
-                    isCollapsed: true
-                  }
-                });
-              }
-              else if (mode === 'how') {
-                updateNode(grandChildNode.id, {
-                  ...grandChildNode,
-                  data: {
-                    ...grandChildNode.data,
-                    detailedText: grandChild.description,
-                    isCollapsed: true,
-                    isTask: true,
-                    isCompleted: false
-                  }
-                });
-              }
-            }
           }
 
           addedNodes++;

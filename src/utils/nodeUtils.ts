@@ -119,3 +119,18 @@ export const getNodeProperties = (node: ReactFlowNode) => {
     isCollapsed: node.data?.isCollapsed || false,
   };
 };
+
+export const getNodeContext = (node: ReactFlowNode, childNodes: ReactFlowNode[] = []) => {
+  const context = {
+    label: node.data?.label || '',
+    detailedText: node.data?.detailedText || '',
+    isTask: node.data?.isTask || false,
+    children: childNodes.map(child => ({
+      label: child.data?.label || '',
+      detailedText: child.data?.detailedText || '',
+      isTask: child.data?.isTask || false,
+    }))
+  };
+
+  return JSON.stringify(context);
+};
