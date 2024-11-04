@@ -38,31 +38,41 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const generateMenuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  let hideTimeout = useRef<NodeJS.Timeout>();
   
   const store = useMindMapStore();
   const level = getNodeLevel(store.edges, id);
 
   const handleNodeMouseEnter = () => {
+    if (hideTimeout.current) {
+      clearTimeout(hideTimeout.current);
+    }
     setShowButton(true);
   };
 
   const handleNodeMouseLeave = () => {
-    // ホバーが外れてもメニューを表示し続ける
-    if (!showGenerateMenu) {
-      setShowButton(false);
-    }
+    hideTimeout.current = setTimeout(() => {
+      if (!showGenerateMenu) {
+        setShowButton(false);
+        setActiveMenuNodeId(null);
+      }
+    }, 1000);
   };
 
   const handleMenuMouseEnter = () => {
+    if (hideTimeout.current) {
+      clearTimeout(hideTimeout.current);
+    }
     setActiveMenuNodeId(id);
   };
 
   const handleMenuMouseLeave = () => {
-    // メニューからホバーが外れても、生成中は表示し続ける
-    if (!showGenerateMenu) {
-      setActiveMenuNodeId(null);
-      setShowButton(false);
-    }
+    hideTimeout.current = setTimeout(() => {
+      if (!showGenerateMenu) {
+        setActiveMenuNodeId(null);
+        setShowButton(false);
+      }
+    }, 1000);
   };
 
   const handleClick = (e: React.MouseEvent) => {
@@ -83,7 +93,6 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
       if (inputValue.trim() !== '') {
         store.updateNodeText(id, inputValue);
         setIsEditing(false);
-        // 同じ階層に新しいノードを追加
         const parentEdge = store.edges.find(edge => edge.target === id);
         const parentId = parentEdge?.source;
         if (parentId) {
@@ -99,7 +108,6 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
     } else if (e.key === 'Tab') {
       e.preventDefault();
       if (data.selected) {
-        // 下の階層に新しいノードを追加
         const currentNode = store.nodes.find(n => n.id === id);
         if (currentNode) {
           store.addNode(currentNode, 'New Node', {
