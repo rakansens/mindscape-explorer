@@ -12,11 +12,11 @@ export const getNodeStyle = (level: number) => {
   
   switch (level) {
     case 0:
-      return `${currentScheme.primary} hover:brightness-110`;
+      return currentScheme.primary;
     case 1:
-      return `${currentScheme.secondary} hover:brightness-110`;
+      return currentScheme.secondary;
     default:
-      return `${currentScheme.accent} hover:brightness-110`;
+      return currentScheme.accent;
   }
 };
 
