@@ -10,13 +10,15 @@ export const getNodeLevel = (edges: Edge[], nodeId: string, level: number = 0): 
 export const getNodeStyle = (level: number) => {
   const { currentScheme } = useColorSchemeStore.getState();
   
+  const baseClasses = 'transition-colors duration-200';
+  
   switch (level) {
     case 0:
-      return currentScheme.primary;
+      return `${currentScheme.primary} ${baseClasses} hover:opacity-90`;
     case 1:
-      return currentScheme.secondary;
+      return `${currentScheme.secondary} ${baseClasses} hover:opacity-90`;
     default:
-      return currentScheme.accent;
+      return `${currentScheme.accent} ${baseClasses} hover:opacity-90`;
   }
 };
 
