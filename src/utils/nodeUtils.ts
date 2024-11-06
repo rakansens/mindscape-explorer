@@ -78,17 +78,31 @@ export const calculateNodePosition = (
   }
 };
 
-export const getNodeStyle = (level: number): string => {
-  switch(level) {
-    case 0:
-      return 'bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold text-lg shadow-blue-200';
-    case 1:
-      return 'bg-gradient-to-br from-indigo-500 to-indigo-600 text-white font-semibold shadow-indigo-200';
-    case 2:
-      return 'bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-purple-200';
-    default:
-      return 'bg-gradient-to-br from-violet-500 to-violet-600 text-white shadow-violet-200';
-  }
+export const getNodeStyle = (level: number, isAppearing?: boolean, isRemoving?: boolean): string => {
+  const baseStyle = (() => {
+    switch(level) {
+      case 0:
+        return 'bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold text-lg shadow-blue-200';
+      case 1:
+        return 'bg-gradient-to-br from-indigo-500 to-indigo-600 text-white font-semibold shadow-indigo-200';
+      case 2:
+        return 'bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-purple-200';
+      default:
+        return 'bg-gradient-to-br from-violet-500 to-violet-600 text-white shadow-violet-200';
+    }
+  })();
+
+  const animationStyle = (() => {
+    if (isAppearing) {
+      return 'animate-in fade-in zoom-in duration-300';
+    }
+    if (isRemoving) {
+      return 'animate-out fade-out zoom-out duration-300';
+    }
+    return '';
+  })();
+
+  return `${baseStyle} ${animationStyle}`;
 };
 
 // ノードラベルの検証

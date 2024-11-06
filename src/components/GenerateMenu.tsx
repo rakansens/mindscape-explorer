@@ -1,16 +1,22 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useOpenAI } from '../utils/openai';
 import { useMindMapStore } from '../store/mindMapStore';
+import { useViewStore } from '../store/viewStore';
 import { Button } from './ui/button';
 import { useToast } from '../hooks/use-toast';
-import { Loader2, Zap, BookOpen, HelpCircle, ListTodo, RefreshCw, Lightbulb } from 'lucide-react';
+import { 
+  Loader2, 
+  Plus,
+  BookOpen, 
+  HelpCircle, 
+  ListTodo, 
+  RefreshCw, 
+  Lightbulb,
+  Sparkles,
+  Zap 
+} from 'lucide-react';
 import { getNodeProperties } from '../utils/nodeUtils';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
+import { sleep } from '../utils/animationUtils';
 
 interface GenerateMenuProps {
   nodeId: string;
@@ -18,9 +24,61 @@ interface GenerateMenuProps {
 
 export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
   const [isLoading, setIsLoading] = React.useState(false);
+  const [showMenu, setShowMenu] = React.useState(false);
+  const [isHovering, setIsHovering] = React.useState(false);
+  const [isMenuHovering, setIsMenuHovering] = React.useState(false);
+  const hideTimeout = React.useRef<NodeJS.Timeout>();
   const { generateSubTopics, apiKey } = useOpenAI();
   const { nodes, edges, addNode, updateNode, removeChildNodes } = useMindMapStore();
+  const { fitView } = useViewStore();
   const { toast } = useToast();
+
+  const handleMenuMouseEnter = () => {
+    if (hideTimeout.current) {
+      clearTimeout(hideTimeout.current);
+    }
+    setIsHovering(true);
+    setShowMenu(true);
+  };
+
+  const handleMenuMouseLeave = () => {
+    setIsHovering(false);
+    if (!isLoading && !isMenuHovering) {
+      hideTimeout.current = setTimeout(() => {
+        if (!isHovering && !isMenuHovering) {
+          setShowMenu(false);
+        }
+      }, 1000);
+    }
+  };
+
+  const handleGenerateMenuMouseEnter = () => {
+    if (hideTimeout.current) {
+      clearTimeout(hideTimeout.current);
+    }
+    setIsMenuHovering(true);
+    setShowMenu(true);
+  };
+
+  const handleGenerateMenuMouseLeave = () => {
+    setIsMenuHovering(false);
+    if (!isLoading && !isHovering) {
+      hideTimeout.current = setTimeout(() => {
+        if (!isHovering && !isMenuHovering) {
+          setShowMenu(false);
+        }
+      }, 1000);
+    }
+  };
+
+  // コンポーネントのクリーンアップ
+  React.useEffect(() => {
+    return () => {
+      if (hideTimeout.current) {
+        clearTimeout(hideTimeout.current);
+      }
+    };
+  }, []);
 
   const handleGenerate = async (mode: 'quick' | 'detailed' | 'why' | 'how' | 'regenerate' | 'ideas') => {
     if (!apiKey) {
@@ -46,7 +104,11 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
     // 生成中のアニメーションを開始
     updateNode(nodeId, {
       ...currentNode,
-      data: { ...currentNode.data, isGenerating: true }
+      data: { 
+        ...currentNode.data, 
+        isGenerating: true,
+        isAppearing: true
+      }
     });
 
     try {
@@ -73,11 +135,11 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
         mode: effectiveMode,
         quickType: effectiveMode === 'quick' ? 'simple' : 'detailed',
         nodeContext: currentNode.data.label,
-        structure: {
-          level1: mode === 'ideas' ? 10 : (childProperties.length || 3),
+        structure: mode === 'regenerate' ? {
+          level1: childProperties.length || 3,
           level2: 2,
           level3: 1
-        }
+        } : undefined
       });
 
       if (!response || !response.children || !Array.isArray(response.children)) {
@@ -98,27 +160,15 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
 
           const newNode = await addNode(currentNode, child.label, childPosition);
           
-          if (mode === 'regenerate' && childProperties[index]) {
-            const originalProperties = childProperties[index].properties;
-            updateNode(newNode.id, {
-              ...newNode,
-              data: {
-                ...newNode.data,
-                ...originalProperties,
-                detailedText: child.description || originalProperties.detailedText
-              }
-            });
-          } else if ((effectiveMode === 'detailed' || effectiveMode === 'why' || effectiveMode === 'how') && child.description) {
-            updateNode(newNode.id, {
-              ...newNode,
-              data: {
-                ...newNode.data,
-                detailedText: child.description,
-                isCollapsed: true,
-                isTask: effectiveMode === 'how'
-              }
-            });
-          }
+          updateNode(newNode.id, {
+            ...newNode,
+            data: {
+              ...newNode.data,
+              isAppearing: true,
+              detailedText: child.description || newNode.data.detailedText,
+              isTask: mode === 'how'
+            }
+          });
 
           if (child.children && Array.isArray(child.children)) {
             const childBaseYOffset = -100 * (child.children.length - 1) / 2;
@@ -164,30 +214,32 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
         }
       }
 
+      await sleep(500);
+      fitView();
+
       // 生成完了後、アニメーションを停止
       updateNode(nodeId, {
         ...currentNode,
-        data: { ...currentNode.data, isGenerating: false }
+        data: { 
+          ...currentNode.data, 
+          isGenerating: false,
+          isAppearing: false
+        }
       });
 
-      if (addedNodes > 0) {
-        toast({
-          title: mode === 'regenerate' ? "再生成完了" : "生成完了",
-          description: `${addedNodes}個のノードを生成しました`,
-        });
-      } else {
-        toast({
-          title: "警告",
-          description: "ノードを生成できませんでした",
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: mode === 'regenerate' ? "再生成完了" : "生成完了",
+        description: `${addedNodes}個のノードを生成しました`,
+      });
     } catch (error) {
       console.error('Generation error:', error);
-      // エラー時もアニメーションを停止
       updateNode(nodeId, {
         ...currentNode,
-        data: { ...currentNode.data, isGenerating: false }
+        data: { 
+          ...currentNode.data, 
+          isGenerating: false,
+          isAppearing: false
+        }
       });
       toast({
         title: "エラー",
@@ -199,112 +251,105 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
     }
   };
 
+  const handleAddNode = () => {
+    const currentNode = nodes.find(n => n.id === nodeId);
+    if (currentNode) {
+      const newPosition = {
+        x: currentNode.position.x + 250,
+        y: currentNode.position.y
+      };
+      addNode(currentNode, '新しいトピック', newPosition);
+      fitView();
+    }
+  };
+
   return (
-    <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg p-2 min-w-[120px] z-50">
-      <div className="flex gap-2">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
+    <div 
+      className="flex flex-col gap-1"
+      onMouseEnter={handleMenuMouseEnter}
+      onMouseLeave={handleMenuMouseLeave}
+    >
+      <Button
+        variant="ghost"
+        size="icon"
+        className="w-8 h-8 p-0 bg-white/80 backdrop-blur-sm shadow-lg border border-gray-200"
+        onClick={handleAddNode}
+      >
+        <Plus className="w-4 h-4" />
+      </Button>
+      <div className="relative">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="w-8 h-8 p-0 bg-white/80 backdrop-blur-sm shadow-lg border border-gray-200"
+        >
+          <Sparkles className="w-4 h-4" />
+        </Button>
+
+        {showMenu && (
+          <div 
+            className="absolute left-1/2 -translate-x-1/2 top-[calc(100%+0.5rem)] bg-white rounded-lg shadow-lg p-2 min-w-[120px] z-50"
+            onMouseEnter={handleGenerateMenuMouseEnter}
+            onMouseLeave={handleGenerateMenuMouseLeave}
+          >
+            <div className="flex gap-2">
               <Button
                 variant="ghost"
                 size="icon"
-                className="w-10 h-10"
+                className="w-8 h-8 p-0"
                 onClick={() => handleGenerate('quick')}
                 disabled={isLoading}
               >
-                {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5" />}
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
               </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>クイック生成</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="w-10 h-10"
+                className="w-8 h-8 p-0"
                 onClick={() => handleGenerate('detailed')}
                 disabled={isLoading}
               >
-                {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <BookOpen className="h-5 w-5" />}
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />}
               </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>詳細生成</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="w-10 h-10"
+                className="w-8 h-8 p-0"
                 onClick={() => handleGenerate('why')}
                 disabled={isLoading}
               >
-                {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <HelpCircle className="h-5 w-5" />}
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <HelpCircle className="h-4 w-4" />}
               </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>WHY分析</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="w-10 h-10"
+                className="w-8 h-8 p-0"
                 onClick={() => handleGenerate('how')}
                 disabled={isLoading}
               >
-                {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <ListTodo className="h-5 w-5" />}
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ListTodo className="h-4 w-4" />}
               </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>HOW分析</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="w-10 h-10"
+                className="w-8 h-8 p-0"
                 onClick={() => handleGenerate('ideas')}
                 disabled={isLoading}
               >
-                {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Lightbulb className="h-5 w-5" />}
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lightbulb className="h-4 w-4" />}
               </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>アイディア生成</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="w-10 h-10"
+                className="w-8 h-8 p-0"
                 onClick={() => handleGenerate('regenerate')}
                 disabled={isLoading}
               >
-                {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <RefreshCw className="h-5 w-5" />}
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
               </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>子ノードを再生成</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,61 +1,50 @@
 import React from 'react';
-import { useMindMapStore } from '../store/mindMapStore';
 import { useViewStore } from '../store/viewStore';
-import { ZoomControls } from './controls/ZoomControls';
-import { ThemeControls } from './controls/ThemeControls';
-import { MinimapControl } from './controls/MinimapControl';
-import { LayoutControls } from './controls/LayoutControls';
-import { preventEvent } from '../utils/eventUtils';
+import { Button } from './ui/button';
+import { Sun, Moon, Map } from 'lucide-react';
+import { Tooltip } from './Tooltip';
 
-const ViewControls: React.FC = () => {
-  const { 
-    theme, 
-    setTheme, 
-    showMinimap, 
-    toggleMinimap,
-  } = useMindMapStore();
-
+export const ViewControls = () => {
   const {
-    zoomIn,
-    zoomOut,
-    fitView,
-    autoLayout,
+    theme,
+    setTheme,
+    showMinimap,
+    toggleMinimap
   } = useViewStore();
 
+  const toggleTheme = () => {
+    setTheme(theme === 'light' ? 'dark' : 'light');
+  };
+
   return (
-    <>
-      <div 
-        className="absolute bottom-4 right-4 flex flex-col gap-2"
-        onMouseDown={preventEvent}
-        onPointerDown={preventEvent}
-        onClick={preventEvent}
-        onDragStart={preventEvent}
-        style={{ pointerEvents: 'auto', zIndex: 1000 }}
-      >
-        <div className="flex gap-2 items-center backdrop-blur-sm bg-white/80 dark:bg-gray-800/80 p-2 rounded-xl shadow-lg border border-blue-100 dark:border-blue-500/30">
-          <ZoomControls 
-            onZoomIn={zoomIn}
-            onZoomOut={zoomOut}
-            onFitView={fitView}
-          />
-          <div className="w-px h-8 bg-blue-100/50" />
-          <LayoutControls 
-            onAutoLayout={autoLayout}
-          />
-          <div className="w-px h-8 bg-blue-100/50" />
-          <ThemeControls 
-            theme={theme}
-            onThemeChange={setTheme}
-          />
-          <div className="w-px h-8 bg-blue-100/50" />
-          <MinimapControl 
-            showMinimap={showMinimap}
-            onToggle={toggleMinimap}
-          />
-        </div>
-      </div>
-    </>
+    <div className="absolute bottom-4 right-4 flex gap-2">
+      <Tooltip text={showMinimap ? "ミニマップを非表示" : "ミニマップを表示"} position="top">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleMinimap}
+          className={`
+            p-2 rounded-lg transition-colors
+            ${showMinimap ? 'bg-blue-100/50 text-blue-500' : 'hover:bg-blue-100/50 text-blue-500'}
+          `}
+        >
+          <Map className="w-5 h-5" />
+        </Button>
+      </Tooltip>
+      <Tooltip text={theme === 'light' ? "ダークモードに切り替え" : "ライトモードに切り替え"} position="top">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleTheme}
+          className="p-2 rounded-lg hover:bg-blue-100/50 text-blue-500 transition-colors"
+        >
+          {theme === 'light' ? (
+            <Moon className="w-5 h-5" />
+          ) : (
+            <Sun className="w-5 h-5" />
+          )}
+        </Button>
+      </Tooltip>
+    </div>
   );
 };
-
-export default ViewControls;

@@ -1,194 +1,76 @@
 import { GenerateOptions } from '../../types/openai';
 
 export const getMindMapPrompt = (topic: string, mode?: string, options?: GenerateOptions): string => {
-  if (mode === 'ideas') {
-    return `
-以下のトピックについて、10個のユニークなアイディアを生成してください。
+  const structure = options?.structure || { 
+    level1: mode === 'ideas' ? 10 : 3,
+    level2: mode === 'quick' ? 2 : 3,
+    level3: mode === 'quick' ? 2 : 2
+  };
+  
+  const basePrompt = `
+以下のトピックについて、マインドマップのノード構造をJSON形式で生成してください。
 
 トピック: "${topic}"
 
-要件:
-1. 各アイディアは2-3行の文章で具体的に説明してください
-2. 実現可能で実用的なアイディアを提案してください
-3. 多様な視点からアイディアを生成してください
-4. 各アイディアは独立していて、重複がないようにしてください
-
-応答は以下のようなJSON形式で返してください:
+必ず以下の形式のJSONで返してください:
 {
-  "label": "${topic}",
-  "children": [
-    {
-      "label": "アイディア1の内容を2-3行で記述",
-      "children": []
-    },
-    {
-      "label": "アイディア2の内容を2-3行で記述",
-      "children": []
-    },
-    {
-      "label": "アイディア3の内容を2-3行で記述",
-      "children": []
-    },
-    {
-      "label": "アイディア4の内容を2-3行で記述",
-      "children": []
-    },
-    {
-      "label": "アイディア5の内容を2-3行で記述",
-      "children": []
-    },
-    {
-      "label": "アイディア6の内容を2-3行で記述",
-      "children": []
-    },
-    {
-      "label": "アイディア7の内容を2-3行で記述",
-      "children": []
-    },
-    {
-      "label": "アイディア8の内容を2-3行で記述",
-      "children": []
-    },
-    {
-      "label": "アイディア9の内容を2-3行で記述",
-      "children": []
-    },
-    {
-      "label": "アイディア10の内容を2-3行で記述",
-      "children": []
-    }
-  ]
-}`;
-  }
-
-  if (mode === 'how') {
-    return `
-以下のトピックについて、「どのように実現するか？」という視点からタスクリストを生成してください。
-
-トピック: "${topic}"
-
-要件:
-1. 3つの主要なアプローチを提案してください
-2. 各アプローチに対して2つの具体的なタスクを含めてください
-3. アプローチは2-3行程度の簡潔な文章で記述してください
-4. タスクも2-3行程度の簡潔な文章で記述してください
-
-応答は以下のようなJSON形式で返してください:
-{
-  "label": "${topic}",
-  "children": [
-    {
-      "label": "アプローチ1の内容を2-3行で記述",
-      "children": [
-        {
-          "label": "タスク1-1の内容を2-3行で記述",
-          "children": []
-        },
-        {
-          "label": "タスク1-2の内容を2-3行で記述",
-          "children": []
-        }
-      ]
-    }
-  ]
-}`;
-  }
-
-  if (mode === 'quick') {
-    return `
-以下のトピックについて、階層的な構造でサブトピックを生成してください。
-
-トピック: "${topic}"
-
-要件:
-1. 最上位レベルに3つの主要なサブトピック
-2. 各主要サブトピックに2つずつの子トピック
-3. 各子トピックに1つずつの孫トピック
-
-応答は以下のようなJSON形式で返してください:
-{
-  "label": "${topic}",
-  "children": [
-    {
-      "label": "主要サブトピック1",
-      "children": [
-        {
-          "label": "子トピック1-1",
-          "children": [
-            {
-              "label": "孫トピック1-1-1",
-              "children": []
-            }
-          ]
-        }
-      ]
-    }
-  ]
-}`;
-  }
-
-  if (mode === 'detailed') {
-    return `
-以下のトピックについて、サブトピックとそれに関連する詳細を提供してください。
-
-トピック: "${topic}"
-
-応答は以下のようなJSON形式で返してください:
-{
-  "label": "${topic}",
+  "label": "トピック名",
   "children": [
     {
       "label": "サブトピック1",
-      "description": "詳細1",
-      "children": []
-    },
-    {
-      "label": "サブトピック2",
-      "description": "詳細2",
+      "description": "詳細説明",
       "children": []
     }
   ]
-}`;
+}
+
+生成ルール:
+- 第1階層のノード数: ${structure.level1}個
+- 第2階層のノード数: ${structure.level2}個（必要な場合）
+- 第3階層のノード数: ${structure.level3}個（必要な場合）
+- 各ノードは必ずlabelプロパティを持つ
+- 説明が必要な場合はdescriptionプロパティを追加
+- childrenは必ず配列（空の場合は[]）
+
+応答は必ず有効なJSON形式でお願いします。
+`;
+
+  switch (mode) {
+    case 'detailed':
+      return `${basePrompt}
+追加の要件:
+- 各ノードに詳細な説明をdescriptionとして追加
+- 説明は100-200文字程度
+`;
+
+    case 'why':
+      return `${basePrompt}
+追加の要件:
+- 各ノードは"なぜ？"の視点で展開
+- 各ノードに理由の説明をdescriptionとして追加
+`;
+
+    case 'how':
+      return `${basePrompt}
+追加の要件:
+- 各ノードは"どうやって？"の視点で具体的なアクションとして展開
+- 各ノードに実行手順の説明をdescriptionとして追加
+`;
+
+    case 'ideas':
+      return `${basePrompt}
+追加の要件:
+- より多くのアイデアを生成（第1階層で${structure.level1}個）
+- 斬新で独創的なアイデアを含める
+- 必要に応じて簡単な説明を追加
+`;
+
+    case 'quick':
+    default:
+      return `${basePrompt}
+追加の要件:
+- シンプルな構造で展開
+- 説明は必要な場合のみ追加
+`;
   }
-
-  if (mode === 'why') {
-    return `
-以下のトピックについて、「なぜそれが重要か」という観点から3つの質問とその答えを生成してください。
-
-トピック: "${topic}"
-
-要件:
-1. 3つの「なぜ？」という質問を生成してください
-2. 各質問に対して詳細な説明を提供してください
-3. 質問は子ノードとして、説明は孫ノードとして表示されます
-
-応答は以下のようなJSON形式で返してください:
-{
-  "label": "${topic}",
-  "children": [
-    {
-      "label": "なぜ質問1？",
-      "children": [
-        {
-          "label": "説明1",
-          "description": "詳細な説明文1",
-          "children": []
-        }
-      ]
-    }
-  ]
-}`;
-  }
-
-  // Default case (if mode is not recognized)
-  return `
-以下のトピックについて、サブトピックを生成してください。
-
-トピック: "${topic}"
-
-応答は以下のようなJSON形式で返してください:
-{
-  "label": "${topic}",
-  "children": []
-}`;
 };

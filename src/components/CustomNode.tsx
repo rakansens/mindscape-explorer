@@ -1,28 +1,28 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useMindMapStore } from '../store/mindMapStore';
 import { Handle, Position } from 'reactflow';
 import { ChevronDown, ChevronRight, CheckSquare, Square } from 'lucide-react';
 import { getNodeLevel, getNodeStyle } from '../utils/nodeUtils';
 import { DetailedTextEditor } from './DetailedTextEditor';
-import { NodeMenu } from './node/NodeMenu';
+import { GenerateMenu } from './GenerateMenu';
+import { NodeData } from '../types/node';
 
 interface CustomNodeProps {
-  data: {
-    label: string;
-    isEditing?: boolean;
-    isGenerating?: boolean;
-    isCollapsed?: boolean;
-    color?: string;
-    description?: string;
-    selected?: boolean;
-    detailedText?: string;
-    isTask?: boolean;
-    isCompleted?: boolean;
-  };
+  data: NodeData;
   id: string;
   xPos?: number;
   yPos?: number;
 }
+
+const LoadingAnimation = () => (
+  <div className="absolute inset-0 flex items-center justify-center">
+    <div className="animate-pulse flex space-x-1">
+      <div className="w-1.5 h-1.5 bg-white/50 rounded-full"></div>
+      <div className="w-1.5 h-1.5 bg-white/50 rounded-full animation-delay-200"></div>
+      <div className="w-1.5 h-1.5 bg-white/50 rounded-full animation-delay-400"></div>
+    </div>
+  </div>
+);
 
 const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -36,15 +36,40 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
   const store = useMindMapStore();
   const level = getNodeLevel(store.edges, id);
 
-  const handleNodeMouseEnter = () => {
+  const handleMenuMouseEnter = () => {
     if (hideTimeout.current) {
       clearTimeout(hideTimeout.current);
     }
     setShowButton(true);
   };
 
+  const handleMenuMouseLeave = () => {
+    hideTimeout.current = setTimeout(() => {
+      setShowButton(false);
+    }, 1000);
+  };
+
+  const handleNodeMouseEnter = () => {
+    if (hideTimeout.current) {
+      clearTimeout(hideTimeout.current);
+    }
+    store.updateNode(id, {
+      data: {
+        ...data,
+        selected: true
+      }
+    });
+    setShowButton(true);
+  };
+
   const handleNodeMouseLeave = () => {
     hideTimeout.current = setTimeout(() => {
+      store.updateNode(id, {
+        data: {
+          ...data,
+          selected: false
+        }
+      });
       setShowButton(false);
     }, 1000);
   };
@@ -120,6 +145,19 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
     });
   };
 
+  useEffect(() => {
+    return () => {
+      if (hideTimeout.current) {
+        clearTimeout(hideTimeout.current);
+      }
+    };
+  }, []);
+
+  if (!data) {
+    console.warn(`Node ${id} has no data`);
+    return null;
+  }
+
   return (
     <>
       <Handle type="target" position={Position.Left} />
@@ -129,11 +167,14 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
         onMouseLeave={handleNodeMouseLeave}
       >
         <div 
-          className={`relative min-w-[120px] max-w-[300px] rounded-xl shadow-lg transition-all duration-300 transform
+          className={`relative min-w-[120px] max-w-[300px] rounded-xl shadow-lg
             ${getNodeStyle(level)}
             ${data.selected ? 'ring-2 ring-blue-500' : ''}
-            ${data.isGenerating ? 'animate-softPulse' : ''}
-            hover:shadow-xl`}
+            ${data.isGenerating ? 'animate-wiggle' : ''}
+            ${data.isAppearing ? 'animate-in fade-in zoom-in duration-500' : ''}
+            hover:shadow-xl
+            transition-all duration-300 transform
+          `}
           onClick={handleClick}
           onDoubleClick={handleDoubleClick}
           onKeyDown={handleKeyDown}
@@ -187,13 +228,19 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
           </div>
         </div>
 
-        <NodeMenu 
-          id={id}
-          showButton={showButton}
-          setShowButton={setShowButton}
-        />
+        {showButton && (
+          <div
+            className="absolute -right-4 top-1/2 -translate-y-1/2 translate-x-full"
+            onMouseEnter={handleMenuMouseEnter}
+            onMouseLeave={handleMenuMouseLeave}
+          >
+            <GenerateMenu nodeId={id} />
+          </div>
+        )}
       </div>
       <Handle type="source" position={Position.Right} />
+
+      {data.isGenerating && <LoadingAnimation />}
     </>
   );
 };

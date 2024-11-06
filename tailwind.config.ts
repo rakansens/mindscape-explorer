@@ -82,6 +82,11 @@ export default {
         softPulse: {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.7' }
+        },
+        wiggle: {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '25%': { transform: 'translateX(-2px)' },
+          '75%': { transform: 'translateX(2px)' }
         }
       },
       animation: {
@@ -90,7 +95,8 @@ export default {
         fadeIn: 'fadeIn 0.3s ease-out',
         typing: 'typing 1s steps(20, end)',
         spin: 'spin 2s linear infinite',
-        softPulse: 'softPulse 2s ease-in-out infinite'
+        softPulse: 'softPulse 2s ease-in-out infinite',
+        wiggle: 'wiggle 1s ease-in-out infinite'
       },
     },
   },

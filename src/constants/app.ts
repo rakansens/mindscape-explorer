@@ -1,0 +1,6 @@
+export const APP_CONSTANTS = {
+  DEFAULT_TITLE: '無題のマインドマップ',
+  AUTO_SAVE_DELAY: 2000,
+  ANIMATION_DURATION: 300,
+  MAX_TITLE_LENGTH: 100,
+} as const; 

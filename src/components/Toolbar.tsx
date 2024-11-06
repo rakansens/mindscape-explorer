@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { preventEvent } from '../utils/eventUtils';
-import { SaveLoadButtons } from './toolbar/SaveLoadButtons';
 import { ExportButtons } from './toolbar/ExportButtons';
 import { JsonButtons } from './toolbar/JsonButtons';
+import { ModelSelector } from './toolbar/ModelSelector';
 import { Tooltip } from './Tooltip';
 
 export const Toolbar: React.FC = () => {
@@ -43,12 +43,10 @@ export const Toolbar: React.FC = () => {
         `}
       >
         <div className="flex gap-2 items-center backdrop-blur-sm bg-white/80 p-2 rounded-xl shadow-lg border border-blue-100">
-          <SaveLoadButtons />
+          <ModelSelector />
           <div className="w-px h-8 bg-blue-100/50" />
-          
           <ExportButtons />
           <div className="w-px h-8 bg-blue-100/50" />
-          
           <JsonButtons />
         </div>
       </div>

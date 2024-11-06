@@ -3,29 +3,31 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toolbar } from "./components/Toolbar";
-import { APIKeyInput } from "./components/APIKeyInput";
-import Index from "./pages/Index";
+import { Sidebar } from "./components/sidebar/Sidebar";
+import { MindMap } from "./components/MindMap";
+import { ReactFlowProvider } from 'reactflow';
 
 const queryClient = new QueryClient();
 
 const App = () => (
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toolbar />
-        <APIKeyInput />
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </React.StrictMode>
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <ReactFlowProvider>
+        <div className="flex h-screen overflow-hidden">
+          <Sidebar />
+          <div className="flex-1 relative">
+            <Toolbar />
+            <div className="w-full h-full">
+              <MindMap />
+            </div>
+            <Toaster />
+            <Sonner />
+          </div>
+        </div>
+      </ReactFlowProvider>
+    </TooltipProvider>
+  </QueryClientProvider>
 );
 
 export default App;

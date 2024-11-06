@@ -5,7 +5,7 @@ export interface TopicTree {
 }
 
 export interface GenerateOptions {
-  mode?: 'what' | 'why' | 'how' | 'which' | 'quick' | 'detailed';
+  mode?: 'what' | 'why' | 'how' | 'which' | 'quick' | 'detailed' | 'ideas' | 'regenerate';
   whatType?: 'simple' | 'detailed';
   whyType?: 'simple' | 'detailed';
   howType?: 'simple' | 'detailed';
