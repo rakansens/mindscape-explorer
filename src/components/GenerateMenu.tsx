@@ -20,65 +20,65 @@ import { sleep } from '../utils/animationUtils';
 
 interface GenerateMenuProps {
   nodeId: string;
+  onMenuHover?: (isHovering: boolean) => void;
 }
-
-export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [showMenu, setShowMenu] = React.useState(false);
-  const [isHovering, setIsHovering] = React.useState(false);
-  const [isMenuHovering, setIsMenuHovering] = React.useState(false);
-  const hideTimeout = React.useRef<NodeJS.Timeout>();
+export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const hideTimeout = useRef<NodeJS.Timeout | null>(null);
   const { generateSubTopics, apiKey } = useOpenAI();
   const { nodes, edges, addNode, updateNode, removeChildNodes } = useMindMapStore();
   const { fitView } = useViewStore();
   const { toast } = useToast();
 
-  const handleMenuMouseEnter = () => {
-    if (hideTimeout.current) {
-      clearTimeout(hideTimeout.current);
-    }
-    setIsHovering(true);
-    setShowMenu(true);
-  };
+  // ホバー状態管理
+  const [isHoveringSparkleButton, setIsHoveringSparkleButton] = useState(false);
+  const [isHoveringMenu, setIsHoveringMenu] = useState(false);
 
-  const handleMenuMouseLeave = () => {
-    setIsHovering(false);
-    if (!isLoading && !isMenuHovering) {
+  // メニュー表示状態を監視して制御
+  useEffect(() => {
+    const shouldShowMenu = isHoveringSparkleButton || isHoveringMenu;
+    
+    if (!shouldShowMenu && showMenu) {
+      // ホバーが外れた場合、1秒後に非表示
       hideTimeout.current = setTimeout(() => {
-        if (!isHovering && !isMenuHovering) {
-          setShowMenu(false);
-        }
+        setShowMenu(false);
       }, 1000);
+    } else if (shouldShowMenu && !showMenu) {
+      // ホバー時は即時表示
+      setShowMenu(true);
     }
-  };
 
-  const handleGenerateMenuMouseEnter = () => {
-    if (hideTimeout.current) {
-      clearTimeout(hideTimeout.current);
-    }
-    setIsMenuHovering(true);
-    setShowMenu(true);
-  };
-
-  const handleGenerateMenuMouseLeave = () => {
-    setIsMenuHovering(false);
-    if (!isLoading && !isHovering) {
-      hideTimeout.current = setTimeout(() => {
-        if (!isHovering && !isMenuHovering) {
-          setShowMenu(false);
-        }
-      }, 1000);
-    }
-  };
-
-  // コンポーネントのクリーンアップ
-  React.useEffect(() => {
     return () => {
       if (hideTimeout.current) {
         clearTimeout(hideTimeout.current);
       }
     };
-  }, []);
+  }, [isHoveringSparkleButton, isHoveringMenu]);
+
+  // スパークルボタンにマウスが入った時のハンドラ
+  const handleMouseEnterSparkleButton = () => {
+    setIsHoveringSparkleButton(true);
+    onMenuHover?.(true);
+  };
+
+  // スパークルボタンからマウスが離れた時のハンドラ
+  const handleMouseLeaveSparkleButton = () => {
+    setIsHoveringSparkleButton(false);
+    onMenuHover?.(false);
+  };
+
+  // メニューにマウスが入った時のハンドラ
+  const handleMouseEnterMenu = () => {
+    setIsHoveringMenu(true);
+    onMenuHover?.(true);
+  };
+
+  // メニューからマウスが離れた時のハンドラ
+  const handleMouseLeaveMenu = () => {
+    setIsHoveringMenu(false);
+    onMenuHover?.(false);
+  };
 
   const handleGenerate = async (mode: 'quick' | 'detailed' | 'why' | 'how' | 'regenerate' | 'ideas') => {
     if (!apiKey) {
@@ -264,93 +264,93 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId }) => {
   };
 
   return (
-    <div 
-      className="flex flex-col gap-1"
-      onMouseEnter={handleMenuMouseEnter}
-      onMouseLeave={handleMenuMouseLeave}
-    >
-      <Button
-        variant="ghost"
-        size="icon"
-        className="w-8 h-8 p-0 bg-white/80 backdrop-blur-sm shadow-lg border border-gray-200"
-        onClick={handleAddNode}
-      >
-        <Plus className="w-4 h-4" />
-      </Button>
-      <div className="relative">
+    <div className="relative flex flex-col gap-1 z-50">
+      {/* ボタンのコンテナ */}
+      <div className="flex flex-col gap-1">
         <Button
           variant="ghost"
           size="icon"
-          className="w-8 h-8 p-0 bg-white/80 backdrop-blur-sm shadow-lg border border-gray-200"
+          className="w-8 h-8 p-0 bg-white/80 backdrop-blur-sm shadow-lg border border-gray-200 hover:bg-white"
+          onClick={handleAddNode}
+        >
+          <Plus className="w-4 h-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="w-8 h-8 p-0 bg-white/80 backdrop-blur-sm shadow-lg border border-gray-200 hover:bg-white"
+          onMouseEnter={handleMouseEnterSparkleButton}
+          onMouseLeave={handleMouseLeaveSparkleButton}
         >
           <Sparkles className="w-4 h-4" />
         </Button>
-
-        {showMenu && (
-          <div 
-            className="absolute left-1/2 -translate-x-1/2 top-[calc(100%+0.5rem)] bg-white rounded-lg shadow-lg p-2 min-w-[120px] z-50"
-            onMouseEnter={handleGenerateMenuMouseEnter}
-            onMouseLeave={handleGenerateMenuMouseLeave}
-          >
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="w-8 h-8 p-0"
-                onClick={() => handleGenerate('quick')}
-                disabled={isLoading}
-              >
-                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="w-8 h-8 p-0"
-                onClick={() => handleGenerate('detailed')}
-                disabled={isLoading}
-              >
-                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="w-8 h-8 p-0"
-                onClick={() => handleGenerate('why')}
-                disabled={isLoading}
-              >
-                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <HelpCircle className="h-4 w-4" />}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="w-8 h-8 p-0"
-                onClick={() => handleGenerate('how')}
-                disabled={isLoading}
-              >
-                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ListTodo className="h-4 w-4" />}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="w-8 h-8 p-0"
-                onClick={() => handleGenerate('ideas')}
-                disabled={isLoading}
-              >
-                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lightbulb className="h-4 w-4" />}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="w-8 h-8 p-0"
-                onClick={() => handleGenerate('regenerate')}
-                disabled={isLoading}
-              >
-                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-              </Button>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* メニュー */}
+      {showMenu && (
+        <div
+          className="absolute left-1/2 -translate-x-1/2 top-[calc(100%+0.25rem)] bg-white rounded-lg shadow-lg p-2 min-w-[120px] z-[60]"
+          onMouseEnter={handleMouseEnterMenu}
+          onMouseLeave={handleMouseLeaveMenu}
+        >
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-8 h-8 p-0"
+              onClick={() => handleGenerate('quick')}
+              disabled={isLoading}
+            >
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-8 h-8 p-0"
+              onClick={() => handleGenerate('detailed')}
+              disabled={isLoading}
+            >
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-8 h-8 p-0"
+              onClick={() => handleGenerate('why')}
+              disabled={isLoading}
+            >
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <HelpCircle className="h-4 w-4" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-8 h-8 p-0"
+              onClick={() => handleGenerate('how')}
+              disabled={isLoading}
+            >
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ListTodo className="h-4 w-4" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-8 h-8 p-0"
+              onClick={() => handleGenerate('ideas')}
+              disabled={isLoading}
+            >
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lightbulb className="h-4 w-4" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-8 h-8 p-0"
+              onClick={() => handleGenerate('regenerate')}
+              disabled={isLoading}
+            >
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
