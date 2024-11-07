@@ -8,13 +8,15 @@ import { Tooltip } from './Tooltip';
 export const Toolbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
+  const handleToolbarClick = (e: React.MouseEvent) => {
+    // ツールバー内のクリックイベントは伝播を停止
+    e.stopPropagation();
+  };
+
   return (
     <div
       className="absolute top-4 right-4 z-50"
-      onMouseDown={preventEvent}
-      onPointerDown={preventEvent}
-      onClick={preventEvent}
-      onDragStart={preventEvent}
+      onClick={handleToolbarClick}
       style={{ pointerEvents: 'auto' }}
     >
       <Tooltip text="ツールメニューを開く" position="left">
@@ -41,9 +43,12 @@ export const Toolbar: React.FC = () => {
           flex items-center gap-2
           ${isOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}
         `}
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="flex gap-2 items-center backdrop-blur-sm bg-white/80 p-2 rounded-xl shadow-lg border border-blue-100">
-          <ModelSelector />
+          <div style={{ pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+            <ModelSelector />
+          </div>
           <div className="w-px h-8 bg-blue-100/50" />
           <ExportButtons />
           <div className="w-px h-8 bg-blue-100/50" />

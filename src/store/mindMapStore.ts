@@ -1,35 +1,49 @@
 import { create } from 'zustand';
-import { Node, Edge } from '../types/reactflow';
+import { Node, Edge } from 'reactflow';
 import { applyNodeChanges, applyEdgeChanges } from 'reactflow';
+import { nanoid } from 'nanoid';
+import { ModelConfig, getDefaultModelConfig } from '../types/models';
+import { NodeData } from '../types/node';
 
 interface MindMapStore {
-  nodes: Node[];
+  nodes: Node<NodeData>[];
   edges: Edge[];
+  modelConfig: ModelConfig | null;
   onNodesChange: (changes: any) => void;
   onEdgesChange: (changes: any) => void;
   onConnect: (connection: any) => void;
-  updateNodes: (nodes: Node[]) => void;
+  updateNodes: (nodes: Node<NodeData>[]) => void;
   updateEdges: (edges: Edge[]) => void;
   selectNode: (id: string) => void;
   updateNodeText: (id: string, text: string) => void;
-  addNode: (parentNode: Node, label: string, position?: { x: number; y: number }) => Node;
-  updateNode: (id: string, updates: Partial<Node>) => void;
+  addNode: (parentNode: Node<NodeData>, label: string, position?: { x: number; y: number }) => Node<NodeData>;
+  updateNode: (id: string, updates: Partial<NodeData>) => void;
   removeChildNodes: (nodeId: string) => void;
+  setModelConfig: (config: ModelConfig | null) => void;
 }
 
-// 初期ノードの設定
-const initialNodes: Node[] = [
+const initialNodes: Node<NodeData>[] = [
   {
     id: '1',
     type: 'custom',
     position: { x: window.innerWidth / 2 - 75, y: window.innerHeight / 3 },
-    data: { label: 'メインテーマ' }
+    data: { 
+      label: 'メインテーマ',
+      selected: false,
+      isGenerating: false,
+      isAppearing: false
+    }
   }
 ];
+
+// 初期のモデル設定を環境変数から取得
+const initialModelConfig = getDefaultModelConfig();
 
 export const useMindMapStore = create<MindMapStore>((set) => ({
   nodes: initialNodes,
   edges: [],
+  // 初期値を明示的に設定
+  modelConfig: initialModelConfig,
 
   onNodesChange: (changes) => {
     set((state) => ({
@@ -80,27 +94,27 @@ export const useMindMapStore = create<MindMapStore>((set) => ({
   },
 
   addNode: (parentNode, label, position) => {
-    const newNode: Node = {
-      id: Math.random().toString(36).substr(2, 9),
+    const newNode: Node<NodeData> = {
+      id: nanoid(),
       type: 'custom',
-      position: position || {
-        x: parentNode.position.x + 250,
-        y: parentNode.position.y
+      position: position || { x: 0, y: 0 },
+      data: {
+        label,
+        isGenerating: false,
+        isAppearing: false,
+        selected: false,
       },
-      data: { label }
     };
 
     set((state) => ({
       nodes: [...state.nodes, newNode],
-      edges: [
-        ...state.edges,
-        {
-          id: `e${parentNode.id}-${newNode.id}`,
-          source: parentNode.id,
-          target: newNode.id,
-          type: 'custom'
-        }
-      ]
+      edges: parentNode
+        ? [...state.edges, {
+            id: `${parentNode.id}-${newNode.id}`,
+            source: parentNode.id,
+            target: newNode.id,
+          }]
+        : state.edges,
     }));
 
     return newNode;
@@ -109,7 +123,15 @@ export const useMindMapStore = create<MindMapStore>((set) => ({
   updateNode: (id, updates) => {
     set((state) => ({
       nodes: state.nodes.map(node =>
-        node.id === id ? { ...node, ...updates } : node
+        node.id === id
+          ? {
+              ...node,
+              data: {
+                ...node.data,
+                ...updates
+              }
+            }
+          : node
       )
     }));
   },
@@ -132,5 +154,25 @@ export const useMindMapStore = create<MindMapStore>((set) => ({
         edges: state.edges.filter(edge => !childIds.has(edge.target))
       };
     });
+  },
+
+  // ModelConfigの設定を改善
+  setModelConfig: (config) => {
+    if (config === null) {
+      // nullの場合は環境変数から再度設定を読み込む
+      set({ modelConfig: getDefaultModelConfig() });
+    } else {
+      // configが提供された場合は、既存の設定とマージ
+      set((state) => ({
+        modelConfig: {
+          ...state.modelConfig,
+          ...config,
+          // モデルタイプに応じて適切なAPIキーを設定
+          apiKey: config.type.includes('GEMINI') 
+            ? state.modelConfig?.geminiKey || ''
+            : state.modelConfig?.apiKey || ''
+        }
+      }));
+    }
   },
 }));

@@ -1,15 +1,13 @@
 export interface NodeData {
   label: string;
-  isEditing?: boolean;
-  isGenerating?: boolean;
-  isCollapsed?: boolean;
-  color?: string;
-  description?: string;
   selected?: boolean;
+  isGenerating?: boolean;
+  isAppearing?: boolean;
+  isRemoving?: boolean;
   detailedText?: string;
   isTask?: boolean;
   isCompleted?: boolean;
-  isAppearing?: boolean;
+  isCollapsed?: boolean;
 }
 
 export interface CustomNode {

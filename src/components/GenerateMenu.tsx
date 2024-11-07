@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { getNodeProperties } from '../utils/nodeUtils';
 import { sleep } from '../utils/animationUtils';
+import { parseTopicTree } from '../utils/parseUtils';
+import { animateText } from '../utils/animationUtils';
 
 interface GenerateMenuProps {
   nodeId: string;
@@ -26,7 +28,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
   const [isLoading, setIsLoading] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const hideTimeout = useRef<NodeJS.Timeout | null>(null);
-  const { generateSubTopics, apiKey } = useOpenAI();
+  const { generateSubTopics } = useOpenAI();
   const { nodes, edges, addNode, updateNode, removeChildNodes } = useMindMapStore();
   const { fitView } = useViewStore();
   const { toast } = useToast();
@@ -81,132 +83,67 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
   };
 
   const handleGenerate = async (mode: 'quick' | 'detailed' | 'why' | 'how' | 'regenerate' | 'ideas') => {
-    if (!apiKey) {
-      toast({
-        title: "エラー",
-        description: "OpenAI APIキーを設定してください",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const currentNode = nodes.find(n => n.id === nodeId);
-    if (!currentNode) {
-      toast({
-        title: "エラー",
-        description: "ノードが見つかりません",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    // 生成中のアニメーションを開始
-    updateNode(nodeId, {
-      ...currentNode,
-      data: { 
-        ...currentNode.data, 
-        isGenerating: true,
-        isAppearing: true
-      }
-    });
-
     try {
-      const childNodes = mode === 'regenerate' ? 
-        nodes.filter(node => {
-          const parentEdge = edges.find(edge => edge.target === node.id);
-          return parentEdge?.source === nodeId;
-        }) : [];
+      setIsLoading(true);
+      const currentNode = nodes.find(n => n.id === nodeId);
+      if (!currentNode) return;
 
-      const childProperties = childNodes.map(node => ({
-        id: node.id,
-        properties: getNodeProperties(node)
-      }));
+      updateNode(nodeId, {
+        isGenerating: true,
+        label: '生成中...'
+      });
+
+      let addedNodes = 0;
+      let lastNodeY = currentNode.position.y;
 
       if (mode === 'regenerate') {
         removeChildNodes(nodeId);
+        await sleep(500);
       }
 
-      const effectiveMode = mode === 'regenerate' ? 
-        (currentNode.data.isTask ? 'how' : 
-         currentNode.data.detailedText ? 'detailed' : 'quick') : mode;
+      const response = await generateSubTopics(currentNode.data.label, { mode });
+      const hierarchy = parseTopicTree(response);
 
-      const response = await generateSubTopics(currentNode.data.label, {
-        mode: effectiveMode,
-        quickType: effectiveMode === 'quick' ? 'simple' : 'detailed',
-        nodeContext: currentNode.data.label,
-        structure: mode === 'regenerate' ? {
-          level1: childProperties.length || 3,
-          level2: 2,
-          level3: 1
-        } : undefined
+      // メインノードを元に戻す
+      updateNode(nodeId, {
+        label: currentNode.data.label,
+        isGenerating: false
       });
 
-      if (!response || !response.children || !Array.isArray(response.children)) {
-        throw new Error('Invalid response format from API');
-      }
-
-      let addedNodes = 0;
-      const baseYOffset = -150 * (response.children.length - 1) / 2;
-
-      for (const [index, child] of response.children.entries()) {
-        if (!child.label) continue;
-
+      for (const item of hierarchy) {
         try {
-          const childPosition = {
+          const newPosition = {
             x: currentNode.position.x + 250,
-            y: currentNode.position.y + baseYOffset + index * 150
+            y: lastNodeY
           };
 
-          const newNode = await addNode(currentNode, child.label, childPosition);
-          
+          // 新しいノードを空のラベルで作成
+          const newNode = addNode(currentNode, '', newPosition);
+          lastNodeY += 100;
+
+          // アニメーション用のフラグを設定
           updateNode(newNode.id, {
-            ...newNode,
-            data: {
-              ...newNode.data,
-              isAppearing: true,
-              detailedText: child.description || newNode.data.detailedText,
-              isTask: mode === 'how'
-            }
+            label: '',  // 空文字列から開始
+            isAppearing: true  // このフラグがTypingAnimationをトリガー
           });
 
-          if (child.children && Array.isArray(child.children)) {
-            const childBaseYOffset = -100 * (child.children.length - 1) / 2;
-            
-            for (const [grandChildIndex, grandChild] of child.children.entries()) {
-              if (!grandChild.label) continue;
+          await sleep(300);
 
-              const grandChildPosition = {
-                x: childPosition.x + 250,
-                y: childPosition.y + childBaseYOffset + grandChildIndex * 100
-              };
+          // テキストを直接設定せず、TypingAnimationに任せる
+          updateNode(newNode.id, {
+            label: item.text,  // 最終的なテキスト
+            isAppearing: true  // アニメーション中はtrueを維持
+          });
 
-              const grandChildNode = await addNode(newNode, grandChild.label, grandChildPosition);
+          await sleep(item.text.length * 50 + 500); // テキストの長さに応じて待機
 
-              if (mode === 'why') {
-                updateNode(grandChildNode.id, {
-                  ...grandChildNode,
-                  data: {
-                    ...grandChildNode.data,
-                    detailedText: grandChild.description,
-                    isCollapsed: true
-                  }
-                });
-              }
-              else if (mode === 'how') {
-                updateNode(grandChildNode.id, {
-                  ...grandChildNode,
-                  data: {
-                    ...grandChildNode.data,
-                    detailedText: grandChild.description,
-                    isCollapsed: true,
-                    isTask: true,
-                    isCompleted: false
-                  }
-                });
-              }
-            }
-          }
+          // アニメーション完了後の状態設定
+          updateNode(newNode.id, {
+            label: item.text,
+            detailedText: item.description,
+            isTask: item.isTask,
+            isAppearing: false
+          });
 
           addedNodes++;
         } catch (error) {
@@ -217,30 +154,12 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
       await sleep(500);
       fitView();
 
-      // 生成完了後、アニメーションを停止
-      updateNode(nodeId, {
-        ...currentNode,
-        data: { 
-          ...currentNode.data, 
-          isGenerating: false,
-          isAppearing: false
-        }
-      });
-
       toast({
         title: mode === 'regenerate' ? "再生成完了" : "生成完了",
         description: `${addedNodes}個のノードを生成しました`,
       });
     } catch (error) {
       console.error('Generation error:', error);
-      updateNode(nodeId, {
-        ...currentNode,
-        data: { 
-          ...currentNode.data, 
-          isGenerating: false,
-          isAppearing: false
-        }
-      });
       toast({
         title: "エラー",
         description: error instanceof Error ? error.message : "ノードの生成に失敗しました",
@@ -248,6 +167,13 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
       });
     } finally {
       setIsLoading(false);
+      const finalNode = nodes.find(n => n.id === nodeId);
+      if (finalNode) {
+        updateNode(nodeId, {
+          isGenerating: false,
+          label: finalNode.data.label
+        });
+      }
     }
   };
 
@@ -270,19 +196,19 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
         <Button
           variant="ghost"
           size="icon"
-          className="w-8 h-8 p-0 bg-white/80 backdrop-blur-sm shadow-lg border border-gray-200 hover:bg-white"
+          className="w-8 h-8 p-0 bg-white/80 backdrop-blur-sm shadow-lg border border-gray-200 hover:bg-white flex items-center justify-center"
           onClick={handleAddNode}
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 text-gray-600" />
         </Button>
         <Button
           variant="ghost"
           size="icon"
-          className="w-8 h-8 p-0 bg-white/80 backdrop-blur-sm shadow-lg border border-gray-200 hover:bg-white"
+          className="w-8 h-8 p-0 bg-white/80 backdrop-blur-sm shadow-lg border border-gray-200 hover:bg-white flex items-center justify-center"
           onMouseEnter={handleMouseEnterSparkleButton}
           onMouseLeave={handleMouseLeaveSparkleButton}
         >
-          <Sparkles className="w-4 h-4" />
+          <Sparkles className="w-4 h-4 text-gray-600" />
         </Button>
       </div>
 
@@ -297,56 +223,56 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
             <Button
               variant="ghost"
               size="icon"
-              className="w-8 h-8 p-0"
+              className="w-8 h-8 p-0 flex items-center justify-center hover:bg-gray-100"
               onClick={() => handleGenerate('quick')}
               disabled={isLoading}
             >
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-gray-600" /> : <Zap className="h-4 w-4 text-gray-600" />}
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className="w-8 h-8 p-0"
+              className="w-8 h-8 p-0 flex items-center justify-center hover:bg-gray-100"
               onClick={() => handleGenerate('detailed')}
               disabled={isLoading}
             >
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />}
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-gray-600" /> : <BookOpen className="h-4 w-4 text-gray-600" />}
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className="w-8 h-8 p-0"
+              className="w-8 h-8 p-0 flex items-center justify-center hover:bg-gray-100"
               onClick={() => handleGenerate('why')}
               disabled={isLoading}
             >
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <HelpCircle className="h-4 w-4" />}
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-gray-600" /> : <HelpCircle className="h-4 w-4 text-gray-600" />}
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className="w-8 h-8 p-0"
+              className="w-8 h-8 p-0 flex items-center justify-center hover:bg-gray-100"
               onClick={() => handleGenerate('how')}
               disabled={isLoading}
             >
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ListTodo className="h-4 w-4" />}
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-gray-600" /> : <ListTodo className="h-4 w-4 text-gray-600" />}
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className="w-8 h-8 p-0"
+              className="w-8 h-8 p-0 flex items-center justify-center hover:bg-gray-100"
               onClick={() => handleGenerate('ideas')}
               disabled={isLoading}
             >
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lightbulb className="h-4 w-4" />}
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-gray-600" /> : <Lightbulb className="h-4 w-4 text-gray-600" />}
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className="w-8 h-8 p-0"
+              className="w-8 h-8 p-0 flex items-center justify-center hover:bg-gray-100"
               onClick={() => handleGenerate('regenerate')}
               disabled={isLoading}
             >
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-gray-600" /> : <RefreshCw className="h-4 w-4 text-gray-600" />}
             </Button>
           </div>
         </div>
