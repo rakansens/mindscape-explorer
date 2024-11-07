@@ -29,49 +29,36 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [inputValue, setInputValue] = useState(data.label);
   const [showButton, setShowButton] = useState(false);
+  const [isHoveringNode, setIsHoveringNode] = useState(false);
+  const [isHoveringMenu, setIsHoveringMenu] = useState(false);
+  const hideTimeout = useRef<NodeJS.Timeout>();
   
   const inputRef = useRef<HTMLInputElement>(null);
-  let hideTimeout = useRef<NodeJS.Timeout>();
   
   const store = useMindMapStore();
   const level = getNodeLevel(store.edges, id);
 
   const handleMenuMouseEnter = () => {
-    if (hideTimeout.current) {
-      clearTimeout(hideTimeout.current);
-    }
-    setShowButton(true);
+    setIsHoveringMenu(true);
   };
 
   const handleMenuMouseLeave = () => {
-    hideTimeout.current = setTimeout(() => {
-      setShowButton(false);
-    }, 1000);
+    setIsHoveringMenu(false);
   };
 
   const handleNodeMouseEnter = () => {
-    if (hideTimeout.current) {
-      clearTimeout(hideTimeout.current);
-    }
+    setIsHoveringNode(true);
+    setShowButton(true);
     store.updateNode(id, {
       data: {
         ...data,
         selected: true
       }
     });
-    setShowButton(true);
   };
 
   const handleNodeMouseLeave = () => {
-    hideTimeout.current = setTimeout(() => {
-      store.updateNode(id, {
-        data: {
-          ...data,
-          selected: false
-        }
-      });
-      setShowButton(false);
-    }, 1000);
+    setIsHoveringNode(false);
   };
 
   const handleClick = (e: React.MouseEvent) => {
@@ -145,13 +132,52 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
     });
   };
 
+  const handleMenuHover = (isHovering: boolean) => {
+    if (isHovering) {
+      if (hideTimeout.current) {
+        clearTimeout(hideTimeout.current);
+      }
+      setIsHoveringMenu(true);
+      setShowButton(true);
+      store.updateNode(id, {
+        data: {
+          ...data,
+          selected: true
+        }
+      });
+    } else {
+      setIsHoveringMenu(false);
+    }
+  };
+
   useEffect(() => {
+    const shouldShowButton = isHoveringNode || isHoveringMenu;
+    
+    if (!shouldShowButton) {
+      hideTimeout.current = setTimeout(() => {
+        if (!isHoveringNode && !isHoveringMenu) {
+          setShowButton(false);
+          store.updateNode(id, {
+            data: {
+              ...data,
+              selected: false
+            }
+          });
+        }
+      }, 1000);
+    } else {
+      if (hideTimeout.current) {
+        clearTimeout(hideTimeout.current);
+      }
+      setShowButton(true);
+    }
+
     return () => {
       if (hideTimeout.current) {
         clearTimeout(hideTimeout.current);
       }
     };
-  }, []);
+  }, [isHoveringNode, isHoveringMenu, id, data, store]);
 
   if (!data) {
     console.warn(`Node ${id} has no data`);
@@ -234,7 +260,10 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
             onMouseEnter={handleMenuMouseEnter}
             onMouseLeave={handleMenuMouseLeave}
           >
-            <GenerateMenu nodeId={id} />
+            <GenerateMenu 
+              nodeId={id} 
+              onMenuHover={handleMenuHover}
+            />
           </div>
         )}
       </div>
