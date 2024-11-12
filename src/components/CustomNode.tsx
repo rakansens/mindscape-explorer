@@ -34,7 +34,8 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
     animatingNodes, 
     loadingNodes,
     setNodeAnimating,
-    setNodeLoading
+    setNodeLoading,
+    fitView
   } = useViewStore();
   
   const level = getNodeLevel(store.edges, id);
@@ -66,7 +67,8 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
     setIsHoveringMenu(false);
   };
 
-  const handleNodeMouseEnter = () => {
+  const handleNodeMouseEnter = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setIsHoveringNode(true);
     setShowButton(true);
     store.updateNode(id, {
@@ -74,11 +76,13 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
     });
   };
 
-  const handleNodeMouseLeave = () => {
+  const handleNodeMouseLeave = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setIsHoveringNode(false);
   };
 
   const handleClick = (e: React.MouseEvent) => {
+    if (isEditing) return; // 編集中はクリックイベントを無視
     e.preventDefault();
     e.stopPropagation();
     store.selectNode(id);
@@ -114,7 +118,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
         };
 
         store.addNode(currentNode, '新しいトピック', newPosition);
-        store.fitView();
+        fitView();
       }
     } else if (e.key === 'Escape') {
       setInputValue(data.label);
@@ -208,9 +212,10 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
-          onBlur={handleEditComplete}
+          onBlur={handleBlur}
           className="bg-transparent text-white outline-none w-full"
           autoFocus
+          onClick={(e) => e.stopPropagation()}
         />
       );
     }
@@ -301,7 +306,10 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
       </div>
 
       {showButton && (
-        <div className="absolute -right-4 top-1/2 -translate-y-1/2 translate-x-full">
+        <div 
+          className="absolute -right-4 top-1/2 -translate-y-1/2 translate-x-full"
+          onClick={(e) => e.stopPropagation()}
+        >
           <GenerateMenu
             nodeId={id}
             onMenuHover={handleMenuHover}
