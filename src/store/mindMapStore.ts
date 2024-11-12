@@ -39,7 +39,13 @@ const initialNodes: Node<NodeData>[] = [
 // 初期のモデル設定を環境変数から取得
 const initialModelConfig = getDefaultModelConfig();
 
-export const useMindMapStore = create<MindMapStore>((set) => ({
+// ノードの配置に関する定数
+const NODE_SPACING = {
+  HORIZONTAL: 250, // ノード間の水平方向の間隔
+  VERTICAL: 100,   // ノード間の垂直方向の間隔
+};
+
+export const useMindMapStore = create<MindMapStore>((set, get) => ({
   nodes: initialNodes,
   edges: [],
   // 初期値を明示的に設定
@@ -94,10 +100,18 @@ export const useMindMapStore = create<MindMapStore>((set) => ({
   },
 
   addNode: (parentNode, label, position) => {
+    const state = get();
+    
+    // 親ノードの子ノードの数を取得
+    const childCount = state.edges.filter(edge => edge.source === parentNode.id).length;
+    
+    // 新しいノードの位置を計算
+    const newPosition = position || calculateNewNodePosition(parentNode, childCount, state.nodes);
+    
     const newNode: Node<NodeData> = {
       id: nanoid(),
       type: 'custom',
-      position: position || { x: 0, y: 0 },
+      position: newPosition,
       data: {
         label,
         isGenerating: false,
@@ -156,18 +170,14 @@ export const useMindMapStore = create<MindMapStore>((set) => ({
     });
   },
 
-  // ModelConfigの設定を改善
   setModelConfig: (config) => {
     if (config === null) {
-      // nullの場合は環境変数から再度設定を読み込む
       set({ modelConfig: getDefaultModelConfig() });
     } else {
-      // configが提供された場合は、既存の設定とマージ
       set((state) => ({
         modelConfig: {
           ...state.modelConfig,
           ...config,
-          // モデルタイプに応じて適切なAPIキーを設定
           apiKey: config.type.includes('GEMINI') 
             ? state.modelConfig?.geminiKey || ''
             : state.modelConfig?.apiKey || ''
@@ -176,3 +186,43 @@ export const useMindMapStore = create<MindMapStore>((set) => ({
     }
   },
 }));
+
+// 新しいノードの位置を計算する関数
+function calculateNewNodePosition(
+  parentNode: Node<NodeData>,
+  childCount: number,
+  allNodes: Node[]
+): { x: number; y: number } {
+  const angle = (childCount * (2 * Math.PI / 8)) - Math.PI / 2; // 8分割で配置
+  const radius = NODE_SPACING.HORIZONTAL;
+
+  const baseX = parentNode.position.x + Math.cos(angle) * radius;
+  const baseY = parentNode.position.y + Math.sin(angle) * radius;
+
+  // 他のノードとの衝突を避けるための調整
+  let adjustedPosition = { x: baseX, y: baseY };
+  let attempts = 0;
+  const maxAttempts = 8;
+
+  while (isPositionOccupied(adjustedPosition, allNodes) && attempts < maxAttempts) {
+    const adjustmentAngle = angle + (attempts * Math.PI / 4);
+    adjustedPosition = {
+      x: parentNode.position.x + Math.cos(adjustmentAngle) * (radius + attempts * 50),
+      y: parentNode.position.y + Math.sin(adjustmentAngle) * (radius + attempts * 50)
+    };
+    attempts++;
+  }
+
+  return adjustedPosition;
+}
+
+// 指定された位置が他のノードと重なっているかチェックする関数
+function isPositionOccupied(position: { x: number; y: number }, nodes: Node[]): boolean {
+  const minDistance = 150; // ノード間の最小距離
+  return nodes.some(node => {
+    const dx = node.position.x - position.x;
+    const dy = node.position.y - position.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    return distance < minDistance;
+  });
+}
