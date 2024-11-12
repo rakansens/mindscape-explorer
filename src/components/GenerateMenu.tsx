@@ -24,6 +24,13 @@ interface GenerateMenuProps {
   nodeId: string;
   onMenuHover?: (isHovering: boolean) => void;
 }
+
+// ノードの配置に関する定数
+const SPACING = {
+  HORIZONTAL: 250,  // 親ノードからの水平距離
+  VERTICAL: 100    // ノード間の垂直距離
+};
+
 export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -82,6 +89,28 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
     onMenuHover?.(false);
   };
 
+  // 新しいノードの位置を計算する関数
+  const calculateNewNodePosition = (parentNode: any, childCount: number) => {
+    // 親ノードの子ノードの数を取得
+    const siblings = edges.filter(edge => edge.source === parentNode.id);
+    
+    // 基本位置（親ノードの右側）
+    const baseX = parentNode.position.x + SPACING.HORIZONTAL;
+    
+    // 垂直位置を計算（既存の子ノードの数に基づいて）
+    let baseY = parentNode.position.y;
+    
+    // 子ノードが存在する場合、最後の子ノードの下に配置
+    if (siblings.length > 0) {
+      const lastSibling = nodes.find(n => n.id === siblings[siblings.length - 1].target);
+      if (lastSibling) {
+        baseY = lastSibling.position.y + SPACING.VERTICAL;
+      }
+    }
+
+    return { x: baseX, y: baseY };
+  };
+
   const handleGenerate = async (mode: 'quick' | 'detailed' | 'why' | 'how' | 'regenerate' | 'ideas') => {
     try {
       setIsLoading(true);
@@ -94,7 +123,6 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
       });
 
       let addedNodes = 0;
-      let lastNodeY = currentNode.position.y;
 
       if (mode === 'regenerate') {
         removeChildNodes(nodeId);
@@ -112,14 +140,11 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
 
       for (const item of hierarchy) {
         try {
-          const newPosition = {
-            x: currentNode.position.x + 250,
-            y: lastNodeY
-          };
+          // 新しいノードの位置を計算
+          const position = calculateNewNodePosition(currentNode, addedNodes);
 
           // 新しいノードを空のラベルで作成
-          const newNode = addNode(currentNode, '', newPosition);
-          lastNodeY += 100;
+          const newNode = addNode(currentNode, '', position);
 
           // アニメーション用のフラグを設定
           updateNode(newNode.id, {
@@ -180,11 +205,12 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
   const handleAddNode = () => {
     const currentNode = nodes.find(n => n.id === nodeId);
     if (currentNode) {
-      const newPosition = {
-        x: currentNode.position.x + 250,
-        y: currentNode.position.y
-      };
-      addNode(currentNode, '新しいトピック', newPosition);
+      // 新しいノードの位置を計算
+      const childCount = edges.filter(edge => edge.source === currentNode.id).length;
+      const position = calculateNewNodePosition(currentNode, childCount);
+      
+      // 新しいノードを追加
+      addNode(currentNode, '新しいトピック', position);
       fitView();
     }
   };
