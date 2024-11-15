@@ -202,7 +202,11 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
     }
   };
 
-  const handleAddNode = () => {
+  const handleAddNode = (e: React.MouseEvent) => {
+    // イベントの伝播を停止
+    e.preventDefault();
+    e.stopPropagation();
+    
     const currentNode = nodes.find(n => n.id === nodeId);
     if (currentNode) {
       // 新しいノードの位置を計算
@@ -216,7 +220,10 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
   };
 
   return (
-    <div className="relative flex flex-col gap-1 z-50">
+    <div 
+      className="relative flex flex-col gap-1 z-50"
+      onClick={(e) => e.stopPropagation()} // メニュー全体でのクリックイベントの伝播を停止
+    >
       {/* ボタンのコンテナ */}
       <div className="flex flex-col gap-1">
         <Button
@@ -224,6 +231,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
           size="icon"
           className="w-8 h-8 p-0 bg-white/80 backdrop-blur-sm shadow-lg border border-gray-200 hover:bg-white flex items-center justify-center"
           onClick={handleAddNode}
+          onMouseDown={(e) => e.stopPropagation()} // マウスダウンイベントの伝播も停止
         >
           <Plus className="w-4 h-4 text-gray-600" />
         </Button>
@@ -233,6 +241,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
           className="w-8 h-8 p-0 bg-white/80 backdrop-blur-sm shadow-lg border border-gray-200 hover:bg-white flex items-center justify-center"
           onMouseEnter={handleMouseEnterSparkleButton}
           onMouseLeave={handleMouseLeaveSparkleButton}
+          onClick={(e) => e.stopPropagation()} // クリックイベントの伝播を停止
         >
           <Sparkles className="w-4 h-4 text-gray-600" />
         </Button>
@@ -244,13 +253,17 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
           className="absolute left-1/2 -translate-x-1/2 top-[calc(100%+0.25rem)] bg-white rounded-lg shadow-lg p-2 min-w-[120px] z-[60]"
           onMouseEnter={handleMouseEnterMenu}
           onMouseLeave={handleMouseLeaveMenu}
+          onClick={(e) => e.stopPropagation()} // メニュー内でのクリックイベントの伝播を停止
         >
           <div className="flex gap-2">
             <Button
               variant="ghost"
               size="icon"
               className="w-8 h-8 p-0 flex items-center justify-center hover:bg-gray-100"
-              onClick={() => handleGenerate('quick')}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleGenerate('quick');
+              }}
               disabled={isLoading}
             >
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-gray-600" /> : <Zap className="h-4 w-4 text-gray-600" />}
@@ -259,7 +272,10 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
               variant="ghost"
               size="icon"
               className="w-8 h-8 p-0 flex items-center justify-center hover:bg-gray-100"
-              onClick={() => handleGenerate('detailed')}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleGenerate('detailed');
+              }}
               disabled={isLoading}
             >
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-gray-600" /> : <BookOpen className="h-4 w-4 text-gray-600" />}
@@ -268,7 +284,10 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
               variant="ghost"
               size="icon"
               className="w-8 h-8 p-0 flex items-center justify-center hover:bg-gray-100"
-              onClick={() => handleGenerate('why')}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleGenerate('why');
+              }}
               disabled={isLoading}
             >
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-gray-600" /> : <HelpCircle className="h-4 w-4 text-gray-600" />}
@@ -277,7 +296,10 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
               variant="ghost"
               size="icon"
               className="w-8 h-8 p-0 flex items-center justify-center hover:bg-gray-100"
-              onClick={() => handleGenerate('how')}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleGenerate('how');
+              }}
               disabled={isLoading}
             >
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-gray-600" /> : <ListTodo className="h-4 w-4 text-gray-600" />}
@@ -286,7 +308,10 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
               variant="ghost"
               size="icon"
               className="w-8 h-8 p-0 flex items-center justify-center hover:bg-gray-100"
-              onClick={() => handleGenerate('ideas')}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleGenerate('ideas');
+              }}
               disabled={isLoading}
             >
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-gray-600" /> : <Lightbulb className="h-4 w-4 text-gray-600" />}
@@ -295,7 +320,10 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
               variant="ghost"
               size="icon"
               className="w-8 h-8 p-0 flex items-center justify-center hover:bg-gray-100"
-              onClick={() => handleGenerate('regenerate')}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleGenerate('regenerate');
+              }}
               disabled={isLoading}
             >
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-gray-600" /> : <RefreshCw className="h-4 w-4 text-gray-600" />}
