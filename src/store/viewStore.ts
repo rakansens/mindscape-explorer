@@ -20,7 +20,7 @@ interface ViewState {
 export const useViewStore = create<ViewState>((set, get) => ({
   theme: 'light',
   setTheme: (theme) => set({ theme }),
-  showMinimap: true,
+  showMinimap: false, // Changed to false as default
   toggleMinimap: () => set((state) => ({ showMinimap: !state.showMinimap })),
   edgeStyle: 'custom',
   setEdgeStyle: (style) => set({ edgeStyle: style }),

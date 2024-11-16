@@ -2,7 +2,7 @@ import React from 'react';
 import { useViewStore } from '../store/viewStore';
 import { useLayoutStore } from '../store/layoutStore';
 import { Button } from './ui/button';
-import { Map, Layout, GitBranch, Waves, ArrowRight, Grid, Bold, Italic } from 'lucide-react';
+import { Map, Layout, GitBranch, Waves, ArrowRight, Grid, LayoutGrid, LayoutList } from 'lucide-react';
 import { Tooltip } from './Tooltip';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { EdgeStyleMenu } from './controls/EdgeStyleMenu';
@@ -23,13 +23,13 @@ export const ViewControls = () => {
 
   const { layout, setLayout } = useLayoutStore();
 
-  const layouts: { id: LayoutType; label: string; icon: string }[] = [
-    { id: 'horizontal', label: '右方向レイアウト', icon: 'arrow-right' },
-    { id: 'layered', label: '階層レイアウト', icon: 'layers' },
-    { id: 'force', label: 'フォースレイアウト', icon: 'move' },
-    { id: 'tree', label: 'ツリーレイアウト', icon: 'git-branch' },
-    { id: 'circle', label: '円形レイアウト', icon: 'circle' },
-    { id: 'orthogonal', label: '直交レイアウト', icon: 'layout' },
+  const layouts: { id: LayoutType; label: string; icon: React.ReactNode }[] = [
+    { id: 'horizontal', label: '右方向レイアウト', icon: <ArrowRight className="w-4 h-4" /> },
+    { id: 'layered', label: '階層レイアウト', icon: <LayoutList className="w-4 h-4" /> },
+    { id: 'force', label: 'フォースレイアウト', icon: <Grid className="w-4 h-4" /> },
+    { id: 'tree', label: 'ツリーレイアウト', icon: <GitBranch className="w-4 h-4" /> },
+    { id: 'circle', label: '円形レイアウト', icon: <Layout className="w-4 h-4" /> },
+    { id: 'orthogonal', label: '直交レイアウト', icon: <LayoutGrid className="w-4 h-4" /> },
   ];
 
   return (
@@ -67,17 +67,17 @@ export const ViewControls = () => {
             </Button>
           </DropdownMenuTrigger>
         </Tooltip>
-        <DropdownMenuContent align="end" className="p-2 grid grid-cols-1 gap-2 min-w-[150px]">
+        <DropdownMenuContent align="end" className="p-2 grid grid-cols-3 gap-2 min-w-[240px]">
           {layouts.map((l) => (
             <button
               key={l.id}
               onClick={() => setLayout({ ...layout, type: l.id })}
               className={`
-                flex items-center gap-2 p-2 rounded-lg hover:bg-accent transition-colors
+                flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-accent transition-colors
                 ${layout.type === l.id ? 'ring-2 ring-primary' : ''}
               `}
             >
-              <span className="text-sm">{l.label}</span>
+              {l.icon}
             </button>
           ))}
         </DropdownMenuContent>

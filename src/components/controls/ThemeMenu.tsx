@@ -36,21 +36,20 @@ export const ThemeMenu = ({ theme, setTheme }: ThemeMenuProps) => {
           </Button>
         </DropdownMenuTrigger>
       </Tooltip>
-      <DropdownMenuContent align="end" className="p-2 grid grid-cols-1 gap-2 min-w-[150px]">
+      <DropdownMenuContent align="end" className="p-2 grid grid-cols-3 gap-2 min-w-[240px]">
         {themeSwatches.map((themeSwatch) => (
           <button
             key={themeSwatch.id}
             onClick={() => setTheme(themeSwatch.id)}
             className={`
-              flex items-center gap-2 p-2 rounded-lg hover:bg-accent transition-colors
+              flex items-center justify-center p-2 rounded-lg hover:bg-accent transition-colors
               ${theme === themeSwatch.id ? 'ring-2 ring-primary' : ''}
             `}
           >
-            <div className="w-6 h-6 rounded-full border border-border overflow-hidden">
+            <div className="w-8 h-8 rounded-full border border-border overflow-hidden">
               <div className={`w-full h-1/2 ${themeSwatch.colors[0]}`} />
               <div className={`w-full h-1/2 ${themeSwatch.colors[1]}`} />
             </div>
-            <span className="text-sm">{themeSwatch.label}</span>
           </button>
         ))}
       </DropdownMenuContent>
