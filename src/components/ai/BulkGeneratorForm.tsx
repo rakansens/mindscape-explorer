@@ -8,6 +8,9 @@ import { useNodeGenerator } from '../mindmap/NodeGenerator';
 import { Button } from '../ui/button';
 import { useApiKeyStore } from '../../store/apiKeyStore';
 import { Select } from '../ui/select';
+import { TopicTree } from '../../types/openai';
+import { HierarchyItem } from '../../types/common';
+import { parseTopicTree } from '../../utils/parseUtils';
 
 interface BulkGeneratorFormProps {
   onClose: () => void;
@@ -63,7 +66,9 @@ export function BulkGeneratorForm({ onClose, onShowAPIKeyInput }: BulkGeneratorF
         isGenerating: false
       });
 
-      await generateNodes(rootNode, [response], () => {
+      // Convert TopicTree to HierarchyItem before passing to generateNodes
+      const hierarchyItems = parseTopicTree(response);
+      await generateNodes(rootNode, hierarchyItems, () => {
         fitView({
           duration: 500,
           padding: 0.5
