@@ -77,11 +77,11 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
       });
 
       // 新しいノードを生成
-      await generateNodes(currentNode, hierarchyItems);
-      
-      fitView({
-        duration: 500,
-        padding: 0.5
+      await generateNodes(currentNode, hierarchyItems, () => {
+        fitView({
+          duration: 500,
+          padding: 0.5
+        });
       });
 
       toast({
