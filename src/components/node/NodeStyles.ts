@@ -8,8 +8,12 @@ export const getNodeThemeStyle = (level: number, theme: string): string => {
       return cn(
         baseStyle, 
         level === 0 
-          ? 'bg-slate-800 text-slate-100' 
-          : 'bg-slate-700 text-slate-100'
+          ? 'bg-gradient-to-br from-slate-800 to-slate-700 text-slate-100' 
+          : level === 1
+          ? 'bg-gradient-to-br from-slate-700 to-indigo-900 text-slate-100'
+          : level === 2
+          ? 'bg-gradient-to-br from-slate-700 to-purple-900 text-slate-100'
+          : 'bg-gradient-to-br from-slate-700 to-blue-900 text-slate-100'
       );
     case 'purple':
       return cn(
