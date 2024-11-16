@@ -104,7 +104,10 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
     }
   };
 
-  const handleAddNode = () => {
+  const handleAddNode = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     const currentNode = nodes.find(n => n.id === nodeId);
     if (currentNode) {
       const newPosition = calculateNewNodePosition(currentNode, nodes, edges);
