@@ -19,3 +19,16 @@ export interface GenerateOptions {
     level3: number;
   };
 }
+
+export interface OpenAIStore {
+  apiKey: string | null;
+  geminiKey: string | null;
+  setApiKey: (key: string) => void;
+  setGeminiKey: (key: string) => void;
+  generateSubTopics: (topic: string, options?: GenerateOptions) => Promise<TopicTree>;
+  generateCode: (nodeId: string) => Promise<{
+    html?: string;
+    css?: string;
+    javascript?: string;
+  }>;
+}
