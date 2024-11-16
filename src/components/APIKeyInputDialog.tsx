@@ -5,6 +5,12 @@ import { ModelType } from '@/types/models';
 import { X } from 'lucide-react';
 import { Button } from './ui/button';
 import { useApiKeyStore } from '@/store/apiKeyStore';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
 
 interface APIKeyInputDialogProps {
   onSubmit: (config: { 
@@ -38,21 +44,13 @@ export const APIKeyInputDialog: React.FC<APIKeyInputDialogProps> = ({ onSubmit, 
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full relative">
-        {onClose && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-2 top-2"
-            onClick={onClose}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        )}
-        <h2 className="text-xl font-semibold mb-4">APIキー設定</h2>
+    <Dialog open={true} onOpenChange={() => onClose?.()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>APIキー設定</DialogTitle>
+        </DialogHeader>
         <APIKeyInput onSubmit={handleSubmit} />
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };

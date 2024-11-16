@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useMindMapStore } from '../../store/mindMapStore';
 import { ModelType, getDefaultModelConfig } from '../../types/models';
 import { Settings2 } from 'lucide-react';
@@ -9,7 +9,6 @@ export const ModelSelector: React.FC = () => {
   const [showAPIKeyInput, setShowAPIKeyInput] = useState(false);
   const modelConfig = useMindMapStore(state => state.modelConfig);
   const setModelConfig = useMindMapStore(state => state.setModelConfig);
-  const modalRef = useRef<HTMLDivElement>(null);
 
   const currentModel = modelConfig?.type || 'GPT3.5';
 
@@ -29,26 +28,6 @@ export const ModelSelector: React.FC = () => {
       geminiKey: defaultConfig.geminiKey
     });
   };
-
-  useEffect(() => {
-    if (showAPIKeyInput && modalRef.current) {
-      const rect = modalRef.current.getBoundingClientRect();
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-
-      // モーダルが画面右端からはみ出す場合
-      if (rect.right > viewportWidth) {
-        modalRef.current.style.left = 'auto';
-        modalRef.current.style.right = '0';
-      }
-
-      // モーダルが画面下端からはみ出す場合
-      if (rect.bottom > viewportHeight) {
-        modalRef.current.style.top = 'auto';
-        modalRef.current.style.bottom = '0';
-      }
-    }
-  }, [showAPIKeyInput]);
 
   return (
     <div className="relative flex items-center gap-2">
@@ -83,17 +62,10 @@ export const ModelSelector: React.FC = () => {
       </Button>
 
       {showAPIKeyInput && (
-        <div ref={modalRef} className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="fixed inset-0 bg-black/50" onClick={() => setShowAPIKeyInput(false)} />
-          <div className="relative bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
-            <APIKeyInputDialog
-              onSubmit={(config) => {
-                setShowAPIKeyInput(false);
-              }}
-              onClose={() => setShowAPIKeyInput(false)}
-            />
-          </div>
-        </div>
+        <APIKeyInputDialog
+          onSubmit={() => setShowAPIKeyInput(false)}
+          onClose={() => setShowAPIKeyInput(false)}
+        />
       )}
     </div>
   );
