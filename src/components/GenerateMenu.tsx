@@ -67,21 +67,21 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
 
       const response = await generateSubTopics(currentNode.data.label, { mode });
       
-      // Convert response to hierarchy structure
+      // レスポンスを階層構造に変換
       const hierarchyItems = parseTopicTree(response);
       
-      // Restore original label after generation
+      // 生成が完了したら元のラベルを復元
       updateNode(nodeId, {
         label: currentNode.data.label,
         isGenerating: false
       });
 
-      // Generate new nodes with completion callback
-      await generateNodes(currentNode, hierarchyItems, () => {
-        fitView({
-          duration: 500,
-          padding: 0.5
-        });
+      // 新しいノードを生成
+      await generateNodes(currentNode, hierarchyItems);
+      
+      fitView({
+        duration: 500,
+        padding: 0.5
       });
 
       toast({
@@ -97,7 +97,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
         variant: "destructive",
       });
       
-      // Restore original label on error
+      // エラー時は元のラベルを復元
       const currentNode = nodes.find(n => n.id === nodeId);
       if (currentNode) {
         updateNode(nodeId, {

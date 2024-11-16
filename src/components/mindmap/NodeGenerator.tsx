@@ -8,46 +8,40 @@ export const useNodeGenerator = () => {
 
   const generateNodes = async (
     parentNode: Node,
-    items: HierarchyItem[],
-    onComplete?: () => void
+    items: HierarchyItem[]
   ) => {
-    // Each item is processed sequentially
+    // 各アイテムを順番に処理
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       
-      // Add delay between nodes except for the first one
+      // 最初のノード以外は、前のノードとの間に十分な待機時間を設ける
       if (i > 0) {
         await sleep(800);
       }
 
-      // Create empty node
+      // 空のノードを作成
       const newNode = addNode(parentNode, '');
       
-      // Visual feedback delay
+      // 視覚的なフィードバックのための待機
       await sleep(500);
       
-      // Animate text with slower typing speed
+      // テキストを一文字ずつアニメーション表示（タイピング速度を遅く）
       await animateText(
         item.text,
         async (text) => {
           updateNodeText(newNode.id, text);
         },
-        100
+        100  // タイピング速度を遅く設定
       );
 
-      // Post-text animation delay
+      // テキスト表示完了後の待機
       await sleep(500);
 
-      // Process child nodes if any
+      // 子ノードがある場合は、親ノードの生成完了後に十分待ってから生成
       if (item.children && item.children.length > 0) {
         await sleep(800);
         await generateNodes(newNode, item.children);
       }
-    }
-
-    // Execute completion callback if provided
-    if (onComplete) {
-      onComplete();
     }
   };
 
