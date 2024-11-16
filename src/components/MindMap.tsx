@@ -26,7 +26,6 @@ export const MindMap = () => {
   const { activeFileId, items } = useFileStore();
   const { theme, showMinimap } = useViewStore();
 
-  // レイアウト変更時の処理を最適化
   useEffect(() => {
     if (nodes.length > 0) {
       const { nodes: layoutedNodes, edges: layoutedEdges } = applyLayout(
@@ -44,6 +43,8 @@ export const MindMap = () => {
         return {
           ...originalEdge,
           ...layoutedEdge,
+          sourceHandle: originalEdge.sourceHandle,
+          targetHandle: originalEdge.targetHandle,
           style: originalEdge.style,
           animated: originalEdge.animated,
           type: originalEdge.type,
@@ -55,7 +56,6 @@ export const MindMap = () => {
     }
   }, [layout.type, layout.direction, layout.nodeSpacing, layout.rankSpacing]);
 
-  // ファイル変更時の処理
   useEffect(() => {
     if (activeFileId) {
       const activeFile = items.find(item => item.id === activeFileId && item.type === 'file');
@@ -70,6 +70,8 @@ export const MindMap = () => {
         // エッジの接続情報を保持
         const updatedEdges = layoutedEdges.map(edge => ({
           ...edge,
+          sourceHandle: edge.sourceHandle,
+          targetHandle: edge.targetHandle,
           type: 'custom',
           animated: true,
         }));
