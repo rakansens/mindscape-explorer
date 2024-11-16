@@ -8,6 +8,8 @@ import { Sparkles } from 'lucide-react';
 import { GenerateMenuButtons } from './generate/GenerateMenuButtons';
 import { GenerateCodeButton } from './code/GenerateCodeButton';
 import { CodePreviewModal } from './code/CodePreviewModal';
+import { useNodeGenerator } from '../components/mindmap/NodeGenerator';
+import { parseTopicTree } from '../utils/parseUtils';
 
 interface GenerateMenuProps {
   nodeId: string;
@@ -29,11 +31,11 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
   const { nodes, edges, addNode, updateNode, removeChildNodes } = useMindMapStore();
   const { fitView } = useViewStore();
   const { toast } = useToast();
+  const { generateNodes } = useNodeGenerator();
 
   const [isHoveringSparkleButton, setIsHoveringSparkleButton] = useState(false);
   const [isHoveringMenu, setIsHoveringMenu] = useState(false);
 
-  // Hover state management for displaying the menu
   useEffect(() => {
     const shouldShowMenu = isHoveringSparkleButton || isHoveringMenu;
 
@@ -64,18 +66,45 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
       });
 
       const response = await generateSubTopics(currentNode.data.label, { mode });
-      // Process response and update nodes here...
-
+      
+      // レスポンスを階層構造に変換
+      const hierarchyItems = parseTopicTree(response);
+      
+      // 生成が完了したら元のラベルを復元
       updateNode(nodeId, {
         label: currentNode.data.label,
         isGenerating: false
       });
+
+      // 新しいノードを生成
+      await generateNodes(currentNode, hierarchyItems, () => {
+        fitView({
+          duration: 500,
+          padding: 0.5
+        });
+      });
+
+      toast({
+        title: "生成完了",
+        description: "新しいノードが生成されました",
+      });
+
     } catch (error) {
+      console.error('生成エラー:', error);
       toast({
         title: "エラー",
         description: "サブトピックの生成に失敗しました。",
         variant: "destructive",
       });
+      
+      // エラー時は元のラベルを復元
+      const currentNode = nodes.find(n => n.id === nodeId);
+      if (currentNode) {
+        updateNode(nodeId, {
+          label: currentNode.data.label,
+          isGenerating: false
+        });
+      }
     } finally {
       setIsLoading(false);
     }
