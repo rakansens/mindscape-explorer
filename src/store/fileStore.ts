@@ -18,11 +18,11 @@ export const useFileStore = create<FileStore>((set, get) => ({
   activeFileId: null,
 
   addFile: (file) => set((state) => ({
-    items: [...state.items, file]
+    items: [...state.items, file] as FileSystemItem[]
   })),
 
   addFolder: (folder) => set((state) => ({
-    items: [...state.items, folder]
+    items: [...state.items, folder] as FileSystemItem[]
   })),
 
   removeItem: (id) => set((state) => ({
@@ -32,7 +32,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
 
   updateItem: (id, updates) => set((state) => ({
     items: state.items.map(item =>
-      item.id === id ? { ...item, ...updates } : item
+      item.id === id ? { ...item, ...updates } as FileSystemItem : item
     )
   })),
 
