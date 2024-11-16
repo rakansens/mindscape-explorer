@@ -4,6 +4,8 @@ import { applyNodeChanges, applyEdgeChanges } from 'reactflow';
 import { nanoid } from 'nanoid';
 import { ModelConfig } from '../types/models';
 import { NodeData } from '../types/node';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const initialNodes: Node<NodeData>[] = [
   {
@@ -34,6 +36,13 @@ interface MindMapStore {
   addNode: (parentNode: Node<NodeData>, label: string, position?: { x: number; y: number }, additionalData?: Partial<NodeData>) => Node<NodeData>;
   updateNode: (id: string, updates: Partial<NodeData>) => void;
   removeChildNodes: (nodeId: string) => void;
+  // Add missing methods to interface
+  saveMap: () => void;
+  loadMap: () => void;
+  exportAsImage: () => Promise<void>;
+  exportAsPDF: () => Promise<void>;
+  exportAsJSON: () => void;
+  importFromJSON: (jsonContent: string) => void;
 }
 
 export const useMindMapStore = create<MindMapStore>((set, get) => ({
@@ -152,6 +161,73 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
         edges: state.edges.filter(edge => !childIds.has(edge.target))
       };
     });
+  },
+
+  saveMap: () => {
+    const { nodes, edges } = get();
+    localStorage.setItem('mindmap', JSON.stringify({ nodes, edges }));
+  },
+
+  loadMap: () => {
+    const savedData = localStorage.getItem('mindmap');
+    if (savedData) {
+      const { nodes, edges } = JSON.parse(savedData);
+      set({ nodes, edges });
+    }
+  },
+
+  exportAsImage: async () => {
+    const element = document.querySelector('.react-flow') as HTMLElement;
+    if (!element) return;
+
+    const canvas = await html2canvas(element);
+    const dataUrl = canvas.toDataURL('image/png');
+    
+    const link = document.createElement('a');
+    link.download = 'mindmap.png';
+    link.href = dataUrl;
+    link.click();
+  },
+
+  exportAsPDF: async () => {
+    const element = document.querySelector('.react-flow') as HTMLElement;
+    if (!element) return;
+
+    const canvas = await html2canvas(element);
+    const imgData = canvas.toDataURL('image/png');
+    
+    const pdf = new jsPDF({
+      orientation: 'landscape',
+      unit: 'px',
+      format: [canvas.width, canvas.height]
+    });
+    
+    pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+    pdf.save('mindmap.pdf');
+  },
+
+  exportAsJSON: () => {
+    const { nodes, edges } = get();
+    const data = JSON.stringify({ nodes, edges }, null, 2);
+    
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.download = 'mindmap.json';
+    link.href = url;
+    link.click();
+    
+    URL.revokeObjectURL(url);
+  },
+
+  importFromJSON: (jsonContent: string) => {
+    try {
+      const { nodes, edges } = JSON.parse(jsonContent);
+      set({ nodes, edges });
+    } catch (error) {
+      console.error('Failed to parse JSON:', error);
+    }
   },
 
   setModelConfig: (config) => set({ modelConfig: config }),
