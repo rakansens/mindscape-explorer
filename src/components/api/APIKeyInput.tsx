@@ -51,7 +51,7 @@ export const APIKeyInput: React.FC<APIKeyInputProps> = ({ onSubmit }) => {
         />
       </div>
 
-      <div className="flex justify-end pt-2">
+      <div className="flex justify-end pt-4">
         <Button type="submit">
           設定を保存
         </Button>

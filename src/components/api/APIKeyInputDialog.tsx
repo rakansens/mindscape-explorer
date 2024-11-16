@@ -2,9 +2,9 @@ import React from 'react';
 import { APIKeyInput } from './APIKeyInput';
 import { useToast } from '@/hooks/use-toast';
 import { ModelType } from '@/types/models';
+import { useApiKeyStore } from '@/store/apiKeyStore';
 import { X } from 'lucide-react';
 import { Button } from '../ui/button';
-import { useApiKeyStore } from '@/store/apiKeyStore';
 
 interface APIKeyInputDialogProps {
   onSubmit: (config: { 
@@ -38,19 +38,21 @@ export const APIKeyInputDialog: React.FC<APIKeyInputDialogProps> = ({ onSubmit, 
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center">
-      <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-t-xl sm:rounded-xl p-4 shadow-lg">
-        <div className="relative">
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+        <div className="relative p-6">
           <Button
             variant="ghost"
             size="icon"
-            className="absolute right-0 top-0"
+            className="absolute right-4 top-4"
             onClick={onClose}
           >
             <X className="h-4 w-4" />
           </Button>
-          <h2 className="text-lg font-semibold mb-4">APIキー設定</h2>
-          <APIKeyInput onSubmit={handleSubmit} />
+          <div className="pr-8">
+            <h2 className="text-lg font-semibold mb-4">APIキー設定</h2>
+            <APIKeyInput onSubmit={handleSubmit} />
+          </div>
         </div>
       </div>
     </div>
