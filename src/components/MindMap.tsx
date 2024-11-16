@@ -1,17 +1,17 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import ReactFlow, { 
   Background, 
   Controls, 
   MiniMap,
   applyNodeChanges, 
   applyEdgeChanges,
-  ReactFlowProvider 
 } from 'reactflow';
 import { useMindMapStore } from '../store/mindMapStore';
 import { useFileStore } from '../store/fileStore';
 import { useViewStore } from '../store/viewStore';
 import CustomNode from './CustomNode';
 import CustomEdge from './CustomEdge';
+import { applyForceLayout } from '../utils/forceLayout';
 import 'reactflow/dist/style.css';
 
 const nodeTypes = {
@@ -26,6 +26,7 @@ export const MindMap = () => {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect, updateNodes, updateEdges } = useMindMapStore();
   const { activeFileId, items } = useFileStore();
   const { theme, showMinimap } = useViewStore();
+  const simulationRef = useRef<any>(null);
 
   useEffect(() => {
     if (activeFileId) {
@@ -36,6 +37,24 @@ export const MindMap = () => {
       }
     }
   }, [activeFileId]);
+
+  useEffect(() => {
+    if (nodes.length > 0 && !simulationRef.current) {
+      simulationRef.current = applyForceLayout(
+        nodes,
+        edges,
+        window.innerWidth,
+        window.innerHeight,
+        updateNodes
+      );
+    }
+
+    return () => {
+      if (simulationRef.current) {
+        simulationRef.current.stop();
+      }
+    };
+  }, [nodes.length, edges.length]);
 
   return (
     <div className={`w-full h-full ${theme}`}>
