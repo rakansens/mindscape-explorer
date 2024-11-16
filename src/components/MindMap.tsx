@@ -12,6 +12,7 @@ import { useViewStore } from '../store/viewStore';
 import CustomNode from './CustomNode';
 import CustomEdge from './CustomEdge';
 import { applyForceLayout } from '../utils/forceLayout';
+import { getLayoutedElements } from '../utils/layoutUtils';
 import 'reactflow/dist/style.css';
 
 const nodeTypes = {
@@ -32,8 +33,20 @@ export const MindMap = () => {
     if (activeFileId) {
       const activeFile = items.find(item => item.id === activeFileId && item.type === 'file');
       if (activeFile && 'data' in activeFile) {
-        updateNodes(activeFile.data.nodes);
-        updateEdges(activeFile.data.edges);
+        // ファイルが読み込まれたときに階層レイアウトを適用
+        const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+          activeFile.data.nodes,
+          activeFile.data.edges,
+          {
+            direction: 'TB',
+            nodeWidth: 200,
+            nodeHeight: 100,
+            rankSpacing: 200,
+            nodeSpacing: 100,
+          }
+        );
+        updateNodes(layoutedNodes);
+        updateEdges(layoutedEdges);
       }
     }
   }, [activeFileId]);
