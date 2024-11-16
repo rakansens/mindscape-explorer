@@ -3,8 +3,6 @@ import ReactFlow, {
   Background, 
   Controls, 
   MiniMap,
-  applyNodeChanges, 
-  applyEdgeChanges,
 } from 'reactflow';
 import { useMindMapStore } from '../store/mindMapStore';
 import { useLayoutStore } from '../store/layoutStore';
@@ -12,7 +10,6 @@ import { useFileStore } from '../store/fileStore';
 import { useViewStore } from '../store/viewStore';
 import CustomNode from './CustomNode';
 import CustomEdge from './CustomEdge';
-import { ViewControls } from './ViewControls';
 import 'reactflow/dist/style.css';
 
 const nodeTypes = {
@@ -38,10 +35,22 @@ export const MindMap = () => {
         window.innerWidth,
         window.innerHeight
       );
-      updateNodes(layoutedNodes);
-      updateEdges(layoutedEdges);
+      
+      // Check if positions actually changed to prevent unnecessary updates
+      const positionsChanged = layoutedNodes.some((newNode, index) => {
+        const oldNode = nodes[index];
+        return (
+          newNode.position.x !== oldNode.position.x ||
+          newNode.position.y !== oldNode.position.y
+        );
+      });
+
+      if (positionsChanged) {
+        updateNodes(layoutedNodes);
+        updateEdges(layoutedEdges);
+      }
     }
-  }, [layout.type, nodes, edges, applyLayout, updateNodes, updateEdges]);
+  }, [layout.type]); // Only re-run when layout type changes
 
   // ファイル変更時のレイアウト適用
   useEffect(() => {
@@ -58,7 +67,7 @@ export const MindMap = () => {
         updateEdges(layoutedEdges);
       }
     }
-  }, [activeFileId, items, applyLayout, updateNodes, updateEdges]);
+  }, [activeFileId, items]); // Only re-run when file changes
 
   return (
     <div className={`w-full h-full ${theme} relative`}>
