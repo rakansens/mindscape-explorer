@@ -10,6 +10,47 @@ interface LayoutOptions {
   nodeSpacing?: number;
 }
 
+// エッジの接続点を最適化する関数
+const optimizeEdgeHandles = (nodes: Node<NodeData>[], edges: Edge[]) => {
+  return edges.map(edge => {
+    const sourceNode = nodes.find(n => n.id === edge.source);
+    const targetNode = nodes.find(n => n.id === edge.target);
+    
+    if (!sourceNode || !targetNode) return edge;
+
+    const dx = targetNode.position.x - sourceNode.position.x;
+    const dy = targetNode.position.y - sourceNode.position.y;
+
+    let sourceHandle, targetHandle;
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+      // 水平方向の接続
+      if (dx > 0) {
+        sourceHandle = 'right';
+        targetHandle = 'left';
+      } else {
+        sourceHandle = 'left';
+        targetHandle = 'right';
+      }
+    } else {
+      // 垂直方向の接続
+      if (dy > 0) {
+        sourceHandle = 'bottom';
+        targetHandle = 'top';
+      } else {
+        sourceHandle = 'top';
+        targetHandle = 'bottom';
+      }
+    }
+
+    return {
+      ...edge,
+      sourceHandle,
+      targetHandle,
+    };
+  });
+};
+
 // 円形レイアウトの実装
 const getCircleLayout = (
   nodes: Node<NodeData>[],
@@ -32,7 +73,10 @@ const getCircleLayout = (
     };
   });
 
-  return { nodes: layoutedNodes, edges };
+  // エッジの最適化を適用
+  const optimizedEdges = optimizeEdgeHandles(layoutedNodes, edges);
+
+  return { nodes: layoutedNodes, edges: optimizedEdges };
 };
 
 // 直交レイアウトの実装
@@ -77,50 +121,13 @@ const getOrthogonalLayout = (
     };
   });
 
-  return { nodes: layoutedNodes, edges };
+  // エッジの最適化を適用
+  const optimizedEdges = optimizeEdgeHandles(layoutedNodes, edges);
+
+  return { nodes: layoutedNodes, edges: optimizedEdges };
 };
 
-// エッジの接続点を最適化する関数を追加
-const optimizeEdgeHandles = (nodes: Node<NodeData>[], edges: Edge[]) => {
-  return edges.map(edge => {
-    const sourceNode = nodes.find(n => n.id === edge.source);
-    const targetNode = nodes.find(n => n.id === edge.target);
-    
-    if (!sourceNode || !targetNode) return edge;
-
-    const dx = targetNode.position.x - sourceNode.position.x;
-    const dy = targetNode.position.y - sourceNode.position.y;
-
-    let sourceHandle, targetHandle;
-
-    if (Math.abs(dx) > Math.abs(dy)) {
-      // 水平方向の接続
-      if (dx > 0) {
-        sourceHandle = 'right';
-        targetHandle = 'left';
-      } else {
-        sourceHandle = 'left';
-        targetHandle = 'right';
-      }
-    } else {
-      // 垂直方向の接続
-      if (dy > 0) {
-        sourceHandle = 'bottom';
-        targetHandle = 'top';
-      } else {
-        sourceHandle = 'top';
-        targetHandle = 'bottom';
-      }
-    }
-
-    return {
-      ...edge,
-      sourceHandle,
-      targetHandle,
-    };
-  });
-};
-
+// 標準レイアウト
 export const getLayoutedElements = (
   nodes: Node<NodeData>[],
   edges: Edge[],
@@ -171,7 +178,7 @@ export const getLayoutedElements = (
     };
   });
 
-  // レイアウト適用後にエッジの接続点を最適化
+  // エッジの最適化を適用
   const optimizedEdges = optimizeEdgeHandles(layoutedNodes, edges);
 
   return { 
