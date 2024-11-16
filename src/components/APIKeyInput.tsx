@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ModelType } from '../types/models';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Select } from './ui/select';
+import { useApiKeyStore } from '../store/apiKeyStore';
 
 interface APIKeyInputProps {
   onSubmit: (config: { 
     type: ModelType;
     apiKey: string;
-    geminiKey?: string;  // Gemini用のAPIキーを追加
+    geminiKey?: string;
   }) => void;
 }
 
@@ -16,13 +17,27 @@ export const APIKeyInput: React.FC<APIKeyInputProps> = ({ onSubmit }) => {
   const [selectedModel, setSelectedModel] = useState<ModelType>('GPT3.5');
   const [openaiKey, setOpenaiKey] = useState('');
   const [geminiKey, setGeminiKey] = useState('');
+  const { setOpenAIKey, setGeminiKey: setGeminiKeyStore } = useApiKeyStore();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (selectedModel.includes('GEMINI')) {
+      setGeminiKeyStore(geminiKey);
+    } else {
+      setOpenAIKey(openaiKey);
+    }
+
     onSubmit({
       type: selectedModel,
       apiKey: openaiKey,
       geminiKey: geminiKey
+    });
+
+    console.log('API Key submitted:', {
+      model: selectedModel,
+      hasOpenAIKey: !!openaiKey,
+      hasGeminiKey: !!geminiKey
     });
   };
 
