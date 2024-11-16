@@ -15,7 +15,7 @@ import { cn } from '../../lib/utils';
 import { SaveConfirmDialog } from '../dialog/SaveConfirmDialog';
 
 export const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false); // 初期値をfalseに変更
   const [showAPIKeyInput, setShowAPIKeyInput] = useState(false);
   const { theme } = useViewStore();
   const { apiKey } = useOpenAI();
