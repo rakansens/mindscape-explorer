@@ -1,5 +1,5 @@
 import React from 'react';
-import { EdgeProps, getBezierPath, getSmoothStepPath, getEdgeCenter } from 'reactflow';
+import { EdgeProps, getBezierPath, getSmoothStepPath } from 'reactflow';
 import { useViewStore } from '../store/viewStore';
 
 interface CustomEdgeProps extends EdgeProps {
