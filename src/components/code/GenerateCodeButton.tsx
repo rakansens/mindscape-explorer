@@ -25,31 +25,27 @@ export const GenerateCodeButton: React.FC<GenerateCodeButtonProps> = ({
       const parentNode = nodes.find(n => n.id === nodeId);
       if (!parentNode) return;
 
-      // LPの各セクションを定義
-      const lpSections = [
-        { label: 'ヘッダー', description: 'ナビゲーションとヒーローセクション' },
-        { label: '特徴・メリット', description: '主要な特徴や利点の説明' },
-        { label: '商品・サービス詳細', description: '提供内容の詳細説明' },
-        { label: '実績・事例', description: '導入事例や成功事例' },
-        { label: 'プラン・料金', description: '価格プランの説明' },
-        { label: 'お問い合わせ', description: 'コンタクトフォーム' },
-        { label: 'フッター', description: '会社情報とリンク' }
+      // トピックに基づいて生成するコードの種類を定義
+      const codeTypes = [
+        { label: 'コンポーネント', description: 'Reactコンポーネントの実装' },
+        { label: 'スタイル', description: 'スタイリングとアニメーション' },
+        { label: 'ユーティリティ', description: 'ヘルパー関数と型定義' },
+        { label: 'テスト', description: 'ユニットテストとE2Eテスト' }
       ];
 
-      // 各セクションに対してノードを生成
-      for (let i = 0; i < lpSections.length; i++) {
-        const section = lpSections[i];
+      // 各コードタイプに対してノードを生成
+      for (let i = 0; i < codeTypes.length; i++) {
+        const type = codeTypes[i];
         const prompt = `
-以下のセクションのHTML、CSS、JavaScriptコードを生成してください：
-親ノード: ${parentNode.data.label}
-セクション: ${section.label}
-説明: ${section.description}
+以下のトピックに関連する${type.label}のコードを生成してください：
+トピック: ${parentNode.data.label}
+説明: ${type.description}
 
 コードは実用的でシンプルなものにしてください。
 `;
         
         // 新しい位置を計算（円形に配置）
-        const angle = (2 * Math.PI * i) / lpSections.length;
+        const angle = (2 * Math.PI * i) / codeTypes.length;
         const radius = 300; // 円の半径
         const position = {
           x: parentNode.position.x + radius * Math.cos(angle),
@@ -65,15 +61,15 @@ export const GenerateCodeButton: React.FC<GenerateCodeButtonProps> = ({
           };
 
           // コード内容を整形
-          const codeContent = `${section.description}\n\nHTML:\n${codes.html}\n\nCSS:\n${codes.css}\n\nJavaScript:\n${codes.javascript}`;
+          const codeContent = `${type.description}\n\nHTML:\n${codes.html}\n\nCSS:\n${codes.css}\n\nJavaScript:\n${codes.javascript}`;
           
           // 新しいノードを追加
-          addNode(parentNode, section.label, position, {
+          addNode(parentNode, `${parentNode.data.label}の${type.label}`, position, {
             detailedText: codeContent,
             isCode: true
           });
         } catch (error) {
-          console.error(`Error generating code for ${section.label}:`, error);
+          console.error(`Error generating code for ${type.label}:`, error);
           // エラーが発生しても続行
           continue;
         }
@@ -81,7 +77,7 @@ export const GenerateCodeButton: React.FC<GenerateCodeButtonProps> = ({
 
       toast({
         title: "コード生成完了",
-        description: "LPの各セクションのコードが生成されました",
+        description: "関連するコードノードが生成されました",
       });
 
     } catch (error) {
