@@ -1,132 +1,38 @@
 import React, { useState } from 'react';
 import { useFileStore } from '../../store/fileStore';
-import { Button } from '../ui/button';
-import { 
-  FilePlus, 
-  ChevronLeft, 
-  ChevronRight, 
-  Save, 
-  Pencil, 
-  Trash2, 
-  Check, 
-  X,
-  FolderOpen,
-  File,
-  Plus,
-  MoreVertical,
-  FolderPlus,
-  ChevronDown,
-  ChevronRight as ChevronRightIcon,
-} from 'lucide-react';
+import { Settings2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { formatDate } from '../../utils/dateUtils';
+import { Button } from '../ui/button';
 import { SaveConfirmDialog } from '../dialog/SaveConfirmDialog';
 import { useToast } from '../../hooks/use-toast';
 import { useMindMapStore } from '../../store/mindMapStore';
 import { useViewStore } from '../../store/viewStore';
 import { generateId } from '../../utils/idUtils';
-import { sleep } from '../../utils/animationUtils';
-import { MindMapFile, Folder, FileSystemItem } from '../../types/file';
-import { Input } from '../ui/input';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "../ui/tooltip";
-import { ScrollArea } from "../ui/scroll-area";
-import { Separator } from "../ui/separator";
+import { MindMapFile } from '../../types/file';
 import { SidebarHeader } from './SidebarHeader';
+import { SidebarContent } from './SidebarContent';
 import { SidebarFooter } from './SidebarFooter';
-import { FileTreeItem } from './FileTreeItem';
+import { SidebarToggle } from './SidebarToggle';
+import { APIKeyInputDialog } from '../api/APIKeyInputDialog';
+import { useOpenAI } from '../../store/openAIStore';
 
 export const Sidebar = () => {
-  const [isOpen, setIsOpen] = React.useState(true);
-  const { items, activeFileId, addFile, addFolder, removeItem, setActiveFile, updateItem, getChildren } = useFileStore();
-  const files = items.filter(item => item.type === 'file') as MindMapFile[];
+  const [isOpen, setIsOpen] = useState(true);
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'save' | 'new'>('save');
-  const { nodes, edges, updateNodes, updateEdges } = useMindMapStore();
-  const { fitView } = useViewStore();
-  const { toast } = useToast();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+  const [showAPIKeyInput, setShowAPIKeyInput] = useState(false);
 
-  const getMainNodeLabel = () => {
-    const mainNode = nodes.find(n => n.id === '1');
-    return mainNode?.data.label || '無題のマインドマップ';
-  };
-
-  const createNewFile = async (title?: string) => {
-    // 一旦ノードをクリア
-    updateNodes([]);
-    updateEdges([]);
-    await sleep(300);
-
-    // 新しいノードを作成
-    const newNode = {
-      id: '1',
-      type: 'custom',
-      position: { x: window.innerWidth / 2 - 75, y: window.innerHeight / 3 },
-      data: { 
-        label: 'メインテーマ',
-        isGenerating: true,
-        isAppearing: true
-      }
-    };
-
-    updateNodes([newNode]);
-    await sleep(500);
-
-    const finalNode = {
-      ...newNode,
-      data: {
-        ...newNode.data,
-        isGenerating: false,
-        isAppearing: false
-      }
-    };
-
-    updateNodes([finalNode]);
-
-    // 新規ファイルを作成して一覧に追加
-    const newFile: MindMapFile = {
-      id: generateId(),
-      title: title || '無題のマインドマップ',
-      type: 'file',
-      parentId: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      data: {
-        nodes: [finalNode],
-        edges: []
-      }
-    };
-    
-    addFile(newFile);
-    fitView();
-
-    toast({
-      title: "新規作成",
-      description: "新しいマインドマップを作成しました",
-    });
-  };
-
-  const handleNewFile = () => {
-    // 新規作成時は常にタイトル入力モーダルを表示
-    setDialogMode('new');
-    setIsSaveDialogOpen(true);
-  };
+  const { items, activeFileId, addFile, addFolder, removeItem, setActiveFile, updateItem, getChildren } = useFileStore();
+  const { nodes, edges, updateNodes, updateEdges } = useMindMapStore();
+  const { fitView } = useViewStore();
+  const { toast } = useToast();
+  const { apiKey, setApiKey } = useOpenAI();
 
   const handleSaveDialog = (title: string) => {
     if (dialogMode === 'save') {
-      // 通常の保存処理
       const newFile: MindMapFile = {
         id: generateId(),
         title,
@@ -142,20 +48,17 @@ export const Sidebar = () => {
         description: "マインドマップを保存しました",
       });
     } else {
-      // 新規作成処理
       createNewFile(title);
     }
     setIsSaveDialogOpen(false);
   };
 
   const handleDialogClose = () => {
-    // モーダルを閉じるだけで、新規作成は行わない
     setIsSaveDialogOpen(false);
   };
 
   const handleSave = () => {
     if (activeFileId) {
-      // アクティブなファイルが存在する場合は直接上書き保存
       updateItem(activeFileId, {
         data: { nodes, edges },
         updatedAt: new Date()
@@ -165,7 +68,6 @@ export const Sidebar = () => {
         description: "マインドマップを保存しました",
       });
     } else {
-      // 新規ファイルの場合は保存ダイアログを表示
       setDialogMode('save');
       setIsSaveDialogOpen(true);
     }
@@ -194,7 +96,7 @@ export const Sidebar = () => {
   };
 
   const handleCreateFolder = () => {
-    const newFolder: Folder = {
+    const newFolder = {
       id: generateId(),
       title: '新しいフォルダ',
       type: 'folder',
@@ -219,48 +121,6 @@ export const Sidebar = () => {
     });
   };
 
-  const renderFileSystemItem = (item: FileSystemItem, level: number = 0) => {
-    const isFolder = item.type === 'folder';
-    const isExpanded = expandedFolders.has(item.id);
-    const children = getChildren(item.id);
-
-    return (
-      <div key={item.id}>
-        <FileTreeItem
-          item={item}
-          level={level}
-          isExpanded={isExpanded}
-          isActive={activeFileId === item.id}
-          isEditing={editingId === item.id}
-          editingTitle={editingTitle}
-          onToggle={() => toggleFolder(item.id)}
-          onSelect={() => {
-            if (isFolder) {
-              toggleFolder(item.id);
-            } else {
-              setActiveFile(item.id);
-              updateNodes((item as MindMapFile).data.nodes);
-              updateEdges((item as MindMapFile).data.edges);
-            }
-          }}
-          onEdit={(e) => handleEdit(item.id, item.title, e)}
-          onSaveTitle={(e) => handleSaveTitle(item.id, e)}
-          onCancelEdit={(e) => {
-            e.stopPropagation();
-            setEditingId(null);
-          }}
-          onDelete={(e) => handleDelete(item.id, e)}
-          onTitleChange={(value) => setEditingTitle(value)}
-        />
-        {isFolder && isExpanded && children.length > 0 && (
-          <div className="ml-4">
-            {children.map(child => renderFileSystemItem(child, level + 1))}
-          </div>
-        )}
-      </div>
-    );
-  };
-
   return (
     <>
       <div
@@ -269,49 +129,49 @@ export const Sidebar = () => {
           isOpen ? "w-72" : "w-0"
         )}
       >
-        {/* トグルボタン */}
-        <div 
-          className={cn(
-            "absolute -right-8 top-1/2 -translate-y-1/2 transition-all duration-300",
-            !isOpen && "translate-x-2"
-          )}
-        >
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsOpen(!isOpen)}
-            className={cn(
-              "h-8 w-8 rounded-full p-0 border shadow-md",
-              "hover:bg-accent hover:translate-x-0.5 transition-all",
-              "flex items-center justify-center",
-              !isOpen && "bg-background hover:bg-accent/80"
-            )}
-            aria-label={isOpen ? "サイドバーを閉じる" : "サイドバーを開く"}
-          >
-            {isOpen ? (
-              <ChevronLeft className="h-4 w-4" />
-            ) : (
-              <ChevronRight className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
+        <SidebarToggle isOpen={isOpen} onToggle={() => setIsOpen(!isOpen)} />
 
-        {/* サイドバーコンテンツ */}
         <div className={cn(
           "h-full flex flex-col transition-all duration-300",
           isOpen ? "opacity-100 visible" : "opacity-0 invisible"
         )}>
           <SidebarHeader
             onCreateFolder={handleCreateFolder}
-            onCreateFile={handleNewFile}
+            onCreateFile={() => {
+              setDialogMode('new');
+              setIsSaveDialogOpen(true);
+            }}
           />
 
-          {/* ファイル一覧 */}
-          <ScrollArea className="flex-1">
-            <div className="p-2 space-y-1">
-              {getChildren(null).map(item => renderFileSystemItem(item))}
-            </div>
-          </ScrollArea>
+          {/* Settings Button */}
+          {!apiKey && (
+            <Button
+              onClick={() => setShowAPIKeyInput(true)}
+              className="mx-4 mt-2 mb-4 flex items-center gap-2 bg-blue-500 text-white hover:bg-blue-600"
+            >
+              <Settings2 className="w-4 h-4" />
+              <span>APIキーを設定</span>
+            </Button>
+          )}
+
+          <SidebarContent
+            items={items}
+            activeFileId={activeFileId}
+            editingId={editingId}
+            editingTitle={editingTitle}
+            expandedFolders={expandedFolders}
+            onSelect={setActiveFile}
+            onToggle={toggleFolder}
+            onEdit={handleEdit}
+            onSaveTitle={handleSaveTitle}
+            onCancelEdit={(e) => {
+              e.stopPropagation();
+              setEditingId(null);
+            }}
+            onDelete={handleDelete}
+            onTitleChange={(value) => setEditingTitle(value)}
+            getChildren={getChildren}
+          />
 
           <SidebarFooter onSave={handleSave} />
         </div>
@@ -324,6 +184,20 @@ export const Sidebar = () => {
         mode={dialogMode}
         defaultTitle={getMainNodeLabel()}
       />
+
+      {showAPIKeyInput && (
+        <APIKeyInputDialog
+          onSubmit={(apiKey) => {
+            setApiKey(apiKey);
+            setShowAPIKeyInput(false);
+            toast({
+              title: "設定完了",
+              description: "APIキーを設定しました",
+            });
+          }}
+          onClose={() => setShowAPIKeyInput(false)}
+        />
+      )}
     </>
   );
-}; 
+};
