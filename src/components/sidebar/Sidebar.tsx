@@ -8,13 +8,14 @@ import { useToast } from '../../hooks/use-toast';
 import { useMindMapStore } from '../../store/mindMapStore';
 import { useViewStore } from '../../store/viewStore';
 import { generateId } from '../../utils/idUtils';
-import { MindMapFile } from '../../types/file';
+import { MindMapFile, Folder } from '../../types/file';
 import { SidebarHeader } from './SidebarHeader';
 import { SidebarContent } from './SidebarContent';
 import { SidebarFooter } from './SidebarFooter';
 import { SidebarToggle } from './SidebarToggle';
 import { APIKeyInputDialog } from '../api/APIKeyInputDialog';
 import { useOpenAI } from '../../store/openAIStore';
+import { createNewFile, getMainNodeLabel } from '../../utils/fileUtils';
 
 export const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -48,9 +49,25 @@ export const Sidebar = () => {
         description: "マインドマップを保存しました",
       });
     } else {
-      createNewFile(title);
+      const newFile = createNewFile(title);
+      addFile(newFile);
+      setActiveFile(newFile.id);
     }
     setIsSaveDialogOpen(false);
+  };
+
+  const handleCreateFolder = () => {
+    const newFolder: Folder = {
+      id: generateId(),
+      title: '新しいフォルダ',
+      type: 'folder',
+      parentId: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    addFolder(newFolder);
+    setEditingId(newFolder.id);
+    setEditingTitle(newFolder.title);
   };
 
   const handleDialogClose = () => {
@@ -95,20 +112,6 @@ export const Sidebar = () => {
     }
   };
 
-  const handleCreateFolder = () => {
-    const newFolder = {
-      id: generateId(),
-      title: '新しいフォルダ',
-      type: 'folder',
-      parentId: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    addFolder(newFolder);
-    setEditingId(newFolder.id);
-    setEditingTitle(newFolder.title);
-  };
-
   const toggleFolder = (folderId: string) => {
     setExpandedFolders(prev => {
       const next = new Set(prev);
@@ -143,7 +146,6 @@ export const Sidebar = () => {
             }}
           />
 
-          {/* Settings Button */}
           {!apiKey && (
             <Button
               onClick={() => setShowAPIKeyInput(true)}
@@ -195,7 +197,6 @@ export const Sidebar = () => {
               description: "APIキーを設定しました",
             });
           }}
-          onClose={() => setShowAPIKeyInput(false)}
         />
       )}
     </>
