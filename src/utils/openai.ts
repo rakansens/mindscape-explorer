@@ -1,10 +1,44 @@
 import { create } from 'zustand';
 import { TopicTree, GenerateOptions } from '../types/openai';
 import { getMindMapPrompt } from './prompts/mindMapPrompts';
-import { OpenAI } from 'openai';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { useMindMapStore } from '../store/mindMapStore';
+import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { useApiKeyStore } from '../store/apiKeyStore';
+
+// Add the missing generateWithAI function
+export const generateWithAI = async (prompt: string) => {
+  const { openaiKey } = useApiKeyStore.getState();
+  
+  if (!openaiKey) {
+    throw new Error('OpenAI API key not found');
+  }
+
+  const openai = new OpenAI({
+    apiKey: openaiKey,
+    dangerouslyAllowBrowser: true
+  });
+
+  const response = await openai.chat.completions.create({
+    model: 'gpt-3.5-turbo',
+    messages: [
+      {
+        role: "system",
+        content: "You are a helpful assistant that generates code based on descriptions."
+      },
+      {
+        role: "user",
+        content: prompt
+      }
+    ],
+    temperature: 0.7,
+  });
+
+  const content = response.choices[0]?.message?.content;
+  if (!content) throw new Error('No content generated');
+
+  return content;
+};
 
 interface OpenAIStore {
   apiKey: string | null;
