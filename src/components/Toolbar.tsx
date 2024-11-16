@@ -5,7 +5,8 @@ import { JsonButtons } from './toolbar/JsonButtons';
 import { ModelSelector } from './toolbar/ModelSelector';
 import { Tooltip } from './Tooltip';
 import { BulkGeneratorForm } from './ai/BulkGeneratorForm';
-import { Sparkles } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
+import { Button } from './ui/button';
 
 export const Toolbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -57,12 +58,13 @@ export const Toolbar: React.FC = () => {
           <JsonButtons />
           <div className="w-px h-8 bg-blue-100/50" />
           <Tooltip text="一括生成" position="bottom">
-            <button
+            <Button
               onClick={() => setShowBulkGenerator(true)}
-              className="p-2 rounded-lg hover:bg-blue-100/50 text-blue-500 transition-colors"
+              className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600"
             >
-              <Sparkles className="w-5 h-5" />
-            </button>
+              <PlusCircle className="w-4 h-4" />
+              <span>一括生成</span>
+            </Button>
           </Tooltip>
         </div>
       </div>
