@@ -27,6 +27,9 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
 
   // ハンドルの位置を決定する関数を最適化
   const getHandlePositions = () => {
+    const dx = targetX - sourceX;
+    const dy = targetY - sourceY;
+    
     // 既存のハンドルIDがある場合は、それを優先して使用
     if (sourceHandle && targetHandle) {
       return {
@@ -41,16 +44,13 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
       };
     }
 
-    // ハンドルIDがない場合は、相対位置から最適な位置を計算
-    const dx = Math.abs(targetX - sourceX);
-    const dy = Math.abs(targetY - sourceY);
-    
-    if (dx > dy) {
-      return targetX > sourceX 
+    // 相対位置から最適な位置を計算
+    if (Math.abs(dx) > Math.abs(dy)) {
+      return dx > 0 
         ? { sourcePos: Position.Right, targetPos: Position.Left }
         : { sourcePos: Position.Left, targetPos: Position.Right };
     } else {
-      return targetY > sourceY
+      return dy > 0
         ? { sourcePos: Position.Bottom, targetPos: Position.Top }
         : { sourcePos: Position.Top, targetPos: Position.Bottom };
     }

@@ -36,20 +36,20 @@ export const MindMap = () => {
         window.innerHeight
       );
 
-      // エッジの接続情報を保持したまま更新
+      // エッジの接続情報とスタイルを保持したまま更新
       const updatedEdges = edges.map(originalEdge => {
         const layoutedEdge = layoutedEdges.find(e => e.id === originalEdge.id);
         if (!layoutedEdge) return originalEdge;
         
         return {
+          ...originalEdge,
           ...layoutedEdge,
-          sourceHandle: originalEdge.sourceHandle,
-          targetHandle: originalEdge.targetHandle,
+          style: originalEdge.style,
+          animated: originalEdge.animated,
           type: originalEdge.type,
         };
       });
 
-      // ノードの更新を実行
       updateNodes(layoutedNodes);
       updateEdges(updatedEdges);
     }
