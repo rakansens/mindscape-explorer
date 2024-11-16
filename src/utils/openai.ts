@@ -7,10 +7,19 @@ import { useMindMapStore } from '../store/mindMapStore';
 import { useApiKeyStore } from '../store/apiKeyStore';
 
 interface OpenAIStore {
+  apiKey: string | null;
+  geminiKey: string | null;
+  setApiKey: (key: string) => void;
+  setGeminiKey: (key: string) => void;
   generateSubTopics: (topic: string, options?: GenerateOptions) => Promise<TopicTree>;
+  generateCode: (nodeId: string) => Promise<{ html?: string; css?: string; javascript?: string }>;
 }
 
-export const useOpenAI = create<OpenAIStore>(() => ({
+export const useOpenAI = create<OpenAIStore>((set) => ({
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY || null,
+  geminiKey: import.meta.env.VITE_GEMINI_API_KEY || null,
+  setApiKey: (key: string) => set({ apiKey: key }),
+  setGeminiKey: (key: string) => set({ geminiKey: key }),
   generateSubTopics: async (topic: string, options?: GenerateOptions) => {
     const { modelConfig } = useMindMapStore.getState();
     const { openaiKey, geminiKey } = useApiKeyStore.getState();
@@ -112,7 +121,34 @@ export const useOpenAI = create<OpenAIStore>(() => ({
       console.error('Error generating topics:', error);
       throw error;
     }
+  },
+
+  generateCode: async (nodeId: string) => {
+    const { nodes } = useMindMapStore.getState();
+    const node = nodes.find(n => n.id === nodeId);
+    if (!node) throw new Error('Node not found');
+
+    const prompt = `
+以下のトピックに関連するHTML、CSS、JavaScriptのコードを生成してください。
+できるだけシンプルで実用的なコードを生成してください。
+
+トピック: "${node.data.label}"
+
+応答は必ず以下の形式の有効なJSONのみを返してください：
+
+{
+  "html": "HTMLコード",
+  "css": "CSSコード",
+  "javascript": "JavaScriptコード"
+}
+`;
+
+    try {
+      const response = await generateWithAI(prompt);
+      return JSON.parse(response);
+    } catch (error) {
+      console.error('Error generating code:', error);
+      throw error;
+    }
   }
 }));
-
-export type { TopicTree, GenerateOptions };
