@@ -112,7 +112,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
           getNodeThemeStyle(level, theme),
           data.selected ? "ring-2 ring-primary" : "",
           data.isGenerating ? "animate-pulse scale-105" : "",
-          "hover:shadow-xl transition-all duration-300 transform"
+          "hover:shadow-xl transition-all duration-300 transform relative"
         )}
         onMouseEnter={() => setIsHoveringNode(true)}
         onMouseLeave={() => setIsHoveringNode(false)}
@@ -129,8 +129,18 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
         onKeyDown={handleKeyDown}
         tabIndex={0}
       >
-        <Handle type="target" position={Position.Left} className="w-2 h-2 bg-primary/50" />
-        <Handle type="source" position={Position.Right} className="w-2 h-2 bg-primary/50" />
+        <Handle
+          type="target"
+          position={Position.Left}
+          className="!w-3 !h-3 !bg-primary/50 !border-2 !border-background"
+          style={{ top: '50%' }}
+        />
+        <Handle
+          type="source"
+          position={Position.Right}
+          className="!w-3 !h-3 !bg-primary/50 !border-2 !border-background"
+          style={{ top: '50%' }}
+        />
         
         <NodeContent
           id={id}
