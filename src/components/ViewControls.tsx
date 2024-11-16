@@ -1,11 +1,13 @@
+import React from 'react';
 import { useViewStore } from '../store/viewStore';
 import { useLayoutStore } from '../store/layoutStore';
 import { Button } from './ui/button';
-import { Map, Layout } from 'lucide-react';
+import { Map, Layout, GitBranch, Waves, ArrowRight, Grid, Bold, Italic } from 'lucide-react';
 import { Tooltip } from './Tooltip';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { EdgeStyleMenu } from './controls/EdgeStyleMenu';
 import { ThemeMenu } from './controls/ThemeMenu';
+import { LayoutType } from '../types/layout';
 
 export const ViewControls = () => {
   const {
@@ -21,7 +23,7 @@ export const ViewControls = () => {
 
   const { layout, setLayout } = useLayoutStore();
 
-  const layouts = [
+  const layouts: { id: LayoutType; label: string; icon: string }[] = [
     { id: 'horizontal', label: '右方向レイアウト', icon: 'arrow-right' },
     { id: 'layered', label: '階層レイアウト', icon: 'layers' },
     { id: 'force', label: 'フォースレイアウト', icon: 'move' },
