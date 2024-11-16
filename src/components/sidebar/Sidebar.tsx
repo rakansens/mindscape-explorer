@@ -82,7 +82,7 @@ export const Sidebar = () => {
             editingId={fileStore.editingId}
             editingTitle={fileStore.editingTitle}
             expandedFolders={fileStore.expandedFolders}
-            onSelect={fileStore.selectFile}
+            onSelect={fileStore.setActiveFile}
             onToggle={fileStore.toggleFolder}
             onEdit={fileStore.startEditing}
             onSaveTitle={fileStore.saveTitle}
