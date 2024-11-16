@@ -7,14 +7,11 @@ import {
   FolderOpen, 
   MoreVertical,
   Pencil,
-  Trash2,
-  Check,
-  X
+  Trash2
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { FileSystemItem, MindMapFile } from '../../types/file';
-import { formatDate } from '../../utils/dateUtils';
-import { Input } from '../ui/input';
+import { FileSystemItem } from '../../types/file';
+import { useViewStore } from '../../store/viewStore';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,24 +40,47 @@ export const FileTreeItem: React.FC<FileTreeItemProps> = ({
   level,
   isExpanded,
   isActive,
-  isEditing,
-  editingTitle,
   onToggle,
   onSelect,
   onEdit,
-  onSaveTitle,
-  onCancelEdit,
   onDelete,
-  onTitleChange,
 }) => {
+  const { theme } = useViewStore();
   const isFolder = item.type === 'folder';
   const paddingLeft = level * 12 + 8;
+
+  // Theme-specific hover styles
+  const hoverStyles = {
+    light: 'hover:bg-gray-100',
+    dark: 'hover:bg-gray-800',
+    blue: 'hover:bg-blue-100',
+    purple: 'hover:bg-purple-100',
+    sepia: 'hover:bg-amber-100',
+    mint: 'hover:bg-emerald-100',
+    rose: 'hover:bg-rose-100',
+    sunset: 'hover:bg-orange-100',
+    ocean: 'hover:bg-cyan-100'
+  }[theme];
+
+  // Theme-specific active styles
+  const activeStyles = {
+    light: 'bg-gray-100',
+    dark: 'bg-gray-800',
+    blue: 'bg-blue-100',
+    purple: 'bg-purple-100',
+    sepia: 'bg-amber-100',
+    mint: 'bg-emerald-100',
+    rose: 'bg-rose-100',
+    sunset: 'bg-orange-100',
+    ocean: 'bg-cyan-100'
+  }[theme];
 
   return (
     <div
       className={cn(
-        "group flex items-center gap-2 p-2 rounded-md cursor-pointer hover:bg-accent",
-        isActive && "bg-accent"
+        "group flex items-center gap-2 p-2 rounded-md cursor-pointer",
+        hoverStyles,
+        isActive && activeStyles
       )}
       style={{ paddingLeft: `${paddingLeft}px` }}
       onClick={onSelect}
@@ -115,4 +135,4 @@ export const FileTreeItem: React.FC<FileTreeItemProps> = ({
       </DropdownMenu>
     </div>
   );
-}; 
+};
