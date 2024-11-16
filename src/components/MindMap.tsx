@@ -35,19 +35,21 @@ export const MindMap = () => {
         window.innerHeight
       );
 
-      // エッジの接続情報とスタイルを保持したまま更新
+      // エッジの接続情報とスタイルを完全に保持
       const updatedEdges = edges.map(originalEdge => {
         const layoutedEdge = layoutedEdges.find(e => e.id === originalEdge.id);
         if (!layoutedEdge) return originalEdge;
         
         return {
           ...originalEdge,
-          ...layoutedEdge,
+          source: layoutedEdge.source,
+          target: layoutedEdge.target,
+          sourceX: layoutedEdge.sourceX,
+          sourceY: layoutedEdge.sourceY,
+          targetX: layoutedEdge.targetX,
+          targetY: layoutedEdge.targetY,
           sourceHandle: originalEdge.sourceHandle,
           targetHandle: originalEdge.targetHandle,
-          style: originalEdge.style,
-          animated: originalEdge.animated,
-          type: originalEdge.type,
         };
       });
 
@@ -67,13 +69,14 @@ export const MindMap = () => {
           window.innerHeight
         );
 
-        // エッジの接続情報を保持
+        // エッジの接続情報とスタイルを完全に保持
         const updatedEdges = layoutedEdges.map(edge => ({
           ...edge,
           sourceHandle: edge.sourceHandle,
           targetHandle: edge.targetHandle,
           type: 'custom',
           animated: true,
+          style: edge.style || {},
         }));
 
         updateNodes(layoutedNodes);
