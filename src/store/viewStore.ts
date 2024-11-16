@@ -1,7 +1,9 @@
 import { create } from 'zustand';
 import { ReactFlowInstance } from 'reactflow';
 
-type Theme = 'light' | 'dark' | 'blue' | 'purple' | 'sepia';
+type Theme = 'light' | 'dark' | 'blue' | 'purple' | 'sepia' | 'mint' | 'rose' | 'sunset' | 'ocean';
+type EdgeStyle = 'bezier' | 'step' | 'smoothstep' | 'straight';
+type LineStyle = 'solid' | 'dashed';
 
 interface ViewStore {
   theme: Theme;
@@ -9,11 +11,15 @@ interface ViewStore {
   animatingNodes: Set<string>;
   loadingNodes: Set<string>;
   instance: ReactFlowInstance | null;
+  edgeStyle: EdgeStyle;
+  lineStyle: LineStyle;
   setTheme: (theme: Theme) => void;
   toggleMinimap: () => void;
   setNodeAnimating: (nodeId: string, isAnimating: boolean) => void;
   setNodeLoading: (nodeId: string, isLoading: boolean) => void;
   setInstance: (instance: ReactFlowInstance | null) => void;
+  setEdgeStyle: (style: EdgeStyle) => void;
+  setLineStyle: (style: LineStyle) => void;
   fitView: () => void;
 }
 
@@ -42,6 +48,8 @@ export const useViewStore = create<ViewStore>((set, get) => ({
   animatingNodes: new Set<string>(),
   loadingNodes: new Set<string>(),
   instance: null,
+  edgeStyle: 'bezier',
+  lineStyle: 'solid',
   
   setTheme: (theme) => {
     // 既存のすべてのテーマクラスを削除
@@ -83,5 +91,8 @@ export const useViewStore = create<ViewStore>((set, get) => ({
     if (instance) {
       instance.fitView({ padding: 0.2 });
     }
-  }
+  },
+
+  setEdgeStyle: (style) => set({ edgeStyle: style }),
+  setLineStyle: (style) => set({ lineStyle: style }),
 }));

@@ -1,5 +1,6 @@
 import React from 'react';
-import { EdgeProps, getBezierPath } from 'reactflow';
+import { EdgeProps, getBezierPath, getSmoothStepPath, getEdgeCenter } from 'reactflow';
+import { useViewStore } from '../store/viewStore';
 
 interface CustomEdgeProps extends EdgeProps {
   data?: {
@@ -18,14 +19,37 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
   style = {},
   data,
 }) => {
-  const [edgePath] = getBezierPath({
-    sourceX,
-    sourceY,
-    sourcePosition,
-    targetX,
-    targetY,
-    targetPosition,
-  });
+  const { edgeStyle, lineStyle } = useViewStore();
+
+  const getPath = () => {
+    const params = {
+      sourceX,
+      sourceY,
+      sourcePosition,
+      targetX,
+      targetY,
+      targetPosition,
+    };
+
+    switch (edgeStyle) {
+      case 'bezier':
+        return getBezierPath(params)[0];
+      case 'step':
+        return getSmoothStepPath({
+          ...params,
+          borderRadius: 0,
+        })[0];
+      case 'smoothstep':
+        return getSmoothStepPath({
+          ...params,
+          borderRadius: 10,
+        })[0];
+      case 'straight':
+        return `M ${sourceX},${sourceY} L ${targetX},${targetY}`;
+      default:
+        return getBezierPath(params)[0];
+    }
+  };
 
   return (
     <path
@@ -34,9 +58,10 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
         ...style,
         strokeWidth: 2,
         stroke: '#2563eb',
+        strokeDasharray: lineStyle === 'dashed' ? '5,5' : 'none',
       }}
       className={`react-flow__edge-path ${data?.animated ? 'animated' : ''}`}
-      d={edgePath}
+      d={getPath()}
     />
   );
 };

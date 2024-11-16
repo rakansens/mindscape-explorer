@@ -2,7 +2,7 @@ import React from 'react';
 import { useViewStore } from '../store/viewStore';
 import { useLayoutStore } from '../store/layoutStore';
 import { Button } from './ui/button';
-import { Map, Layout } from 'lucide-react';
+import { Map, Layout, GitBranch } from 'lucide-react';
 import { Tooltip } from './Tooltip';
 import {
   DropdownMenu,
@@ -15,7 +15,11 @@ export const ViewControls = () => {
     theme,
     setTheme,
     showMinimap,
-    toggleMinimap
+    toggleMinimap,
+    edgeStyle,
+    setEdgeStyle,
+    lineStyle,
+    setLineStyle
   } = useViewStore();
 
   const { layout, setLayout } = useLayoutStore();
@@ -77,6 +81,18 @@ export const ViewControls = () => {
     { id: 'orthogonal', label: '直交レイアウト', icon: 'layout' },
   ];
 
+  const edgeStyles = [
+    { id: 'bezier', label: 'なめらかな曲線' },
+    { id: 'step', label: '直角の階段状' },
+    { id: 'smoothstep', label: '滑らかな階段状' },
+    { id: 'straight', label: '直線' },
+  ];
+
+  const lineStyles = [
+    { id: 'solid', label: '実線' },
+    { id: 'dashed', label: '破線' },
+  ];
+
   return (
     <div className="absolute bottom-4 right-4 flex gap-2">
       <Tooltip text={showMinimap ? "ミニマップを非表示" : "ミニマップを表示"} position="top">
@@ -92,6 +108,49 @@ export const ViewControls = () => {
           <Map className="w-5 h-5" />
         </Button>
       </Tooltip>
+
+      <DropdownMenu>
+        <Tooltip text="エッジスタイルを変更" position="top">
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="p-2 rounded-lg hover:bg-blue-100/50 text-blue-500 transition-colors"
+            >
+              <GitBranch className="w-5 h-5" />
+            </Button>
+          </DropdownMenuTrigger>
+        </Tooltip>
+        <DropdownMenuContent align="end" className="p-2 grid grid-cols-1 gap-2 min-w-[150px]">
+          <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">線の形状</div>
+          {edgeStyles.map((style) => (
+            <button
+              key={style.id}
+              onClick={() => setEdgeStyle(style.id as any)}
+              className={`
+                flex items-center gap-2 p-2 rounded-lg hover:bg-accent transition-colors
+                ${edgeStyle === style.id ? 'ring-2 ring-primary' : ''}
+              `}
+            >
+              <span className="text-sm">{style.label}</span>
+            </button>
+          ))}
+          <div className="w-full h-px bg-border my-1" />
+          <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">線のスタイル</div>
+          {lineStyles.map((style) => (
+            <button
+              key={style.id}
+              onClick={() => setLineStyle(style.id as any)}
+              className={`
+                flex items-center gap-2 p-2 rounded-lg hover:bg-accent transition-colors
+                ${lineStyle === style.id ? 'ring-2 ring-primary' : ''}
+              `}
+            >
+              <span className="text-sm">{style.label}</span>
+            </button>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       <DropdownMenu>
         <Tooltip text="レイアウトを変更" position="top">
