@@ -27,7 +27,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code, language }) => {
       <Button
         variant="ghost"
         size="icon"
-        className="absolute right-2 top-2"
+        className="absolute right-2 top-2 z-10"
         onClick={handleCopy}
       >
         {copied ? (
@@ -36,7 +36,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code, language }) => {
           <Copy className="h-4 w-4" />
         )}
       </Button>
-      <pre className="p-4 bg-gray-100 rounded-lg overflow-auto">
+      <pre className="p-4 bg-gray-100 rounded-lg">
         <code className={`language-${language}`}>{code}</code>
       </pre>
     </div>

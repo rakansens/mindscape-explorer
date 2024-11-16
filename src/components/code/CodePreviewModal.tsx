@@ -7,6 +7,7 @@ import {
 } from "../ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { CodeBlock } from './CodeBlock';
+import { ScrollArea } from '../ui/scroll-area';
 
 interface CodePreviewModalProps {
   isOpen: boolean;
@@ -27,47 +28,61 @@ export const CodePreviewModal: React.FC<CodePreviewModalProps> = ({
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[80vh]">
+      <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>コードプレビュー</DialogTitle>
         </DialogHeader>
-        <Tabs defaultValue="preview" className="w-full h-full">
-          <TabsList>
+        
+        <Tabs defaultValue="preview" className="flex-1 flex flex-col">
+          <TabsList className="mb-2">
             <TabsTrigger value="preview">プレビュー</TabsTrigger>
             {codes.html && <TabsTrigger value="html">HTML</TabsTrigger>}
             {codes.css && <TabsTrigger value="css">CSS</TabsTrigger>}
             {codes.javascript && <TabsTrigger value="js">JavaScript</TabsTrigger>}
           </TabsList>
-          <TabsContent value="preview" className="h-full">
-            <div className="w-full h-full border rounded-lg p-4 overflow-auto">
-              {preview ? (
-                <iframe
-                  srcDoc={preview}
-                  className="w-full h-full border-none"
-                  title="Preview"
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full text-gray-500">
-                  プレビューはありません
-                </div>
-              )}
-            </div>
-          </TabsContent>
-          {codes.html && (
-            <TabsContent value="html">
-              <CodeBlock code={codes.html} language="html" />
+
+          <div className="flex-1 min-h-0">
+            <TabsContent value="preview" className="h-full m-0">
+              <div className="w-full h-full border rounded-lg overflow-hidden bg-white">
+                {preview ? (
+                  <iframe
+                    srcDoc={preview}
+                    className="w-full h-full border-none"
+                    title="Preview"
+                    sandbox="allow-scripts"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-500">
+                    プレビューはありません
+                  </div>
+                )}
+              </div>
             </TabsContent>
-          )}
-          {codes.css && (
-            <TabsContent value="css">
-              <CodeBlock code={codes.css} language="css" />
-            </TabsContent>
-          )}
-          {codes.javascript && (
-            <TabsContent value="js">
-              <CodeBlock code={codes.javascript} language="javascript" />
-            </TabsContent>
-          )}
+
+            {codes.html && (
+              <TabsContent value="html" className="m-0 h-full">
+                <ScrollArea className="h-full rounded-md">
+                  <CodeBlock code={codes.html} language="html" />
+                </ScrollArea>
+              </TabsContent>
+            )}
+
+            {codes.css && (
+              <TabsContent value="css" className="m-0 h-full">
+                <ScrollArea className="h-full rounded-md">
+                  <CodeBlock code={codes.css} language="css" />
+                </ScrollArea>
+              </TabsContent>
+            )}
+
+            {codes.javascript && (
+              <TabsContent value="js" className="m-0 h-full">
+                <ScrollArea className="h-full rounded-md">
+                  <CodeBlock code={codes.javascript} language="javascript" />
+                </ScrollArea>
+              </TabsContent>
+            )}
+          </div>
         </Tabs>
       </DialogContent>
     </Dialog>
