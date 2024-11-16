@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { ReactFlowInstance } from 'reactflow';
 
-type Theme = 'light' | 'dark' | 'system';
+type Theme = 'light' | 'dark' | 'blue' | 'purple' | 'sepia';
 
 interface ViewStore {
   theme: Theme;
@@ -18,13 +18,17 @@ interface ViewStore {
 }
 
 export const useViewStore = create<ViewStore>((set, get) => ({
-  theme: 'system',
+  theme: 'light',
   showMinimap: false,
   animatingNodes: new Set<string>(),
   loadingNodes: new Set<string>(),
   instance: null,
   
-  setTheme: (theme) => set({ theme }),
+  setTheme: (theme) => {
+    document.documentElement.classList.remove('light', 'dark', 'blue', 'purple', 'sepia');
+    document.documentElement.classList.add(theme);
+    set({ theme });
+  },
   
   toggleMinimap: () => set((state) => ({ 
     showMinimap: !state.showMinimap 
@@ -57,5 +61,4 @@ export const useViewStore = create<ViewStore>((set, get) => ({
     if (instance) {
       instance.fitView({ padding: 0.2 });
     }
-  }
 }));
