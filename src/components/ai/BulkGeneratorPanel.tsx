@@ -4,17 +4,27 @@ import { Settings2 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { BulkGeneratorForm } from './BulkGeneratorForm';
 import { BulkGeneratorButton } from './BulkGeneratorButton';
-import { APIKeyInputDialog } from '../APIKeyInputDialog';
+import { APIKeyInputDialog } from '../api/APIKeyInputDialog';
 import { useApiKeyStore } from '../../store/apiKeyStore';
+import { ModelType } from '../../types/models';
+
+interface APIKeyConfig {
+  type: ModelType;
+  apiKey: string;
+  geminiKey?: string;
+}
 
 export function BulkGeneratorPanel() {
   const { openaiKey, setOpenAIKey, setGeminiKey } = useApiKeyStore();
-  const [showAPIKeyInput, setShowAPIKeyInput] = useState(true);
-  const [isOpen, setIsOpen] = useState(false);
+  const [showAPIKeyInput, setShowAPIKeyInput] = React.useState(true);
+  const [isOpen, setIsOpen] = React.useState(false);
 
-  const handleAPIKeySubmit = (config: { apiKey: string; geminiKey: string }) => {
-    setOpenAIKey(config.apiKey);
-    setGeminiKey(config.geminiKey);
+  const handleAPIKeySubmit = (config: APIKeyConfig) => {
+    if (config.type.includes('GEMINI')) {
+      setGeminiKey(config.geminiKey || '');
+    } else {
+      setOpenAIKey(config.apiKey);
+    }
     setShowAPIKeyInput(false);
   };
 

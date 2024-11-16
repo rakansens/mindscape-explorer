@@ -1,6 +1,7 @@
 import React from 'react';
-import { APIKeyInput } from './APIKeyInput';
+import { APIKeyInput } from './api/APIKeyInput';
 import { useToast } from '@/hooks/use-toast';
+import { ModelType } from '@/types/models';
 import { useApiKeyStore } from '@/store/apiKeyStore';
 import {
   Dialog,
@@ -11,8 +12,9 @@ import {
 
 interface APIKeyInputDialogProps {
   onSubmit: (config: { 
+    type: ModelType;
     apiKey: string;
-    geminiKey: string;
+    geminiKey?: string;
   }) => void;
   onClose?: () => void;
 }
@@ -22,11 +24,15 @@ export const APIKeyInputDialog: React.FC<APIKeyInputDialogProps> = ({ onSubmit, 
   const { setOpenAIKey, setGeminiKey } = useApiKeyStore();
 
   const handleSubmit = (config: { 
+    type: ModelType;
     apiKey: string;
-    geminiKey: string;
+    geminiKey?: string;
   }) => {
-    setOpenAIKey(config.apiKey);
-    setGeminiKey(config.geminiKey);
+    if (config.type.includes('GEMINI')) {
+      setGeminiKey(config.geminiKey || '');
+    } else {
+      setOpenAIKey(config.apiKey);
+    }
     
     onSubmit(config);
     toast({
