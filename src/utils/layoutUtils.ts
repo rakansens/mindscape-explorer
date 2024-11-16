@@ -2,14 +2,12 @@ import dagre from 'dagre';
 import { Node, Edge } from 'reactflow';
 import { NodeData } from '../types/node';
 
-type Direction = 'TB' | 'LR';  // TB: top-to-bottom, LR: left-to-right
-
 interface LayoutOptions {
-  direction?: Direction;
+  direction?: 'TB' | 'LR' | 'RL';
   nodeWidth?: number;
   nodeHeight?: number;
-  rankSpacing?: number;  // 階層間の間隔
-  nodeSpacing?: number;  // 同じ階層のノード間の間隔
+  rankSpacing?: number;
+  nodeSpacing?: number;
 }
 
 export const getLayoutedElements = (
@@ -18,7 +16,7 @@ export const getLayoutedElements = (
   options: LayoutOptions = {}
 ) => {
   const {
-    direction = 'TB',
+    direction = 'LR',
     nodeWidth = 200,
     nodeHeight = 100,
     rankSpacing = 200,
@@ -28,16 +26,22 @@ export const getLayoutedElements = (
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
 
-  // グラフの方向を設定
+  const isHorizontal = direction === 'LR' || direction === 'RL';
+  
   dagreGraph.setGraph({
     rankdir: direction,
     nodesep: nodeSpacing,
     ranksep: rankSpacing,
+    marginx: 50,
+    marginy: 50,
   });
 
   // ノードを追加
   nodes.forEach((node) => {
-    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+    dagreGraph.setNode(node.id, { 
+      width: nodeWidth, 
+      height: nodeHeight 
+    });
   });
 
   // エッジを追加

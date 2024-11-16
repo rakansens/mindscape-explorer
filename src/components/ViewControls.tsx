@@ -69,6 +69,7 @@ export const ViewControls = () => {
   ];
 
   const layouts = [
+    { id: 'horizontal', label: '右方向レイアウト', icon: 'arrow-right' },
     { id: 'layered', label: '階層レイアウト', icon: 'layers' },
     { id: 'force', label: 'フォースレイアウト', icon: 'move' },
     { id: 'tree', label: 'ツリーレイアウト', icon: 'git-branch' },

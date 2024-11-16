@@ -13,8 +13,8 @@ interface LayoutStore {
 
 export const useLayoutStore = create<LayoutStore>((set, get) => ({
   layout: {
-    type: 'layered',
-    direction: 'TB',
+    type: 'horizontal',
+    direction: 'LR',
     nodeSpacing: 100,
     rankSpacing: 200,
   },
@@ -29,10 +29,21 @@ export const useLayoutStore = create<LayoutStore>((set, get) => ({
     switch (layout.type) {
       case 'force':
         return applyForceLayout(nodes, edges, width, height);
+      case 'horizontal':
+        return getLayoutedElements(nodes, edges, {
+          direction: 'LR',
+          nodeSpacing: layout.nodeSpacing,
+          rankSpacing: layout.rankSpacing,
+        });
+      case 'layered':
+        return getLayoutedElements(nodes, edges, {
+          direction: 'TB',
+          nodeSpacing: layout.nodeSpacing,
+          rankSpacing: layout.rankSpacing,
+        });
       case 'tree':
       case 'circle':
       case 'orthogonal':
-      case 'layered':
       default:
         return getLayoutedElements(nodes, edges, {
           direction: layout.direction,
