@@ -3,6 +3,8 @@ import ReactFlow, {
   Background, 
   Controls, 
   MiniMap,
+  Edge,
+  Connection,
 } from 'reactflow';
 import { useMindMapStore } from '../store/mindMapStore';
 import { useLayoutStore } from '../store/layoutStore';
@@ -44,10 +46,6 @@ export const MindMap = () => {
           ...originalEdge,
           source: layoutedEdge.source,
           target: layoutedEdge.target,
-          sourceX: layoutedEdge.sourceX,
-          sourceY: layoutedEdge.sourceY,
-          targetX: layoutedEdge.targetX,
-          targetY: layoutedEdge.targetY,
           sourceHandle: originalEdge.sourceHandle,
           targetHandle: originalEdge.targetHandle,
         };
