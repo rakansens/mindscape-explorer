@@ -35,27 +35,23 @@ export const MindMap = () => {
         window.innerWidth,
         window.innerHeight
       );
-      
-      // ノードの位置が実際に変更されたかチェック
-      const positionsChanged = layoutedNodes.some((newNode, index) => {
-        const oldNode = nodes[index];
-        return (
-          Math.abs(newNode.position.x - oldNode.position.x) > 1 ||
-          Math.abs(newNode.position.y - oldNode.position.y) > 1
-        );
+
+      // エッジの接続情報を保持したまま更新
+      const updatedEdges = edges.map(originalEdge => {
+        const layoutedEdge = layoutedEdges.find(e => e.id === originalEdge.id);
+        if (!layoutedEdge) return originalEdge;
+        
+        return {
+          ...layoutedEdge,
+          sourceHandle: originalEdge.sourceHandle,
+          targetHandle: originalEdge.targetHandle,
+          type: originalEdge.type,
+        };
       });
 
-      if (positionsChanged) {
-        // エッジの接続情報を保持したまま更新
-        const updatedEdges = layoutedEdges.map(edge => ({
-          ...edge,
-          sourceHandle: edges.find(e => e.id === edge.id)?.sourceHandle,
-          targetHandle: edges.find(e => e.id === edge.id)?.targetHandle,
-        }));
-
-        updateNodes(layoutedNodes);
-        updateEdges(updatedEdges);
-      }
+      // ノードの更新を実行
+      updateNodes(layoutedNodes);
+      updateEdges(updatedEdges);
     }
   }, [layout.type, layout.direction, layout.nodeSpacing, layout.rankSpacing]);
 
@@ -70,8 +66,16 @@ export const MindMap = () => {
           window.innerWidth,
           window.innerHeight
         );
+
+        // エッジの接続情報を保持
+        const updatedEdges = layoutedEdges.map(edge => ({
+          ...edge,
+          type: 'custom',
+          animated: true,
+        }));
+
         updateNodes(layoutedNodes);
-        updateEdges(layoutedEdges);
+        updateEdges(updatedEdges);
       }
     }
   }, [activeFileId, items]);
