@@ -1,5 +1,5 @@
-import { AIGeneratorPanel } from './ai/AIGeneratorPanel';
+import { BulkGeneratorPanel } from './ai/BulkGeneratorPanel';
 
 export function AIGenerator() {
-  return <AIGeneratorPanel />;
+  return <BulkGeneratorPanel />;
 }
