@@ -10,12 +10,13 @@ import { APIKeyInput } from './APIKeyInput';
 import { TopicTree } from '../types/openai';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
+import { HierarchyItem } from '../types/common';
 
 export function AIGenerator() {
   const [prompt, setPrompt] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [showAPIKeyInput, setShowAPIKeyInput] = useState(false);
+  const [showAPIKeyInput, setShowAPIKeyInput] = useState(true); // デフォルトで表示
   const [layoutStyle, setLayoutStyle] = useState<'horizontal' | 'radial'>('horizontal');
   
   const { nodes, updateNodeText } = useMindMapStore();
@@ -128,7 +129,7 @@ export function AIGenerator() {
           <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
             <h2 className="text-xl font-semibold mb-4">APIキー設定</h2>
             <APIKeyInput
-              onSubmit={({ type, apiKey }) => {
+              onSubmit={({ type, apiKey, geminiKey }) => {
                 setApiKey(apiKey);
                 setShowAPIKeyInput(false);
                 toast({
