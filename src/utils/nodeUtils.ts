@@ -43,36 +43,33 @@ export const parseTopicTree = (topicTree: TopicTree): HierarchyItem[] => {
 };
 
 export const calculateNodePosition = (
-  parentNode: ReactFlowNode | null,
+  parentNode: ReactFlowNode,
   index: number,
   totalSiblings: number,
-  layout: 'horizontal' | 'vertical' | 'radial'
+  layout: 'horizontal' | 'vertical' | 'radial' = 'horizontal'
 ) => {
-  if (!parentNode) {
-    return { x: window.innerWidth / 2, y: window.innerHeight / 3 };
-  }
+  const HORIZONTAL_SPACING = 250;  // ノード間の水平方向の間隔
+  const VERTICAL_SPACING = 100;    // ノード間の垂直方向の間隔
+  const verticalOffset = ((index - (totalSiblings - 1) / 2) * VERTICAL_SPACING);
 
-  const { spacing } = theme;
-  const verticalOffset = ((index - (totalSiblings - 1) / 2) * spacing.node[layout].sub);
-  
   switch (layout) {
     case 'vertical':
       return {
-        x: parentNode.position.x + ((index - (totalSiblings - 1) / 2) * spacing.node.vertical.sub),
-        y: parentNode.position.y + spacing.node.vertical.main + (parentNode.data?.detailedText ? 150 : 0),
+        x: parentNode.position.x + ((index - (totalSiblings - 1) / 2) * HORIZONTAL_SPACING),
+        y: parentNode.position.y + VERTICAL_SPACING + (parentNode.data?.detailedText ? 150 : 0),
       };
     case 'radial':
       const angleStep = (Math.PI * 0.8) / Math.max(totalSiblings - 1, 1);
       const startAngle = -Math.PI * 0.4;
       const angle = startAngle + (index * angleStep);
-      const radius = spacing.node.radial.main + (parentNode.data?.detailedText ? 100 : 0);
+      const radius = HORIZONTAL_SPACING + (parentNode.data?.detailedText ? 100 : 0);
       return {
         x: parentNode.position.x + Math.cos(angle) * radius,
         y: parentNode.position.y + Math.sin(angle) * radius,
       };
     default: // horizontal
       return {
-        x: parentNode.position.x + spacing.node.horizontal.main + (parentNode.data?.detailedText ? 100 : 0),
+        x: parentNode.position.x + HORIZONTAL_SPACING + (parentNode.data?.detailedText ? 100 : 0),
         y: parentNode.position.y + verticalOffset,
       };
   }
