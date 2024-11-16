@@ -85,23 +85,16 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
     }
   };
 
-  // 基本スタイルを定義（常に優先される）
   const baseStyle = {
     strokeWidth: 2,
-    stroke: '#2563eb', // 青色を維持
+    stroke: '#2563eb',
     strokeDasharray: lineStyle === 'dashed' ? '5,5' : 'none',
-  };
-
-  // スタイルの適用順序を変更し、基本スタイルを最後に適用して確実に上書き
-  const finalStyle = {
-    ...style,
-    ...baseStyle,
   };
 
   return (
     <path
       id={id}
-      style={finalStyle}
+      style={baseStyle}
       className={`react-flow__edge-path ${data?.animated ? 'animated' : ''}`}
       d={getPath()}
     />
