@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toolbar } from "./components/Toolbar";
 import { Sidebar } from "./components/sidebar/Sidebar";
 import { MindMap } from "./components/MindMap";
+import { ViewControls } from "./components/ViewControls";
 import { ReactFlowProvider } from 'reactflow';
 
 const queryClient = new QueryClient({
@@ -28,6 +29,7 @@ const App: React.FC = () => {
               <div className="w-full h-full">
                 <MindMap />
               </div>
+              <ViewControls />
               <Toaster />
               <Sonner />
             </div>
