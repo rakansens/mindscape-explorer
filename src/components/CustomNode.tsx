@@ -105,6 +105,18 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
     return null;
   }
 
+  const handleNodeClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    store.selectNode(id);
+  };
+
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsEditing(true);
+  };
+
   return (
     <NodeContextMenu nodeId={id}>
       <div
@@ -116,16 +128,8 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
         )}
         onMouseEnter={() => setIsHoveringNode(true)}
         onMouseLeave={() => setIsHoveringNode(false)}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          store.selectNode(id);
-        }}
-        onDoubleClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setIsEditing(true);
-        }}
+        onClick={handleNodeClick}
+        onDoubleClick={handleDoubleClick}
         onKeyDown={handleKeyDown}
         tabIndex={0}
       >

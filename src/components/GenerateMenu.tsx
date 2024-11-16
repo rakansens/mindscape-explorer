@@ -76,7 +76,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
       });
 
       await generateNodes(currentNode, hierarchyItems, () => {
-        fitView();  // オプションを削除
+        fitView();
       });
 
       toast({
@@ -122,7 +122,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
   };
 
   return (
-    <div className="relative flex flex-col gap-1 z-50">
+    <div className="relative flex flex-col gap-1 z-50" onClick={e => e.stopPropagation()}>
       <div className="flex flex-col gap-1">
         <Button
           variant="ghost"
