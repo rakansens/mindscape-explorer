@@ -39,7 +39,14 @@ export const GenerateCodeButton: React.FC<GenerateCodeButtonProps> = ({
       // 各セクションに対してノードを生成
       for (let i = 0; i < lpSections.length; i++) {
         const section = lpSections[i];
-        const codes = await generateCode(`${parentNode.data.label} - ${section.label}`);
+        const prompt = `
+以下のセクションのHTML、CSS、JavaScriptコードを生成してください：
+親ノード: ${parentNode.data.label}
+セクション: ${section.label}
+説明: ${section.description}
+
+コードは実用的でシンプルなものにしてください。
+`;
         
         // 新しい位置を計算（円形に配置）
         const angle = (2 * Math.PI * i) / lpSections.length;
@@ -49,14 +56,27 @@ export const GenerateCodeButton: React.FC<GenerateCodeButtonProps> = ({
           y: parentNode.position.y + radius * Math.sin(angle)
         };
 
-        // コード内容を整形
-        const codeContent = `${section.description}\n\nHTML:\n${codes.html}\n\nCSS:\n${codes.css}\n\nJavaScript:\n${codes.javascript}`;
-        
-        // 新しいノードを追加
-        addNode(parentNode, section.label, position, {
-          detailedText: codeContent,
-          isCode: true
-        });
+        try {
+          const response = await generateCode(prompt);
+          const codes = {
+            html: response.html || '',
+            css: response.css || '',
+            javascript: response.javascript || ''
+          };
+
+          // コード内容を整形
+          const codeContent = `${section.description}\n\nHTML:\n${codes.html}\n\nCSS:\n${codes.css}\n\nJavaScript:\n${codes.javascript}`;
+          
+          // 新しいノードを追加
+          addNode(parentNode, section.label, position, {
+            detailedText: codeContent,
+            isCode: true
+          });
+        } catch (error) {
+          console.error(`Error generating code for ${section.label}:`, error);
+          // エラーが発生しても続行
+          continue;
+        }
       }
 
       toast({
