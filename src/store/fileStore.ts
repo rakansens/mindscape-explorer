@@ -36,7 +36,6 @@ export const useFileStore = create<FileStore>((set, get) => ({
   expandedFolders: new Set(),
 
   addFile: (file) => set((state) => ({
-    ...state,
     items: [...state.items, file]
   })),
 
@@ -48,7 +47,10 @@ export const useFileStore = create<FileStore>((set, get) => ({
       parentId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
-      data: { nodes: [], edges: [] }
+      data: {
+        nodes: [],
+        edges: []
+      }
     };
     get().addFile(newFile);
   },
@@ -63,13 +65,11 @@ export const useFileStore = create<FileStore>((set, get) => ({
       updatedAt: new Date()
     };
     set((state) => ({
-      ...state,
       items: [...state.items, newFolder]
     }));
   },
 
   removeItem: (id) => set((state) => ({
-    ...state,
     items: state.items.filter(item => item.id !== id),
     activeFileId: state.activeFileId === id ? null : state.activeFileId
   })),
@@ -80,50 +80,40 @@ export const useFileStore = create<FileStore>((set, get) => ({
   },
 
   updateItem: (id, updates) => set((state) => ({
-    ...state,
     items: state.items.map(item =>
       item.id === id ? { ...item, ...updates } : item
     )
   })),
 
-  setActiveFile: (id) => set((state) => ({
-    ...state,
-    activeFileId: id
-  })),
+  setActiveFile: (id) => set({ activeFileId: id }),
 
   startEditing: (id, title, e) => {
     e.stopPropagation();
-    set((state) => ({
-      ...state,
+    set({
       editingId: id,
       editingTitle: title
-    }));
+    });
   },
 
   saveTitle: (id, e) => {
     e.stopPropagation();
     const store = get();
     store.updateItem(id, { title: store.editingTitle });
-    set((state) => ({
-      ...state,
+    set({
       editingId: null,
       editingTitle: ''
-    }));
+    });
   },
 
   cancelEditing: (e) => {
     e.stopPropagation();
-    set((state) => ({
-      ...state,
+    set({
       editingId: null,
       editingTitle: ''
-    }));
+    });
   },
 
-  setEditingTitle: (value) => set((state) => ({
-    ...state,
-    editingTitle: value
-  })),
+  setEditingTitle: (value) => set({ editingTitle: value }),
 
   toggleFolder: (id) => set((state) => {
     const newExpandedFolders = new Set(state.expandedFolders);
@@ -132,15 +122,11 @@ export const useFileStore = create<FileStore>((set, get) => ({
     } else {
       newExpandedFolders.add(id);
     }
-    return {
-      ...state,
-      expandedFolders: newExpandedFolders
-    };
+    return { expandedFolders: newExpandedFolders };
   }),
 
   getChildren: (parentId) => {
-    const { items } = get();
-    return items.filter(item => item.parentId === parentId);
+    return get().items.filter(item => item.parentId === parentId);
   },
 
   autoSave: () => {
