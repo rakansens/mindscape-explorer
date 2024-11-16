@@ -86,11 +86,19 @@ export const ViewControls = () => {
     { id: 'step', label: '直角の階段状' },
     { id: 'smoothstep', label: '滑らかな階段状' },
     { id: 'straight', label: '直線' },
+    { id: 'double', label: '二重線' },
+    { id: 'wavy', label: '波線' },
+    { id: 'gradient', label: 'グラデーション' },
+    { id: 'varying', label: '可変幅' },
   ];
 
   const lineStyles = [
     { id: 'solid', label: '実線' },
     { id: 'dashed', label: '破線' },
+    { id: 'double', label: '二重線' },
+    { id: 'wavy', label: '波線' },
+    { id: 'gradient', label: 'グラデーション' },
+    { id: 'varying', label: '可変幅' },
   ];
 
   return (

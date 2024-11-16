@@ -1,98 +1,28 @@
-import { create } from 'zustand';
-import { ReactFlowInstance } from 'reactflow';
+import create from 'zustand';
+import { LineStyle } from '../types/reactflow';
 
-type Theme = 'light' | 'dark' | 'blue' | 'purple' | 'sepia' | 'mint' | 'rose' | 'sunset' | 'ocean';
-type EdgeStyle = 'bezier' | 'step' | 'smoothstep' | 'straight';
-type LineStyle = 'solid' | 'dashed';
-
-interface ViewStore {
-  theme: Theme;
+interface ViewState {
+  theme: string;
+  setTheme: (theme: string) => void;
   showMinimap: boolean;
-  animatingNodes: Set<string>;
-  loadingNodes: Set<string>;
-  instance: ReactFlowInstance | null;
-  edgeStyle: EdgeStyle;
-  lineStyle: LineStyle;
-  setTheme: (theme: Theme) => void;
   toggleMinimap: () => void;
-  setNodeAnimating: (nodeId: string, isAnimating: boolean) => void;
-  setNodeLoading: (nodeId: string, isLoading: boolean) => void;
-  setInstance: (instance: ReactFlowInstance | null) => void;
-  setEdgeStyle: (style: EdgeStyle) => void;
+  edgeStyle: string;
+  setEdgeStyle: (style: string) => void;
+  lineStyle: LineStyle;
   setLineStyle: (style: LineStyle) => void;
-  fitView: () => void;
+  instance: any; // ReactFlow instance type can be refined
+  setInstance: (instance: any) => void;
 }
 
-// ブラウザの設定に基づいて初期テーマを決定
-const getInitialTheme = (): Theme => {
-  if (typeof window === 'undefined') return 'light';
-
-  const savedTheme = localStorage.getItem('theme') as Theme;
-  if (savedTheme) {
-    document.documentElement.className = savedTheme;
-    return savedTheme;
-  }
-  
-  if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    document.documentElement.className = 'dark';
-    return 'dark';
-  }
-
-  document.documentElement.className = 'light';
-  return 'light';
-};
-
-export const useViewStore = create<ViewStore>((set, get) => ({
-  theme: getInitialTheme(),
-  showMinimap: false,
-  animatingNodes: new Set<string>(),
-  loadingNodes: new Set<string>(),
-  instance: null,
-  edgeStyle: 'bezier',
-  lineStyle: 'solid',
-  
-  setTheme: (theme) => {
-    // 既存のすべてのテーマクラスを削除
-    document.documentElement.className = '';
-    // 新しいテーマを適用
-    document.documentElement.className = theme;
-    localStorage.setItem('theme', theme);
-    set({ theme });
-  },
-  
-  toggleMinimap: () => set((state) => ({ 
-    showMinimap: !state.showMinimap 
-  })),
-  
-  setNodeAnimating: (nodeId: string, isAnimating: boolean) => set((state) => {
-    const newAnimatingNodes = new Set(state.animatingNodes);
-    if (isAnimating) {
-      newAnimatingNodes.add(nodeId);
-    } else {
-      newAnimatingNodes.delete(nodeId);
-    }
-    return { animatingNodes: newAnimatingNodes };
-  }),
-  
-  setNodeLoading: (nodeId: string, isLoading: boolean) => set((state) => {
-    const newLoadingNodes = new Set(state.loadingNodes);
-    if (isLoading) {
-      newLoadingNodes.add(nodeId);
-    } else {
-      newLoadingNodes.delete(nodeId);
-    }
-    return { loadingNodes: newLoadingNodes };
-  }),
-
-  setInstance: (instance) => set({ instance }),
-  
-  fitView: () => {
-    const { instance } = get();
-    if (instance) {
-      instance.fitView({ padding: 0.2 });
-    }
-  },
-
+export const useViewStore = create<ViewState>((set) => ({
+  theme: 'light',
+  setTheme: (theme) => set({ theme }),
+  showMinimap: true,
+  toggleMinimap: () => set((state) => ({ showMinimap: !state.showMinimap })),
+  edgeStyle: 'custom',
   setEdgeStyle: (style) => set({ edgeStyle: style }),
+  lineStyle: 'solid', // Default line style
   setLineStyle: (style) => set({ lineStyle: style }),
+  instance: null,
+  setInstance: (instance) => set({ instance }),
 }));
