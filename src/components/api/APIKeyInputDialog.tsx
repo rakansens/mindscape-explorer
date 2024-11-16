@@ -38,18 +38,18 @@ export const APIKeyInputDialog: React.FC<APIKeyInputDialogProps> = ({ onSubmit, 
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <div className="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-2xl transform transition-all">
-        <div className="p-6">
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center">
+      <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-t-xl sm:rounded-xl p-4 shadow-lg">
+        <div className="relative">
           <Button
             variant="ghost"
             size="icon"
-            className="absolute right-3 top-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+            className="absolute right-0 top-0"
             onClick={onClose}
           >
             <X className="h-4 w-4" />
           </Button>
-          <h2 className="text-xl font-semibold mb-4">APIキー設定</h2>
+          <h2 className="text-lg font-semibold mb-4">APIキー設定</h2>
           <APIKeyInput onSubmit={handleSubmit} />
         </div>
       </div>
