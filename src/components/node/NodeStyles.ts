@@ -8,8 +8,8 @@ export const getNodeThemeStyle = (level: number, theme: string): string => {
       return cn(
         baseStyle, 
         level === 0 
-          ? 'bg-primary text-primary-foreground' 
-          : 'bg-secondary text-secondary-foreground'
+          ? 'bg-primary text-primary-foreground dark:text-secondary' 
+          : 'bg-secondary text-secondary-foreground dark:text-primary'
       );
     case 'purple':
       return cn(
