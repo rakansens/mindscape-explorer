@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { Panel, useReactFlow } from 'reactflow';
 import { Sparkles } from 'lucide-react';
 import { useMindMapStore } from '../store/mindMapStore';
-import { useOpenAI, TopicTree } from '../utils/openai';
+import { useOpenAI } from '../store/openAIStore';
 import { useToast } from '../hooks/use-toast';
 import { sleep, animateText } from '../utils/animationUtils';
 import { useNodeGenerator } from './mindmap/NodeGenerator';
+import { APIKeyInput } from './APIKeyInput';
 
 type LayoutStyle = 'horizontal' | 'radial';
 
@@ -19,10 +20,11 @@ export function AIGenerator() {
   const [prompt, setPrompt] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [layoutStyle, setLayoutStyle] = useState<LayoutStyle>('horizontal');
+  const [showAPIKeyInput, setShowAPIKeyInput] = useState(false);
+  const [layoutStyle, setLayoutStyle] = useState<'horizontal' | 'radial'>('horizontal');
   
   const { nodes, updateNodeText } = useMindMapStore();
-  const { generateSubTopics, apiKey } = useOpenAI();
+  const { generateSubTopics, apiKey, setApiKey } = useOpenAI();
   const { fitView } = useReactFlow();
   const { toast } = useToast();
   const { generateNodes } = useNodeGenerator();
@@ -62,11 +64,7 @@ export function AIGenerator() {
 
   const handleGenerate = async () => {
     if (!apiKey) {
-      toast({
-        title: "エラー",
-        description: "OpenAI APIキーを設定してください",
-        variant: "destructive",
-      });
+      setShowAPIKeyInput(true);
       return;
     }
 
@@ -129,7 +127,20 @@ export function AIGenerator() {
   };
 
   return (
-    <Panel position="bottom-right" className="mr-4 mb-4">
+    <>
+      {showAPIKeyInput && (
+        <APIKeyInput
+          onSubmit={({ type, apiKey, geminiKey }) => {
+            setApiKey(apiKey);
+            setShowAPIKeyInput(false);
+            toast({
+              title: "設定完了",
+              description: "APIキーを設定しました",
+            });
+          }}
+        />
+      )}
+      <Panel position="bottom-right" className="mr-4 mb-4">
       {isOpen ? (
         <div className="bg-white p-4 rounded-lg shadow-lg">
           <div className="mb-4">
@@ -199,6 +210,7 @@ export function AIGenerator() {
           <Sparkles size={24} />
         </button>
       )}
-    </Panel>
+      </Panel>
+    </>
   );
 }
