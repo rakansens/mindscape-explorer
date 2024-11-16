@@ -1,10 +1,10 @@
 import React from 'react';
-import { APIKeyInput } from '../APIKeyInput';
-import { useToast } from '../../hooks/use-toast';
-import { ModelType } from '../../types/models';
+import { APIKeyInput } from './api/APIKeyInput';
+import { useToast } from '@/hooks/use-toast';
+import { ModelType } from '@/types/models';
 import { X } from 'lucide-react';
-import { Button } from '../ui/button';
-import { useApiKeyStore } from '../../store/apiKeyStore';
+import { Button } from './ui/button';
+import { useApiKeyStore } from '@/store/apiKeyStore';
 
 interface APIKeyInputDialogProps {
   onSubmit: (config: { 

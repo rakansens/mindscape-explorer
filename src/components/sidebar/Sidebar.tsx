@@ -30,7 +30,7 @@ export const Sidebar = () => {
   const { nodes, edges, updateNodes, updateEdges } = useMindMapStore();
   const { fitView } = useViewStore();
   const { toast } = useToast();
-  const { apiKey, setApiKey } = useOpenAI();
+  const { apiKey, setApiKey, setOpenAIKey, setGeminiKey } = useOpenAI();
 
   const handleSaveDialog = (title: string) => {
     if (dialogMode === 'save') {
@@ -124,6 +124,23 @@ export const Sidebar = () => {
     });
   };
 
+  const handleAPIKeySubmit = (config: { 
+    type: ModelType;
+    apiKey: string;
+    geminiKey?: string;
+  }) => {
+    if (config.type.includes('GEMINI')) {
+      setGeminiKey(config.geminiKey || '');
+    } else {
+      setOpenAIKey(config.apiKey);
+    }
+    setShowAPIKeyInput(false);
+    toast({
+      title: "設定完了",
+      description: "APIキーを設定しました",
+    });
+  };
+
   return (
     <>
       <div
@@ -190,14 +207,7 @@ export const Sidebar = () => {
 
       {showAPIKeyInput && (
         <APIKeyInputDialog
-          onSubmit={(apiKey) => {
-            setApiKey(apiKey);
-            setShowAPIKeyInput(false);
-            toast({
-              title: "設定完了",
-              description: "APIキーを設定しました",
-            });
-          }}
+          onSubmit={handleAPIKeySubmit}
           onClose={() => setShowAPIKeyInput(false)}
         />
       )}
