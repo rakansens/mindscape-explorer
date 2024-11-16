@@ -1,6 +1,9 @@
 import { create } from 'zustand';
 import { TopicTree, GenerateOptions } from '../types/openai';
 import { getMindMapPrompt } from '../utils/prompts/mindMapPrompts';
+import { useMindMapStore } from './mindMapStore';
+import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 interface OpenAIStore {
   apiKey: string | null;
@@ -159,3 +162,5 @@ export const useOpenAI = create<OpenAIStore>(() => ({
     }
   }
 }));
+
+export type { TopicTree, GenerateOptions };
