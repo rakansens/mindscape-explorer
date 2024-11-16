@@ -14,6 +14,8 @@ import { useOpenAI } from '../../store/openAIStore';
 import { createNewFile, getMainNodeLabel } from '../../utils/fileUtils';
 import { Button } from '../ui/button';
 import { useToast } from '../../hooks/use-toast';
+import { cn } from '../../lib/utils';
+import { SaveConfirmDialog } from '../dialog/SaveConfirmDialog';
 
 export const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
