@@ -61,4 +61,5 @@ export const useViewStore = create<ViewStore>((set, get) => ({
     if (instance) {
       instance.fitView({ padding: 0.2 });
     }
+  }
 }));
