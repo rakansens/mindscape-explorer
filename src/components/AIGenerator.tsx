@@ -11,6 +11,13 @@ import { Button } from './ui/button';
 import { HierarchyItem } from '../types/common';
 import { APIKeyInputDialog } from './api/APIKeyInputDialog';
 import { useApiKeyStore } from '../store/apiKeyStore';
+import { ModelType } from '../types/models';
+
+interface APIKeyConfig {
+  type: ModelType;
+  apiKey: string;
+  geminiKey?: string;
+}
 
 export function AIGenerator() {
   const [prompt, setPrompt] = useState('');
@@ -126,19 +133,19 @@ export function AIGenerator() {
     }
   };
 
+  const handleAPIKeySubmit = (config: APIKeyConfig) => {
+    if (config.type.includes('GEMINI')) {
+      setGeminiKey(config.geminiKey || '');
+    } else {
+      setOpenAIKey(config.apiKey);
+    }
+    setShowAPIKeyInput(false);
+  };
+
   return (
     <>
       {showAPIKeyInput && (
-        <APIKeyInputDialog
-          onSubmit={(config) => {
-            if (config.type.includes('GEMINI')) {
-              setGeminiKey(config.geminiKey || '');
-            } else {
-              setOpenAIKey(config.apiKey);
-            }
-            setShowAPIKeyInput(false);
-          }}
-        />
+        <APIKeyInputDialog onSubmit={handleAPIKeySubmit} />
       )}
       <Panel position="bottom-right" className="mr-4 mb-4">
         <div className="flex flex-col gap-2">

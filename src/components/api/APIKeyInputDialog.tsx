@@ -1,13 +1,17 @@
 import React from 'react';
-import { APIKeyInput } from '../APIKeyInput';
-import { useToast } from '../../hooks/use-toast';
-import { ModelType } from '../../types/models';
+import { APIKeyInput } from './APIKeyInput';
+import { useToast } from '@/hooks/use-toast';
+import { ModelType } from '@/types/models';
 import { X } from 'lucide-react';
 import { Button } from '../ui/button';
-import { useApiKeyStore } from '../../store/apiKeyStore';
+import { useApiKeyStore } from '@/store/apiKeyStore';
 
 interface APIKeyInputDialogProps {
-  onSubmit: (apiKey: string) => void;
+  onSubmit: (config: { 
+    type: ModelType;
+    apiKey: string;
+    geminiKey?: string;
+  }) => void;
   onClose?: () => void;
 }
 
@@ -15,18 +19,18 @@ export const APIKeyInputDialog: React.FC<APIKeyInputDialogProps> = ({ onSubmit, 
   const { toast } = useToast();
   const { setOpenAIKey, setGeminiKey } = useApiKeyStore();
 
-  const handleSubmit = ({ type, apiKey, geminiKey }: { 
+  const handleSubmit = (config: { 
     type: ModelType;
     apiKey: string;
     geminiKey?: string;
   }) => {
-    if (type.includes('GEMINI')) {
-      setGeminiKey(geminiKey || '');
+    if (config.type.includes('GEMINI')) {
+      setGeminiKey(config.geminiKey || '');
     } else {
-      setOpenAIKey(apiKey);
+      setOpenAIKey(config.apiKey);
     }
     
-    onSubmit(apiKey);
+    onSubmit(config);
     toast({
       title: "設定完了",
       description: "APIキーを設定しました",
