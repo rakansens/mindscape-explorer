@@ -19,26 +19,24 @@ const queryClient = new QueryClient({
 
 const App: React.FC = () => {
   return (
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <ReactFlowProvider>
-          <TooltipProvider>
-            <div className="flex h-screen overflow-hidden">
-              <Sidebar />
-              <div className="flex-1 relative">
-                <Toolbar />
-                <div className="w-full h-full">
-                  <MindMap />
-                </div>
-                <ViewControls />
-                <Toaster />
-                <Sonner />
+    <QueryClientProvider client={queryClient}>
+      <ReactFlowProvider>
+        <TooltipProvider>
+          <div className="flex h-screen overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 relative">
+              <Toolbar />
+              <div className="w-full h-full">
+                <MindMap />
               </div>
+              <ViewControls />
+              <Toaster />
+              <Sonner />
             </div>
-          </TooltipProvider>
-        </ReactFlowProvider>
-      </QueryClientProvider>
-    </React.StrictMode>
+          </div>
+        </TooltipProvider>
+      </ReactFlowProvider>
+    </QueryClientProvider>
   );
 };
 

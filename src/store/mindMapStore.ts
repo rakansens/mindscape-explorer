@@ -2,10 +2,22 @@ import { create } from 'zustand';
 import { Node, Edge } from 'reactflow';
 import { applyNodeChanges, applyEdgeChanges } from 'reactflow';
 import { nanoid } from 'nanoid';
-import { ModelConfig, getDefaultModelConfig } from '../types/models';
+import { ModelConfig } from '../types/models';
 import { NodeData } from '../types/node';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+
+const initialNodes: Node<NodeData>[] = [
+  {
+    id: '1',
+    type: 'custom',
+    position: { x: window.innerWidth / 2 - 75, y: window.innerHeight / 3 },
+    data: { 
+      label: 'メインテーマ',
+      selected: false,
+      isGenerating: false,
+      isAppearing: false
+    }
+  }
+];
 
 interface MindMapStore {
   nodes: Node<NodeData>[];
@@ -22,35 +34,12 @@ interface MindMapStore {
   addNode: (parentNode: Node<NodeData>, label: string, position?: { x: number; y: number }, additionalData?: Partial<NodeData>) => Node<NodeData>;
   updateNode: (id: string, updates: Partial<NodeData>) => void;
   removeChildNodes: (nodeId: string) => void;
-  exportAsImage: () => Promise<void>;
-  exportAsPDF: () => Promise<void>;
-  exportAsJSON: () => void;
-  importFromJSON: (jsonString: string) => void;
-  saveMap: () => void;
-  loadMap: () => void;
 }
-
-const initialNodes: Node<NodeData>[] = [
-  {
-    id: '1',
-    type: 'custom',
-    position: { x: window.innerWidth / 2 - 75, y: window.innerHeight / 3 },
-    data: { 
-      label: 'メインテーマ',
-      selected: false,
-      isGenerating: false,
-      isAppearing: false
-    }
-  }
-];
-
-// 初期のモデル設定を環境変数から取得
-const initialModelConfig = getDefaultModelConfig();
 
 export const useMindMapStore = create<MindMapStore>((set, get) => ({
   nodes: initialNodes,
   edges: [],
-  modelConfig: initialModelConfig,
+  modelConfig: null,
 
   onNodesChange: (changes) => {
     set((state) => ({
@@ -121,6 +110,7 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
             id: `${parentNode.id}-${newNode.id}`,
             source: parentNode.id,
             target: newNode.id,
+            type: 'custom'
           }]
         : state.edges,
     }));
@@ -162,69 +152,6 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
         edges: state.edges.filter(edge => !childIds.has(edge.target))
       };
     });
-  },
-
-  exportAsImage: async () => {
-    const element = document.querySelector('.react-flow') as HTMLElement;
-    if (element) {
-      const canvas = await html2canvas(element);
-      const dataUrl = canvas.toDataURL('image/png');
-      const link = document.createElement('a');
-      link.download = 'mindmap.png';
-      link.href = dataUrl;
-      link.click();
-    }
-  },
-
-  exportAsPDF: async () => {
-    const element = document.querySelector('.react-flow') as HTMLElement;
-    if (element) {
-      const canvas = await html2canvas(element);
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('l', 'mm', 'a4');
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save('mindmap.pdf');
-    }
-  },
-
-  exportAsJSON: () => {
-    const { nodes, edges } = get();
-    const data = { nodes, edges };
-    const jsonString = JSON.stringify(data, null, 2);
-    const blob = new Blob([jsonString], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'mindmap.json';
-    link.click();
-    URL.revokeObjectURL(url);
-  },
-
-  importFromJSON: (jsonString: string) => {
-    try {
-      const data = JSON.parse(jsonString);
-      if (data.nodes && data.edges) {
-        set({ nodes: data.nodes, edges: data.edges });
-      }
-    } catch (error) {
-      console.error('Failed to import JSON:', error);
-    }
-  },
-
-  saveMap: () => {
-    const { nodes, edges } = get();
-    localStorage.setItem('mindmap', JSON.stringify({ nodes, edges }));
-  },
-
-  loadMap: () => {
-    const saved = localStorage.getItem('mindmap');
-    if (saved) {
-      const { nodes, edges } = JSON.parse(saved);
-      set({ nodes, edges });
-    }
   },
 
   setModelConfig: (config) => set({ modelConfig: config }),
