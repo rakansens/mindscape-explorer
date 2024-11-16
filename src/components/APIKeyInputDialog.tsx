@@ -2,8 +2,6 @@ import React from 'react';
 import { APIKeyInput } from './api/APIKeyInput';
 import { useToast } from '@/hooks/use-toast';
 import { ModelType } from '@/types/models';
-import { X } from 'lucide-react';
-import { Button } from './ui/button';
 import { useApiKeyStore } from '@/store/apiKeyStore';
 import {
   Dialog,
@@ -45,7 +43,7 @@ export const APIKeyInputDialog: React.FC<APIKeyInputDialogProps> = ({ onSubmit, 
 
   return (
     <Dialog open={true} onOpenChange={() => onClose?.()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="fixed bottom-0 left-0 right-0 top-auto rounded-b-none sm:bottom-auto sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-lg">
         <DialogHeader>
           <DialogTitle>APIキー設定</DialogTitle>
         </DialogHeader>
