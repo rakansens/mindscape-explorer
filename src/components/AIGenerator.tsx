@@ -21,7 +21,7 @@ export function AIGenerator() {
   
   const { nodes, updateNodeText } = useMindMapStore();
   const { generateSubTopics } = useOpenAI();
-  const { openaiKey, geminiKey } = useApiKeyStore();
+  const { openaiKey, geminiKey, setOpenAIKey, setGeminiKey } = useApiKeyStore();
   const { fitView } = useReactFlow();
   const { toast } = useToast();
   const { generateNodes } = useNodeGenerator();
@@ -130,8 +130,12 @@ export function AIGenerator() {
     <>
       {showAPIKeyInput && (
         <APIKeyInputDialog
-          onSubmit={(apiKey) => {
-            setApiKey(apiKey);
+          onSubmit={(config) => {
+            if (config.type.includes('GEMINI')) {
+              setGeminiKey(config.geminiKey || '');
+            } else {
+              setOpenAIKey(config.apiKey);
+            }
             setShowAPIKeyInput(false);
           }}
         />
