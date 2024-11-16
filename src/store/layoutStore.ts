@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { LayoutType, LayoutConfig } from '../types/layout';
-import { getLayoutedElements } from '../utils/layoutUtils';
+import { getLayoutedElements, getCircleLayout, getOrthogonalLayout } from '../utils/layoutUtils';
 import { applyForceLayout } from '../utils/forceLayout';
 import { Node, Edge } from 'reactflow';
 import { NodeData } from '../types/node';
@@ -41,9 +41,15 @@ export const useLayoutStore = create<LayoutStore>((set, get) => ({
           nodeSpacing: layout.nodeSpacing,
           rankSpacing: layout.rankSpacing,
         });
-      case 'tree':
       case 'circle':
+        return getCircleLayout(nodes, edges, width, height);
       case 'orthogonal':
+        return getOrthogonalLayout(nodes, edges, {
+          direction: layout.direction,
+          nodeSpacing: layout.nodeSpacing,
+          rankSpacing: layout.rankSpacing,
+        });
+      case 'tree':
       default:
         return getLayoutedElements(nodes, edges, {
           direction: layout.direction,

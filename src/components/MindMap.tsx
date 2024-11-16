@@ -36,7 +36,7 @@ export const MindMap = () => {
         window.innerHeight
       );
       
-      // Check if positions actually changed to prevent unnecessary updates
+      // 位置が実際に変更されたかチェック
       const positionsChanged = layoutedNodes.some((newNode, index) => {
         const oldNode = nodes[index];
         return (
@@ -50,9 +50,8 @@ export const MindMap = () => {
         updateEdges(layoutedEdges);
       }
     }
-  }, [layout.type]); // Only re-run when layout type changes
+  }, [layout.type, layout.direction, layout.nodeSpacing, layout.rankSpacing]); // レイアウトの全パラメータを監視
 
-  // ファイル変更時のレイアウト適用
   useEffect(() => {
     if (activeFileId) {
       const activeFile = items.find(item => item.id === activeFileId && item.type === 'file');
@@ -107,4 +106,3 @@ export const MindMap = () => {
       </ReactFlow>
     </div>
   );
-};
