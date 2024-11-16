@@ -9,12 +9,14 @@ import { sleep, animateText } from '../../utils/animationUtils';
 import { Button } from '../ui/button';
 import { TopicTree } from '../../types/openai';
 import { HierarchyItem } from '../../types/common';
+import { useApiKeyStore } from '../../store/apiKeyStore';
 
 interface AIGeneratorFormProps {
   onClose: () => void;
+  onShowAPIKeyInput: () => void;
 }
 
-export function AIGeneratorForm({ onClose }: AIGeneratorFormProps) {
+export function AIGeneratorForm({ onClose, onShowAPIKeyInput }: AIGeneratorFormProps) {
   const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [layoutStyle, setLayoutStyle] = useState<'horizontal' | 'radial'>('horizontal');
@@ -24,6 +26,7 @@ export function AIGeneratorForm({ onClose }: AIGeneratorFormProps) {
   const { fitView } = useReactFlow();
   const { toast } = useToast();
   const { generateNodes } = useNodeGenerator();
+  const { openaiKey, geminiKey } = useApiKeyStore();
 
   const parseTopicTree = (topicTree: TopicTree): HierarchyItem[] => {
     const hierarchy: HierarchyItem[] = [];
@@ -63,7 +66,7 @@ export function AIGeneratorForm({ onClose }: AIGeneratorFormProps) {
     const isGemini = modelConfig?.type.includes('GEMINI');
     
     if ((isGemini && !geminiKey) || (!isGemini && !openaiKey)) {
-      setShowAPIKeyInput(true);
+      onShowAPIKeyInput();
       return;
     }
 

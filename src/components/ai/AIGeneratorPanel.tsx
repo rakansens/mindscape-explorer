@@ -1,3 +1,4 @@
+import React from 'react';
 import { Panel } from 'reactflow';
 import { Settings2 } from 'lucide-react';
 import { Button } from '../ui/button';
@@ -44,7 +45,10 @@ export function AIGeneratorPanel() {
             </Button>
           )}
           {isOpen ? (
-            <AIGeneratorForm onClose={() => setIsOpen(false)} />
+            <AIGeneratorForm 
+              onClose={() => setIsOpen(false)} 
+              onShowAPIKeyInput={() => setShowAPIKeyInput(true)}
+            />
           ) : (
             <AIGeneratorButton onClick={() => setIsOpen(true)} />
           )}
