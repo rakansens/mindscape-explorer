@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Handle, Position } from 'reactflow';
 import { useMindMapStore } from '../store/mindMapStore';
 import { useViewStore } from '../store/viewStore';
-import { getNodeLevel, getNodeStyle } from '../utils/nodeUtils';
+import { getNodeLevel } from '../utils/nodeUtils';
 import { GenerateMenu } from './GenerateMenu';
 import { NodeData } from '../types/node';
 import { cn } from '../utils/cn';
@@ -35,6 +35,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   
   const store = useMindMapStore();
+  const { theme } = useViewStore();
   const { 
     animatingNodes, 
     loadingNodes,
@@ -156,6 +157,23 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
     }
   };
 
+  const getNodeThemeStyle = (level: number): string => {
+    const baseStyle = "relative min-w-[120px] max-w-[300px] rounded-xl shadow-lg";
+    
+    switch(theme) {
+      case 'dark':
+        return cn(baseStyle, level === 0 ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground');
+      case 'purple':
+        return cn(baseStyle, level === 0 ? 'bg-purple-600 text-white' : 'bg-purple-500 text-white');
+      case 'blue':
+        return cn(baseStyle, level === 0 ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white');
+      case 'sepia':
+        return cn(baseStyle, level === 0 ? 'bg-amber-700 text-white' : 'bg-amber-600 text-white');
+      default: // light
+        return cn(baseStyle, level === 0 ? 'bg-blue-500 text-white' : 'bg-blue-400 text-white');
+    }
+  };
+
   if (!data) {
     console.warn(`Node ${id} has no data`);
     return null;
@@ -165,9 +183,8 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
     <NodeContextMenu nodeId={id}>
       <div
         className={cn(
-          "relative min-w-[120px] max-w-[300px] rounded-xl shadow-lg",
-          getNodeStyle(level, data.isAppearing, data.isRemoving),
-          data.selected ? "ring-2 ring-blue-500" : "",
+          getNodeThemeStyle(level),
+          data.selected ? "ring-2 ring-primary" : "",
           data.isGenerating ? "animate-pulse scale-105" : "",
           "hover:shadow-xl transition-all duration-300 transform"
         )}
@@ -176,8 +193,8 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
       >
-        <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-500/50" />
-        <Handle type="source" position={Position.Right} className="w-2 h-2 bg-blue-500/50" />
+        <Handle type="target" position={Position.Left} className="w-2 h-2 bg-primary/50" />
+        <Handle type="source" position={Position.Right} className="w-2 h-2 bg-primary/50" />
         
         <NodeContent
           id={id}
@@ -192,9 +209,9 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
         {data.isCode && (
           <button
             onClick={handleCodePreview}
-            className="absolute -left-8 top-1/2 -translate-y-1/2 p-1.5 bg-white rounded-full shadow-lg hover:bg-gray-50"
+            className="absolute -left-8 top-1/2 -translate-y-1/2 p-1.5 bg-background rounded-full shadow-lg hover:bg-muted"
           >
-            <Eye className="w-4 h-4 text-gray-600" />
+            <Eye className="w-4 h-4 text-foreground" />
           </button>
         )}
 

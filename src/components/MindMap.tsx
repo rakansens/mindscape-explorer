@@ -8,6 +8,7 @@ import ReactFlow, {
 } from 'reactflow';
 import { useMindMapStore } from '../store/mindMapStore';
 import { useFileStore } from '../store/fileStore';
+import { useViewStore } from '../store/viewStore';
 import CustomNode from './CustomNode';
 import CustomEdge from './CustomEdge';
 import 'reactflow/dist/style.css';
@@ -23,6 +24,7 @@ const edgeTypes = {
 export const MindMap = () => {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect, updateNodes, updateEdges } = useMindMapStore();
   const { activeFileId, items } = useFileStore();
+  const { theme } = useViewStore();
 
   useEffect(() => {
     if (activeFileId) {
@@ -35,7 +37,7 @@ export const MindMap = () => {
   }, [activeFileId]);
 
   return (
-    <div className="w-full h-full">
+    <div className={`w-full h-full ${theme}`}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -49,11 +51,11 @@ export const MindMap = () => {
           animated: true,
         }}
         fitView
-        className="bg-dot-pattern"
+        className={`bg-background text-foreground`}
       >
-        <Background />
-        <Controls />
+        <Background className="bg-background" />
+        <Controls className="bg-background text-foreground border-border" />
       </ReactFlow>
     </div>
   );
-}; 
+};
