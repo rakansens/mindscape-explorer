@@ -11,6 +11,7 @@ import { NodeContent } from './node/NodeContent';
 import { NodePreviewButton } from './node/NodePreviewButton';
 import { CodePreviewModal } from './code/CodePreviewModal';
 import { getNodeThemeStyle } from './node/NodeStyles';
+import { calculateNewNodePosition } from '../utils/nodePositionUtils';
 
 interface CustomNodeProps {
   id: string;
@@ -70,10 +71,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
       e.preventDefault();
       const currentNode = store.nodes.find(n => n.id === id);
       if (currentNode) {
-        const newPosition = {
-          x: currentNode.position.x + 250,
-          y: currentNode.position.y
-        };
+        const newPosition = calculateNewNodePosition(currentNode, store.nodes, store.edges);
         store.addNode(currentNode, '新しいトピック', newPosition);
       }
     }

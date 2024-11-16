@@ -10,6 +10,7 @@ import { GenerateCodeButton } from './code/GenerateCodeButton';
 import { CodePreviewModal } from './code/CodePreviewModal';
 import { useNodeGenerator } from '../components/mindmap/NodeGenerator';
 import { parseTopicTree } from '../utils/parseUtils';
+import { calculateNewNodePosition } from '../utils/nodePositionUtils';
 
 interface GenerateMenuProps {
   nodeId: string;
@@ -67,16 +68,13 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
 
       const response = await generateSubTopics(currentNode.data.label, { mode });
       
-      // レスポンスを階層構造に変換
       const hierarchyItems = parseTopicTree(response);
       
-      // 生成が完了したら元のラベルを復元
       updateNode(nodeId, {
         label: currentNode.data.label,
         isGenerating: false
       });
 
-      // 新しいノードを生成
       await generateNodes(currentNode, hierarchyItems, () => {
         fitView();  // オプションを削除
       });
@@ -94,7 +92,6 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
         variant: "destructive",
       });
       
-      // エラー時は元のラベルを復元
       const currentNode = nodes.find(n => n.id === nodeId);
       if (currentNode) {
         updateNode(nodeId, {
@@ -110,12 +107,9 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
   const handleAddNode = () => {
     const currentNode = nodes.find(n => n.id === nodeId);
     if (currentNode) {
-      const newPosition = {
-        x: currentNode.position.x + 250,
-        y: currentNode.position.y
-      };
+      const newPosition = calculateNewNodePosition(currentNode, nodes, edges);
       addNode(currentNode, '新しいトピック', newPosition);
-      fitView();  // オプションを削除
+      fitView();
     }
   };
 
