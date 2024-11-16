@@ -16,6 +16,7 @@ import { Button } from '../ui/button';
 import { useToast } from '../../hooks/use-toast';
 import { cn } from '../../lib/utils';
 import { SaveConfirmDialog } from '../dialog/SaveConfirmDialog';
+import { ModelType } from '../../types/models';
 
 export const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -30,7 +31,7 @@ export const Sidebar = () => {
   const { nodes, edges, updateNodes, updateEdges } = useMindMapStore();
   const { fitView } = useViewStore();
   const { toast } = useToast();
-  const { apiKey, setApiKey, setOpenAIKey, setGeminiKey } = useOpenAI();
+  const { apiKey, setApiKey } = useOpenAI();
 
   const handleSaveDialog = (title: string) => {
     if (dialogMode === 'save') {
@@ -90,6 +91,19 @@ export const Sidebar = () => {
     }
   };
 
+  const handleAPIKeySubmit = (config: { 
+    type: ModelType;
+    apiKey: string;
+    geminiKey?: string;
+  }) => {
+    setApiKey(config.apiKey);
+    setShowAPIKeyInput(false);
+    toast({
+      title: "設定完了",
+      description: "APIキーを設定しました",
+    });
+  };
+
   const handleEdit = (id: string, title: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setEditingId(id);
@@ -121,23 +135,6 @@ export const Sidebar = () => {
         next.add(folderId);
       }
       return next;
-    });
-  };
-
-  const handleAPIKeySubmit = (config: { 
-    type: ModelType;
-    apiKey: string;
-    geminiKey?: string;
-  }) => {
-    if (config.type.includes('GEMINI')) {
-      setGeminiKey(config.geminiKey || '');
-    } else {
-      setOpenAIKey(config.apiKey);
-    }
-    setShowAPIKeyInput(false);
-    toast({
-      title: "設定完了",
-      description: "APIキーを設定しました",
     });
   };
 
