@@ -4,12 +4,14 @@ import { ExportButtons } from './toolbar/ExportButtons';
 import { JsonButtons } from './toolbar/JsonButtons';
 import { ModelSelector } from './toolbar/ModelSelector';
 import { Tooltip } from './Tooltip';
+import { BulkGeneratorForm } from './ai/BulkGeneratorForm';
+import { Sparkles } from 'lucide-react';
 
 export const Toolbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showBulkGenerator, setShowBulkGenerator] = useState(false);
 
   const handleToolbarClick = (e: React.MouseEvent) => {
-    // ツールバー内のクリックイベントは伝播を停止
     e.stopPropagation();
   };
 
@@ -53,8 +55,24 @@ export const Toolbar: React.FC = () => {
           <ExportButtons />
           <div className="w-px h-8 bg-blue-100/50" />
           <JsonButtons />
+          <div className="w-px h-8 bg-blue-100/50" />
+          <Tooltip text="一括生成" position="bottom">
+            <button
+              onClick={() => setShowBulkGenerator(true)}
+              className="p-2 rounded-lg hover:bg-blue-100/50 text-blue-500 transition-colors"
+            >
+              <Sparkles className="w-5 h-5" />
+            </button>
+          </Tooltip>
         </div>
       </div>
+
+      {showBulkGenerator && (
+        <BulkGeneratorForm
+          onClose={() => setShowBulkGenerator(false)}
+          onShowAPIKeyInput={() => {}}
+        />
+      )}
     </div>
   );
 };
