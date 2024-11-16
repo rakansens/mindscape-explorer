@@ -7,6 +7,7 @@ import { SidebarContent } from './SidebarContent';
 import { SidebarFooter } from './SidebarFooter';
 import { SidebarToggle } from './SidebarToggle';
 import { SaveConfirmDialog } from '../dialog/SaveConfirmDialog';
+import { cn } from '../../utils/cn';
 
 export const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
