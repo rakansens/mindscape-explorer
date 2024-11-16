@@ -19,18 +19,21 @@ export const useLayoutStore = create<LayoutStore>((set, get) => ({
     rankSpacing: 200,
   },
 
-  setLayout: (layout) => set({ layout }),
+  setLayout: (layout) => {
+    set({ layout });
+  },
 
   applyLayout: (nodes, edges, width, height) => {
     const { layout } = get();
     
     switch (layout.type) {
       case 'force':
-        // フォースレイアウトの場合は既存の実装を使用
-        return { nodes, edges };
+        return applyForceLayout(nodes, edges);
+      case 'tree':
+      case 'circle':
+      case 'orthogonal':
       case 'layered':
       default:
-        // 階層レイアウトの場合は既存の実装を使用
         return getLayoutedElements(nodes, edges, {
           direction: layout.direction,
           nodeSpacing: layout.nodeSpacing,

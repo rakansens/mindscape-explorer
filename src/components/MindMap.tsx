@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import ReactFlow, { 
   Background, 
   Controls, 
@@ -25,10 +25,25 @@ const edgeTypes = {
 
 export const MindMap = () => {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect, updateNodes, updateEdges } = useMindMapStore();
-  const { applyLayout } = useLayoutStore();
+  const { layout, applyLayout } = useLayoutStore();
   const { activeFileId, items } = useFileStore();
   const { theme, showMinimap } = useViewStore();
 
+  // レイアウト変更時に再レンダリング
+  useEffect(() => {
+    if (nodes.length > 0) {
+      const { nodes: layoutedNodes, edges: layoutedEdges } = applyLayout(
+        nodes,
+        edges,
+        window.innerWidth,
+        window.innerHeight
+      );
+      updateNodes(layoutedNodes);
+      updateEdges(layoutedEdges);
+    }
+  }, [layout, applyLayout]);
+
+  // ファイル変更時のレイアウト適用
   useEffect(() => {
     if (activeFileId) {
       const activeFile = items.find(item => item.id === activeFileId && item.type === 'file');
