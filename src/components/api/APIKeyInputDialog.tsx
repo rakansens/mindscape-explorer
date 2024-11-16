@@ -1,4 +1,3 @@
-import React from 'react';
 import { APIKeyInput } from './APIKeyInput';
 import { useToast } from '@/hooks/use-toast';
 import { ModelType } from '@/types/models';
@@ -38,7 +37,7 @@ export const APIKeyInputDialog: React.FC<APIKeyInputDialogProps> = ({ onSubmit, 
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 mt-20">
       <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
         <div className="relative p-6">
           <Button
