@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
+import { Settings2, X } from 'lucide-react';
 import { useFileStore } from '../../store/fileStore';
-import { Settings2 } from 'lucide-react';
-import { cn } from '../../lib/utils';
-import { Button } from '../ui/button';
-import { SaveConfirmDialog } from '../dialog/SaveConfirmDialog';
-import { useToast } from '../../hooks/use-toast';
 import { useMindMapStore } from '../../store/mindMapStore';
 import { useViewStore } from '../../store/viewStore';
 import { generateId } from '../../utils/idUtils';
@@ -16,6 +12,8 @@ import { SidebarToggle } from './SidebarToggle';
 import { APIKeyInputDialog } from '../api/APIKeyInputDialog';
 import { useOpenAI } from '../../store/openAIStore';
 import { createNewFile, getMainNodeLabel } from '../../utils/fileUtils';
+import { Button } from '../ui/button';
+import { useToast } from '../../hooks/use-toast';
 
 export const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -148,11 +146,12 @@ export const Sidebar = () => {
 
           {!apiKey && (
             <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setShowAPIKeyInput(true)}
-              className="mx-4 mt-2 mb-4 flex items-center gap-2 bg-blue-500 text-white hover:bg-blue-600"
+              className="ml-4 mb-2 text-muted-foreground hover:text-foreground"
             >
               <Settings2 className="w-4 h-4" />
-              <span>APIキーを設定</span>
             </Button>
           )}
 
@@ -197,6 +196,7 @@ export const Sidebar = () => {
               description: "APIキーを設定しました",
             });
           }}
+          onClose={() => setShowAPIKeyInput(false)}
         />
       )}
     </>
