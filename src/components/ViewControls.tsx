@@ -42,6 +42,26 @@ export const ViewControls = () => {
       id: 'sepia', 
       colors: ['bg-amber-50', 'bg-amber-700'],
       label: 'セピアテーマ'
+    },
+    { 
+      id: 'mint', 
+      colors: ['bg-green-50', 'bg-green-500'],
+      label: 'ミントテーマ'
+    },
+    { 
+      id: 'rose', 
+      colors: ['bg-pink-50', 'bg-pink-400'],
+      label: 'ローズテーマ'
+    },
+    { 
+      id: 'sunset', 
+      colors: ['bg-orange-50', 'bg-orange-500'],
+      label: 'サンセットテーマ'
+    },
+    { 
+      id: 'ocean', 
+      colors: ['bg-cyan-50', 'bg-cyan-500'],
+      label: 'オーシャンテーマ'
     }
   ];
 

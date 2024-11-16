@@ -130,6 +130,94 @@
     --input: 30 31.8% 91.4%;
     --ring: 30 84% 4.9%;
   }
+
+  .mint {
+    --background: 160 20% 98%;
+    --foreground: 160 84% 4.9%;
+    --card: 160 20% 98%;
+    --card-foreground: 160 84% 4.9%;
+    --popover: 160 20% 98%;
+    --popover-foreground: 160 84% 4.9%;
+    --primary: 160 60% 50%;
+    --primary-foreground: 160 40% 98%;
+    --secondary: 160 40% 96.1%;
+    --secondary-foreground: 160 47.4% 11.2%;
+    --muted: 160 40% 96.1%;
+    --muted-foreground: 160 16.3% 46.9%;
+    --accent: 160 40% 96.1%;
+    --accent-foreground: 160 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 160 40% 98%;
+    --border: 160 31.8% 91.4%;
+    --input: 160 31.8% 91.4%;
+    --ring: 160 84% 4.9%;
+  }
+
+  .rose {
+    --background: 350 20% 98%;
+    --foreground: 350 84% 4.9%;
+    --card: 350 20% 98%;
+    --card-foreground: 350 84% 4.9%;
+    --popover: 350 20% 98%;
+    --popover-foreground: 350 84% 4.9%;
+    --primary: 350 65% 65%;
+    --primary-foreground: 350 40% 98%;
+    --secondary: 350 40% 96.1%;
+    --secondary-foreground: 350 47.4% 11.2%;
+    --muted: 350 40% 96.1%;
+    --muted-foreground: 350 16.3% 46.9%;
+    --accent: 350 40% 96.1%;
+    --accent-foreground: 350 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 350 40% 98%;
+    --border: 350 31.8% 91.4%;
+    --input: 350 31.8% 91.4%;
+    --ring: 350 84% 4.9%;
+  }
+
+  .sunset {
+    --background: 30 30% 98%;
+    --foreground: 30 84% 4.9%;
+    --card: 30 30% 98%;
+    --card-foreground: 30 84% 4.9%;
+    --popover: 30 30% 98%;
+    --popover-foreground: 30 84% 4.9%;
+    --primary: 30 80% 60%;
+    --primary-foreground: 30 40% 98%;
+    --secondary: 30 40% 96.1%;
+    --secondary-foreground: 30 47.4% 11.2%;
+    --muted: 30 40% 96.1%;
+    --muted-foreground: 30 16.3% 46.9%;
+    --accent: 30 40% 96.1%;
+    --accent-foreground: 30 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 30 40% 98%;
+    --border: 30 31.8% 91.4%;
+    --input: 30 31.8% 91.4%;
+    --ring: 30 84% 4.9%;
+  }
+
+  .ocean {
+    --background: 200 30% 98%;
+    --foreground: 200 84% 4.9%;
+    --card: 200 30% 98%;
+    --card-foreground: 200 84% 4.9%;
+    --popover: 200 30% 98%;
+    --popover-foreground: 200 84% 4.9%;
+    --primary: 200 70% 55%;
+    --primary-foreground: 200 40% 98%;
+    --secondary: 200 40% 96.1%;
+    --secondary-foreground: 200 47.4% 11.2%;
+    --muted: 200 40% 96.1%;
+    --muted-foreground: 200 16.3% 46.9%;
+    --accent: 200 40% 96.1%;
+    --accent-foreground: 200 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 200 40% 98%;
+    --border: 200 31.8% 91.4%;
+    --input: 200 31.8% 91.4%;
+    --ring: 200 84% 4.9%;
+  }
 }
 
 @layer base {
