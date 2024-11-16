@@ -8,6 +8,7 @@ export interface NodeData {
   isTask?: boolean;
   isCompleted?: boolean;
   isCollapsed?: boolean;
+  isCode?: boolean;
 }
 
 export interface CustomNode {
@@ -18,4 +19,4 @@ export interface CustomNode {
     y: number;
   };
   data: NodeData;
-} 
+}

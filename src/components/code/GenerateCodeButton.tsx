@@ -3,6 +3,7 @@ import { FileCode } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useToast } from '../../hooks/use-toast';
 import { useOpenAI } from '../../utils/openai';
+import { useMindMapStore } from '../../store/mindMapStore';
 
 interface GenerateCodeButtonProps {
   nodeId: string;
@@ -16,12 +17,33 @@ export const GenerateCodeButton: React.FC<GenerateCodeButtonProps> = ({
   const [isLoading, setIsLoading] = React.useState(false);
   const { generateCode } = useOpenAI();
   const { toast } = useToast();
+  const { nodes, addNode } = useMindMapStore();
 
   const handleClick = async () => {
     try {
       setIsLoading(true);
       const codes = await generateCode(nodeId);
+      
+      // 親ノードを取得
+      const parentNode = nodes.find(n => n.id === nodeId);
+      if (!parentNode) return;
+
+      // コードを含む新しいノードを作成
+      const codeContent = `HTML:\n${codes.html}\n\nCSS:\n${codes.css}\n\nJavaScript:\n${codes.javascript}`;
+      addNode(parentNode, "Generated Code", {
+        x: parentNode.position.x + 250,
+        y: parentNode.position.y
+      }, {
+        detailedText: codeContent,
+        isCode: true
+      });
+
       onGenerate(codes);
+      
+      toast({
+        title: "コード生成完了",
+        description: "新しいノードにコードが追加されました",
+      });
     } catch (error) {
       toast({
         title: "エラー",

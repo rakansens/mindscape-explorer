@@ -19,7 +19,7 @@ interface MindMapStore {
   updateEdges: (edges: Edge[]) => void;
   selectNode: (id: string) => void;
   updateNodeText: (id: string, text: string) => void;
-  addNode: (parentNode: Node<NodeData>, label: string, position?: { x: number; y: number }) => Node<NodeData>;
+  addNode: (parentNode: Node<NodeData>, label: string, position?: { x: number; y: number }, additionalData?: Partial<NodeData>) => Node<NodeData>;
   updateNode: (id: string, updates: Partial<NodeData>) => void;
   removeChildNodes: (nodeId: string) => void;
   exportAsImage: () => Promise<void>;
@@ -100,7 +100,7 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
     }));
   },
 
-  addNode: (parentNode, label, position) => {
+  addNode: (parentNode, label, position, additionalData = {}) => {
     const newNode: Node<NodeData> = {
       id: nanoid(),
       type: 'custom',
@@ -110,6 +110,7 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
         isGenerating: false,
         isAppearing: false,
         selected: false,
+        ...additionalData
       },
     };
 
