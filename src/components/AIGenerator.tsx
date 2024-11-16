@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Panel, useReactFlow } from 'reactflow';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Settings2 } from 'lucide-react';
 import { useMindMapStore } from '../store/mindMapStore';
 import { useOpenAI } from '../store/openAIStore';
 import { useToast } from '../hooks/use-toast';
@@ -136,9 +136,10 @@ export function AIGenerator() {
           {!apiKey && (
             <Button
               onClick={() => setShowAPIKeyInput(true)}
-              className="bg-blue-500 text-white hover:bg-blue-600"
+              className="flex items-center gap-2 bg-blue-500 text-white hover:bg-blue-600"
             >
-              APIキーを設定
+              <Settings2 className="w-4 h-4" />
+              <span>APIキーを設定</span>
             </Button>
           )}
           {isOpen ? (
