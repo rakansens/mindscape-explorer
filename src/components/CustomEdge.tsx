@@ -89,14 +89,19 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
     }
   };
 
+  // 基本のエッジスタイルを定義
+  const baseStyle = {
+    strokeWidth: 2,
+    stroke: '#2563eb', // 青色を維持
+    strokeDasharray: lineStyle === 'dashed' ? '5,5' : 'none',
+  };
+
   return (
     <path
       id={id}
       style={{
-        ...style,
-        strokeWidth: 2,
-        stroke: '#2563eb',
-        strokeDasharray: lineStyle === 'dashed' ? '5,5' : 'none',
+        ...baseStyle,
+        ...style, // カスタムスタイルがある場合は上書きを許可しつつ、基本スタイルを優先
       }}
       className={`react-flow__edge-path ${data?.animated ? 'animated' : ''}`}
       d={getPath()}
