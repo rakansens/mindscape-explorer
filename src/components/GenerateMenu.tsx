@@ -78,10 +78,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
 
       // 新しいノードを生成
       await generateNodes(currentNode, hierarchyItems, () => {
-        fitView({
-          duration: 500,
-          padding: 0.5
-        });
+        fitView();  // オプションを削除
       });
 
       toast({
@@ -118,7 +115,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
         y: currentNode.position.y
       };
       addNode(currentNode, '新しいトピック', newPosition);
-      fitView();
+      fitView();  // オプションを削除
     }
   };
 
