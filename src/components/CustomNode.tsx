@@ -65,6 +65,20 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
     };
   }, [isHoveringNode, isHoveringMenu]);
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const currentNode = store.nodes.find(n => n.id === id);
+      if (currentNode) {
+        const newPosition = {
+          x: currentNode.position.x + 250,
+          y: currentNode.position.y
+        };
+        store.addNode(currentNode, '新しいトピック', newPosition);
+      }
+    }
+  };
+
   const handleCodePreview = () => {
     if (data.detailedText) {
       const codeLines = data.detailedText.split('\n');
@@ -114,6 +128,8 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
           e.stopPropagation();
           setIsEditing(true);
         }}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
       >
         <Handle type="target" position={Position.Left} className="w-2 h-2 bg-primary/50" />
         <Handle type="source" position={Position.Right} className="w-2 h-2 bg-primary/50" />
