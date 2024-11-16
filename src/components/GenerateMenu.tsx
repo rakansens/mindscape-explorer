@@ -26,7 +26,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
     css?: string;
     javascript?: string;
   }>({});
-  
+
   const hideTimeout = useRef<NodeJS.Timeout | null>(null);
   const { generateSubTopics } = useOpenAI();
   const { nodes, edges, addNode, updateNode, removeChildNodes } = useMindMapStore();
@@ -122,13 +122,18 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
   };
 
   return (
-    <div className="relative flex flex-col gap-1 z-50" onClick={e => e.stopPropagation()}>
+    <div 
+      className="relative flex flex-col gap-1 z-50" 
+      onClick={e => e.stopPropagation()}
+    >
       <div className="flex flex-col gap-1">
         <Button
           variant="ghost"
           size="icon"
           className="w-8 h-8 p-0 bg-white/80 backdrop-blur-sm shadow-lg border border-gray-200 hover:bg-white"
           onClick={handleAddNode}
+          onMouseDown={e => e.stopPropagation()}
+          onDoubleClick={e => e.stopPropagation()}
         >
           <Plus className="w-4 h-4 text-gray-600" />
         </Button>
@@ -160,6 +165,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
             setIsHoveringMenu(false);
             onMenuHover?.(false);
           }}
+          onClick={e => e.stopPropagation()}
         >
           <div className="flex flex-col gap-2">
             <GenerateMenuButtons
