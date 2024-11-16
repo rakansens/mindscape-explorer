@@ -2,7 +2,7 @@ import React from 'react';
 import { useViewStore } from '../store/viewStore';
 import { useLayoutStore } from '../store/layoutStore';
 import { Button } from './ui/button';
-import { Map, Layout, GitBranch } from 'lucide-react';
+import { Map, Layout, GitBranch, Wave, ArrowRight, Grid, Bold, Italic } from 'lucide-react';
 import { Tooltip } from './Tooltip';
 import {
   DropdownMenu,
@@ -82,23 +82,19 @@ export const ViewControls = () => {
   ];
 
   const edgeStyles = [
-    { id: 'bezier', label: 'なめらかな曲線' },
-    { id: 'step', label: '直角の階段状' },
-    { id: 'smoothstep', label: '滑らかな階段状' },
-    { id: 'straight', label: '直線' },
-    { id: 'double', label: '二重線' },
-    { id: 'wavy', label: '波線' },
-    { id: 'gradient', label: 'グラデーション' },
-    { id: 'varying', label: '可変幅' },
+    { id: 'bezier', label: 'なめらかな曲線', icon: Wave },
+    { id: 'step', label: '直角の階段状', icon: Grid },
+    { id: 'smoothstep', label: '滑らかな階段状', icon: ArrowRight },
+    { id: 'straight', label: '直線', icon: GitBranch },
   ];
 
   const lineStyles = [
-    { id: 'solid', label: '実線' },
-    { id: 'dashed', label: '破線' },
-    { id: 'double', label: '二重線' },
-    { id: 'wavy', label: '波線' },
-    { id: 'gradient', label: 'グラデーション' },
-    { id: 'varying', label: '可変幅' },
+    { id: 'solid', label: '実線', icon: ArrowRight },
+    { id: 'dashed', label: '破線', icon: Bold },
+    { id: 'double', label: '二重線', icon: Bold },
+    { id: 'wavy', label: '波線', icon: Wave },
+    { id: 'gradient', label: 'グラデーション', icon: Italic },
+    { id: 'varying', label: '可変幅', icon: Bold },
   ];
 
   return (
@@ -129,34 +125,40 @@ export const ViewControls = () => {
             </Button>
           </DropdownMenuTrigger>
         </Tooltip>
-        <DropdownMenuContent align="end" className="p-2 grid grid-cols-1 gap-2 min-w-[150px]">
+        <DropdownMenuContent align="end" className="p-2">
           <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">線の形状</div>
-          {edgeStyles.map((style) => (
-            <button
-              key={style.id}
-              onClick={() => setEdgeStyle(style.id as any)}
-              className={`
-                flex items-center gap-2 p-2 rounded-lg hover:bg-accent transition-colors
-                ${edgeStyle === style.id ? 'ring-2 ring-primary' : ''}
-              `}
-            >
-              <span className="text-sm">{style.label}</span>
-            </button>
-          ))}
-          <div className="w-full h-px bg-border my-1" />
+          <div className="grid grid-cols-2 gap-2">
+            {edgeStyles.map((style) => (
+              <button
+                key={style.id}
+                onClick={() => setEdgeStyle(style.id as any)}
+                className={`
+                  flex items-center gap-2 p-2 rounded-lg hover:bg-accent transition-colors
+                  ${edgeStyle === style.id ? 'ring-2 ring-primary bg-accent' : ''}
+                `}
+              >
+                <style.icon className="w-4 h-4" />
+                <span className="text-sm">{style.label}</span>
+              </button>
+            ))}
+          </div>
+          <div className="w-full h-px bg-border my-2" />
           <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">線のスタイル</div>
-          {lineStyles.map((style) => (
-            <button
-              key={style.id}
-              onClick={() => setLineStyle(style.id as any)}
-              className={`
-                flex items-center gap-2 p-2 rounded-lg hover:bg-accent transition-colors
-                ${lineStyle === style.id ? 'ring-2 ring-primary' : ''}
-              `}
-            >
-              <span className="text-sm">{style.label}</span>
-            </button>
-          ))}
+          <div className="grid grid-cols-2 gap-2">
+            {lineStyles.map((style) => (
+              <button
+                key={style.id}
+                onClick={() => setLineStyle(style.id as any)}
+                className={`
+                  flex items-center gap-2 p-2 rounded-lg hover:bg-accent transition-colors
+                  ${lineStyle === style.id ? 'ring-2 ring-primary bg-accent' : ''}
+                `}
+              >
+                <style.icon className="w-4 h-4" />
+                <span className="text-sm">{style.label}</span>
+              </button>
+            ))}
+          </div>
         </DropdownMenuContent>
       </DropdownMenu>
 
