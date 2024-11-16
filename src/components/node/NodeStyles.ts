@@ -19,29 +19,57 @@ export const getNodeThemeStyle = (level: number, theme: string): string => {
       return cn(
         baseStyle, 
         level === 0 
-          ? 'bg-purple-600 text-white' 
-          : 'bg-purple-500 text-white'
+          ? 'bg-gradient-to-br from-purple-600 to-purple-700 text-white' 
+          : 'bg-gradient-to-br from-purple-500 to-purple-600 text-white'
       );
     case 'blue':
       return cn(
         baseStyle, 
         level === 0 
-          ? 'bg-blue-600 text-white' 
-          : 'bg-blue-500 text-white'
+          ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white' 
+          : 'bg-gradient-to-br from-blue-500 to-blue-600 text-white'
       );
     case 'sepia':
       return cn(
         baseStyle, 
         level === 0 
-          ? 'bg-amber-700 text-white' 
-          : 'bg-amber-600 text-white'
+          ? 'bg-gradient-to-br from-amber-700 to-amber-800 text-white' 
+          : 'bg-gradient-to-br from-amber-600 to-amber-700 text-white'
+      );
+    case 'mint':
+      return cn(
+        baseStyle,
+        level === 0
+          ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white'
+          : 'bg-gradient-to-br from-emerald-400 to-teal-500 text-white'
+      );
+    case 'rose':
+      return cn(
+        baseStyle,
+        level === 0
+          ? 'bg-gradient-to-br from-rose-400 to-pink-500 text-white'
+          : 'bg-gradient-to-br from-rose-300 to-pink-400 text-white'
+      );
+    case 'sunset':
+      return cn(
+        baseStyle,
+        level === 0
+          ? 'bg-gradient-to-br from-orange-400 to-red-500 text-white'
+          : 'bg-gradient-to-br from-orange-300 to-red-400 text-white'
+      );
+    case 'ocean':
+      return cn(
+        baseStyle,
+        level === 0
+          ? 'bg-gradient-to-br from-cyan-500 to-blue-600 text-white'
+          : 'bg-gradient-to-br from-cyan-400 to-blue-500 text-white'
       );
     default: // light
       return cn(
         baseStyle, 
         level === 0 
-          ? 'bg-blue-500 text-white' 
-          : 'bg-blue-400 text-white'
+          ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white' 
+          : 'bg-gradient-to-br from-blue-400 to-blue-500 text-white'
       );
   }
 };
