@@ -1,7 +1,6 @@
 import React from 'react';
 import { Button } from '../ui/button';
 import {
-  Plus,
   Zap,
   BookOpen,
   HelpCircle,
@@ -14,24 +13,14 @@ import {
 interface GenerateMenuButtonsProps {
   isLoading: boolean;
   onGenerate: (mode: 'quick' | 'detailed' | 'why' | 'how' | 'regenerate' | 'ideas') => void;
-  onAddNode: () => void;
 }
 
 export const GenerateMenuButtons: React.FC<GenerateMenuButtonsProps> = ({
   isLoading,
   onGenerate,
-  onAddNode,
 }) => {
   return (
     <div className="flex gap-2">
-      <Button
-        variant="ghost"
-        size="icon"
-        className="w-8 h-8 p-0"
-        onClick={onAddNode}
-      >
-        <Plus className="h-4 w-4 text-gray-600" />
-      </Button>
       <Button
         variant="ghost"
         size="icon"

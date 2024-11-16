@@ -4,7 +4,7 @@ import { useMindMapStore } from '../store/mindMapStore';
 import { useViewStore } from '../store/viewStore';
 import { Button } from './ui/button';
 import { useToast } from '../hooks/use-toast';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Plus } from 'lucide-react';
 import { GenerateMenuButtons } from './generate/GenerateMenuButtons';
 import { GenerateCodeButton } from './code/GenerateCodeButton';
 import { CodePreviewModal } from './code/CodePreviewModal';
@@ -131,6 +131,14 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
           variant="ghost"
           size="icon"
           className="w-8 h-8 p-0 bg-white/80 backdrop-blur-sm shadow-lg border border-gray-200 hover:bg-white"
+          onClick={handleAddNode}
+        >
+          <Plus className="w-4 h-4 text-gray-600" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="w-8 h-8 p-0 bg-white/80 backdrop-blur-sm shadow-lg border border-gray-200 hover:bg-white"
           onMouseEnter={() => {
             setIsHoveringSparkleButton(true);
             onMenuHover?.(true);
@@ -160,7 +168,6 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
             <GenerateMenuButtons
               isLoading={isLoading}
               onGenerate={handleGenerate}
-              onAddNode={handleAddNode}
             />
             <div className="w-full h-px bg-gray-200" />
             <GenerateCodeButton
