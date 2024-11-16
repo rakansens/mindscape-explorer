@@ -4,6 +4,7 @@ import { useToast } from '../../hooks/use-toast';
 import { ModelType } from '../../types/models';
 import { X } from 'lucide-react';
 import { Button } from '../ui/button';
+import { useApiKeyStore } from '../../store/apiKeyStore';
 
 interface APIKeyInputDialogProps {
   onSubmit: (apiKey: string) => void;
@@ -12,12 +13,19 @@ interface APIKeyInputDialogProps {
 
 export const APIKeyInputDialog: React.FC<APIKeyInputDialogProps> = ({ onSubmit, onClose }) => {
   const { toast } = useToast();
+  const { setOpenAIKey, setGeminiKey } = useApiKeyStore();
 
   const handleSubmit = ({ type, apiKey, geminiKey }: { 
     type: ModelType;
     apiKey: string;
     geminiKey?: string;
   }) => {
+    if (type.includes('GEMINI')) {
+      setGeminiKey(geminiKey || '');
+    } else {
+      setOpenAIKey(apiKey);
+    }
+    
     onSubmit(apiKey);
     toast({
       title: "設定完了",

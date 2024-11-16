@@ -10,6 +10,7 @@ import { TopicTree } from '../types/openai';
 import { Button } from './ui/button';
 import { HierarchyItem } from '../types/common';
 import { APIKeyInputDialog } from './api/APIKeyInputDialog';
+import { useApiKeyStore } from '../store/apiKeyStore';
 
 export function AIGenerator() {
   const [prompt, setPrompt] = useState('');
@@ -19,7 +20,8 @@ export function AIGenerator() {
   const [layoutStyle, setLayoutStyle] = useState<'horizontal' | 'radial'>('horizontal');
   
   const { nodes, updateNodeText } = useMindMapStore();
-  const { generateSubTopics, apiKey, setApiKey } = useOpenAI();
+  const { generateSubTopics } = useOpenAI();
+  const { openaiKey, geminiKey } = useApiKeyStore();
   const { fitView } = useReactFlow();
   const { toast } = useToast();
   const { generateNodes } = useNodeGenerator();
@@ -58,7 +60,10 @@ export function AIGenerator() {
   };
 
   const handleGenerate = async () => {
-    if (!apiKey) {
+    const modelConfig = useMindMapStore.getState().modelConfig;
+    const isGemini = modelConfig?.type.includes('GEMINI');
+    
+    if ((isGemini && !geminiKey) || (!isGemini && !openaiKey)) {
       setShowAPIKeyInput(true);
       return;
     }
@@ -133,7 +138,7 @@ export function AIGenerator() {
       )}
       <Panel position="bottom-right" className="mr-4 mb-4">
         <div className="flex flex-col gap-2">
-          {!apiKey && (
+          {!openaiKey && (
             <Button
               onClick={() => setShowAPIKeyInput(true)}
               className="flex items-center gap-2 bg-blue-500 text-white hover:bg-blue-600"
