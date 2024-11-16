@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Handle, Position } from 'reactflow';
 import { useMindMapStore } from '../store/mindMapStore';
 import { useViewStore } from '../store/viewStore';
 import { getNodeLevel } from '../utils/nodeUtils';
@@ -12,6 +11,7 @@ import { NodePreviewButton } from './node/NodePreviewButton';
 import { CodePreviewModal } from './code/CodePreviewModal';
 import { getNodeThemeStyle } from './node/NodeStyles';
 import { calculateNewNodePosition } from '../utils/nodePositionUtils';
+import { NodeHandles } from './node/NodeHandles';
 
 interface CustomNodeProps {
   id: string;
@@ -129,30 +129,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
         onKeyDown={handleKeyDown}
         tabIndex={0}
       >
-        <Handle 
-          type="target" 
-          position={Position.Left} 
-          className="w-2 h-2 bg-primary/50" 
-          id="left"
-        />
-        <Handle 
-          type="source" 
-          position={Position.Right} 
-          className="w-2 h-2 bg-primary/50" 
-          id="right"
-        />
-        <Handle 
-          type="target" 
-          position={Position.Top} 
-          className="w-2 h-2 bg-primary/50" 
-          id="top"
-        />
-        <Handle 
-          type="source" 
-          position={Position.Bottom} 
-          className="w-2 h-2 bg-primary/50" 
-          id="bottom"
-        />
+        <NodeHandles />
         
         <NodeContent
           id={id}

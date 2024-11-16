@@ -21,37 +21,38 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
 }) => {
   const { edgeStyle, lineStyle } = useViewStore();
 
-  // 接続点の最適な位置を計算
+  // Calculate optimal handle positions based on node positions
   const getOptimalHandlePositions = () => {
     const dx = targetX - sourceX;
     const dy = targetY - sourceY;
     
-    // 水平方向の距離が垂直方向より大きい場合
+    // If horizontal distance is greater than vertical distance
     if (Math.abs(dx) > Math.abs(dy)) {
       return {
-        source: dx > 0 ? 'right' : 'left',
-        target: dx > 0 ? 'left' : 'right'
+        sourcePos: dx > 0 ? 'right' : 'left',
+        targetPos: dx > 0 ? 'left' : 'right'
       };
     }
-    // 垂直方向の距離が水平方向より大きい場合
+    // If vertical distance is greater than horizontal distance
     else {
       return {
-        source: dy > 0 ? 'bottom' : 'top',
-        target: dy > 0 ? 'top' : 'bottom'
+        sourcePos: dy > 0 ? 'bottom' : 'top',
+        targetPos: dy > 0 ? 'top' : 'bottom'
       };
     }
   };
 
-  const { source, target } = getOptimalHandlePositions();
+  // Get optimal positions
+  const { sourcePos, targetPos } = getOptimalHandlePositions();
 
   const getPath = () => {
     const params = {
       sourceX,
       sourceY,
-      sourcePosition,
+      sourcePosition: sourcePos,
       targetX,
       targetY,
-      targetPosition,
+      targetPosition: targetPos,
     };
 
     switch (edgeStyle) {
