@@ -25,6 +25,12 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
   const [isHoveringNode, setIsHoveringNode] = useState(false);
   const [isHoveringMenu, setIsHoveringMenu] = useState(false);
   const [showCodePreview, setShowCodePreview] = useState(false);
+  const [previewCodes, setPreviewCodes] = useState<{
+    html?: string;
+    css?: string;
+    javascript?: string;
+  }>({});
+  
   const hideTimeout = useRef<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   
@@ -145,10 +151,9 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
         }
       });
 
+      setPreviewCodes(codes);
       setShowCodePreview(true);
-      return codes;
     }
-    return {};
   };
 
   if (!data) {
@@ -186,7 +191,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
 
         {data.isCode && (
           <button
-            onClick={() => handleCodePreview()}
+            onClick={handleCodePreview}
             className="absolute -left-8 top-1/2 -translate-y-1/2 p-1.5 bg-white rounded-full shadow-lg hover:bg-gray-50"
           >
             <Eye className="w-4 h-4 text-gray-600" />
@@ -211,8 +216,8 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
         <CodePreviewModal
           isOpen={showCodePreview}
           onClose={() => setShowCodePreview(false)}
-          codes={handleCodePreview()}
-          preview={handleCodePreview().html}
+          codes={previewCodes}
+          preview={previewCodes.html}
         />
       </div>
     </NodeContextMenu>
