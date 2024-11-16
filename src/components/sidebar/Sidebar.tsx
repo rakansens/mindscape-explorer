@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Settings2 } from 'lucide-react';
 import { useFileStore } from '../../store/fileStore';
 import { useMindMapStore } from '../../store/mindMapStore';
 import { useViewStore } from '../../store/viewStore';
@@ -7,18 +6,11 @@ import { SidebarHeader } from './SidebarHeader';
 import { SidebarContent } from './SidebarContent';
 import { SidebarFooter } from './SidebarFooter';
 import { SidebarToggle } from './SidebarToggle';
-import { APIKeyInputDialog } from '../api/APIKeyInputDialog';
-import { useOpenAI } from '../../store/openAIStore';
-import { Button } from '../ui/button';
-import { useToast } from '../../hooks/use-toast';
-import { cn } from '../../lib/utils';
 import { SaveConfirmDialog } from '../dialog/SaveConfirmDialog';
 
 export const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(false); // 初期値をfalseに変更
-  const [showAPIKeyInput, setShowAPIKeyInput] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const { theme } = useViewStore();
-  const { apiKey } = useOpenAI();
   const fileStore = useFileStore();
   const mindMapStore = useMindMapStore();
 
@@ -65,17 +57,6 @@ export const Sidebar = () => {
             onCreateFile={handleCreateFile}
           />
 
-          {!apiKey && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowAPIKeyInput(true)}
-              className="ml-4 mb-2 text-muted-foreground hover:text-foreground"
-            >
-              <Settings2 className="w-4 h-4" />
-            </Button>
-          )}
-
           <SidebarContent 
             items={fileStore.items}
             activeFileId={fileStore.activeFileId}
@@ -94,15 +75,6 @@ export const Sidebar = () => {
           <SidebarFooter onSave={handleSave} />
         </div>
       </div>
-
-      {showAPIKeyInput && (
-        <APIKeyInputDialog
-          onSubmit={(config) => {
-            setShowAPIKeyInput(false);
-          }}
-          onClose={() => setShowAPIKeyInput(false)}
-        />
-      )}
     </>
   );
 };

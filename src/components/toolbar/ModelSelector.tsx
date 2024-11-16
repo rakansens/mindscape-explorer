@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useMindMapStore } from '../../store/mindMapStore';
 import { ModelType, getDefaultModelConfig } from '../../types/models';
+import { Settings2 } from 'lucide-react';
+import { Button } from '../ui/button';
+import { APIKeyInputDialog } from '../api/APIKeyInputDialog';
 
 export const ModelSelector: React.FC = () => {
+  const [showAPIKeyInput, setShowAPIKeyInput] = useState(false);
   const modelConfig = useMindMapStore(state => state.modelConfig);
   const setModelConfig = useMindMapStore(state => state.setModelConfig);
 
@@ -47,6 +51,24 @@ export const ModelSelector: React.FC = () => {
           <option value="GEMINI-ULTRA">Gemini Ultra</option>
         </optgroup>
       </select>
+      
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setShowAPIKeyInput(true)}
+        className="text-muted-foreground hover:text-foreground"
+      >
+        <Settings2 className="w-4 h-4" />
+      </Button>
+
+      {showAPIKeyInput && (
+        <APIKeyInputDialog
+          onSubmit={(config) => {
+            setShowAPIKeyInput(false);
+          }}
+          onClose={() => setShowAPIKeyInput(false)}
+        />
+      )}
     </div>
   );
-}; 
+};
