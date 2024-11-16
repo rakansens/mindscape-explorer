@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { FileSystemItem, MindMapFile, Folder } from '../types/file';
 import { Node, Edge } from '../types/reactflow';
+import { generateId } from '../utils/idUtils';
 
 interface FileStore {
   items: FileSystemItem[];
@@ -9,7 +10,6 @@ interface FileStore {
   editingTitle: string;
   expandedFolders: Set<string>;
   
-  // File operations
   addFile: (file: MindMapFile) => void;
   createFile: (title: string) => void;
   createFolder: (title: string) => void;
@@ -17,18 +17,15 @@ interface FileStore {
   deleteItem: (id: string, e: React.MouseEvent) => void;
   updateItem: (id: string, updates: Partial<FileSystemItem>) => void;
   
-  // Selection and editing
   setActiveFile: (id: string) => void;
   startEditing: (id: string, title: string, e: React.MouseEvent) => void;
   saveTitle: (id: string, e: React.MouseEvent) => void;
   cancelEditing: (e: React.MouseEvent) => void;
   setEditingTitle: (value: string) => void;
   
-  // Folder operations
   toggleFolder: (id: string) => void;
   getChildren: (parentId: string | null) => FileSystemItem[];
   
-  // Auto-save functionality
   autoSave: () => void;
 }
 
@@ -45,7 +42,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
 
   createFile: (title) => {
     const newFile: MindMapFile = {
-      id: crypto.randomUUID(),
+      id: generateId(),
       title,
       type: 'file',
       parentId: null,
@@ -60,7 +57,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
 
   createFolder: (title) => {
     const newFolder: Folder = {
-      id: crypto.randomUUID(),
+      id: generateId(),
       title,
       type: 'folder',
       parentId: null,
