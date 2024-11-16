@@ -14,12 +14,13 @@ import { useToast } from '../../hooks/use-toast';
 import { cn } from '../../lib/utils';
 import { SaveConfirmDialog } from '../dialog/SaveConfirmDialog';
 
-// Sidebar component is getting too large, so we'll split it into smaller components
 export const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
   const [showAPIKeyInput, setShowAPIKeyInput] = useState(false);
   const { theme } = useViewStore();
   const { apiKey } = useOpenAI();
+  const fileStore = useFileStore();
+  const mindMapStore = useMindMapStore();
 
   // Get theme-specific styles
   const sidebarStyles = {
@@ -38,6 +39,18 @@ export const Sidebar = () => {
     }[theme]
   };
 
+  const handleCreateFolder = () => {
+    fileStore.createFolder("新規フォルダ");
+  };
+
+  const handleCreateFile = () => {
+    fileStore.createFile("新規マインドマップ");
+  };
+
+  const handleSave = () => {
+    mindMapStore.saveMap();
+  };
+
   return (
     <>
       <div className={cn(sidebarStyles.base, sidebarStyles.width, sidebarStyles.theme)}>
@@ -47,7 +60,10 @@ export const Sidebar = () => {
           "h-full flex flex-col transition-all duration-300",
           isOpen ? "opacity-100 visible" : "opacity-0 invisible"
         )}>
-          <SidebarHeader />
+          <SidebarHeader 
+            onCreateFolder={handleCreateFolder}
+            onCreateFile={handleCreateFile}
+          />
 
           {!apiKey && (
             <Button
@@ -60,8 +76,22 @@ export const Sidebar = () => {
             </Button>
           )}
 
-          <SidebarContent />
-          <SidebarFooter />
+          <SidebarContent 
+            items={fileStore.items}
+            activeFileId={fileStore.activeFileId}
+            editingId={fileStore.editingId}
+            editingTitle={fileStore.editingTitle}
+            expandedFolders={fileStore.expandedFolders}
+            onSelect={fileStore.selectFile}
+            onToggle={fileStore.toggleFolder}
+            onEdit={fileStore.startEditing}
+            onSaveTitle={fileStore.saveTitle}
+            onCancelEdit={fileStore.cancelEditing}
+            onDelete={fileStore.deleteItem}
+            onTitleChange={fileStore.setEditingTitle}
+            getChildren={fileStore.getChildren}
+          />
+          <SidebarFooter onSave={handleSave} />
         </div>
       </div>
 
