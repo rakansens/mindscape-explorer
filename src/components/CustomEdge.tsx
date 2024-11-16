@@ -6,6 +6,8 @@ interface CustomEdgeProps extends EdgeProps {
   data?: {
     animated?: boolean;
   };
+  sourceHandle?: string;
+  targetHandle?: string;
 }
 
 const CustomEdge: React.FC<CustomEdgeProps> = ({
