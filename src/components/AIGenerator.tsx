@@ -6,17 +6,16 @@ import { useOpenAI } from '../store/openAIStore';
 import { useToast } from '../hooks/use-toast';
 import { sleep, animateText } from '../utils/animationUtils';
 import { useNodeGenerator } from './mindmap/NodeGenerator';
-import { APIKeyInput } from './APIKeyInput';
 import { TopicTree } from '../types/openai';
 import { Button } from './ui/button';
-import { Input } from './ui/input';
 import { HierarchyItem } from '../types/common';
+import { APIKeyInputDialog } from './api/APIKeyInputDialog';
 
 export function AIGenerator() {
   const [prompt, setPrompt] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [showAPIKeyInput, setShowAPIKeyInput] = useState(true); // デフォルトで表示
+  const [showAPIKeyInput, setShowAPIKeyInput] = useState(true);
   const [layoutStyle, setLayoutStyle] = useState<'horizontal' | 'radial'>('horizontal');
   
   const { nodes, updateNodeText } = useMindMapStore();
@@ -125,21 +124,12 @@ export function AIGenerator() {
   return (
     <>
       {showAPIKeyInput && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
-            <h2 className="text-xl font-semibold mb-4">APIキー設定</h2>
-            <APIKeyInput
-              onSubmit={({ type, apiKey, geminiKey }) => {
-                setApiKey(apiKey);
-                setShowAPIKeyInput(false);
-                toast({
-                  title: "設定完了",
-                  description: "APIキーを設定しました",
-                });
-              }}
-            />
-          </div>
-        </div>
+        <APIKeyInputDialog
+          onSubmit={(apiKey) => {
+            setApiKey(apiKey);
+            setShowAPIKeyInput(false);
+          }}
+        />
       )}
       <Panel position="bottom-right" className="mr-4 mb-4">
         <div className="flex flex-col gap-2">
