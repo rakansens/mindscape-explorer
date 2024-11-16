@@ -5,6 +5,7 @@ export type FileType = 'file' | 'folder';
 export interface BaseItem {
   id: string;
   title: string;
+  type: FileType;
   parentId: string | null;
   createdAt: Date;
   updatedAt: Date;

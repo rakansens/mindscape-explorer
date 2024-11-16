@@ -53,17 +53,20 @@ export const useFileStore = create<FileStore>((set, get) => ({
     get().addFile(newFile);
   },
 
-  createFolder: (title) => set((state) => ({
-    ...state,
-    items: [...state.items, {
+  createFolder: (title) => {
+    const newFolder: Folder = {
       id: generateId(),
       title,
       type: 'folder',
       parentId: null,
       createdAt: new Date(),
       updatedAt: new Date()
-    } as Folder]
-  })),
+    };
+    set((state) => ({
+      ...state,
+      items: [...state.items, newFolder]
+    }));
+  },
 
   removeItem: (id) => set((state) => ({
     ...state,
