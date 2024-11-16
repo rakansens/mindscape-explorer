@@ -1,5 +1,5 @@
 import React from 'react';
-import { EdgeProps, getBezierPath, getSmoothStepPath } from 'reactflow';
+import { EdgeProps, getBezierPath, getSmoothStepPath, Position } from 'reactflow';
 import { useViewStore } from '../store/viewStore';
 
 interface CustomEdgeProps extends EdgeProps {
@@ -29,15 +29,15 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
     // If horizontal distance is greater than vertical distance
     if (Math.abs(dx) > Math.abs(dy)) {
       return {
-        sourcePos: dx > 0 ? 'right' : 'left',
-        targetPos: dx > 0 ? 'left' : 'right'
+        sourcePos: dx > 0 ? Position.Right : Position.Left,
+        targetPos: dx > 0 ? Position.Left : Position.Right
       };
     }
     // If vertical distance is greater than horizontal distance
     else {
       return {
-        sourcePos: dy > 0 ? 'bottom' : 'top',
-        targetPos: dy > 0 ? 'top' : 'bottom'
+        sourcePos: dy > 0 ? Position.Bottom : Position.Top,
+        targetPos: dy > 0 ? Position.Top : Position.Bottom
       };
     }
   };
