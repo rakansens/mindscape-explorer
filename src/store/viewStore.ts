@@ -19,19 +19,20 @@ interface ViewStore {
 
 // ブラウザの設定に基づいて初期テーマを決定
 const getInitialTheme = (): Theme => {
-  if (typeof window !== 'undefined') {
-    const savedTheme = localStorage.getItem('theme') as Theme;
-    if (savedTheme) {
-      document.documentElement.classList.add(savedTheme);
-      return savedTheme;
-    }
-    
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      document.documentElement.classList.add('dark');
-      return 'dark';
-    }
+  if (typeof window === 'undefined') return 'light';
+
+  const savedTheme = localStorage.getItem('theme') as Theme;
+  if (savedTheme) {
+    document.documentElement.className = savedTheme;
+    return savedTheme;
   }
-  document.documentElement.classList.add('light');
+  
+  if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.documentElement.className = 'dark';
+    return 'dark';
+  }
+
+  document.documentElement.className = 'light';
   return 'light';
 };
 
@@ -43,8 +44,10 @@ export const useViewStore = create<ViewStore>((set, get) => ({
   instance: null,
   
   setTheme: (theme) => {
-    document.documentElement.classList.remove('light', 'dark', 'blue', 'purple', 'sepia');
-    document.documentElement.classList.add(theme);
+    // 既存のすべてのテーマクラスを削除
+    document.documentElement.className = '';
+    // 新しいテーマを適用
+    document.documentElement.className = theme;
     localStorage.setItem('theme', theme);
     set({ theme });
   },
