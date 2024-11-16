@@ -1,12 +1,11 @@
 import React from 'react';
 import { useViewStore } from '../store/viewStore';
 import { Button } from './ui/button';
-import { Sun, Moon, Map, Palette } from 'lucide-react';
+import { Map } from 'lucide-react';
 import { Tooltip } from './Tooltip';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
@@ -18,13 +17,33 @@ export const ViewControls = () => {
     toggleMinimap
   } = useViewStore();
 
-  const themeLabels = {
-    light: 'ライトモード',
-    dark: 'ダークモード',
-    blue: 'ブルーテーマ',
-    purple: 'パープルテーマ',
-    sepia: 'セピアテーマ'
-  };
+  const themeSwatches = [
+    { 
+      id: 'light', 
+      colors: ['bg-white', 'bg-blue-500'],
+      label: 'ライトモード'
+    },
+    { 
+      id: 'dark', 
+      colors: ['bg-[#1A1F2C]', 'bg-gray-700'],
+      label: 'ダークモード'
+    },
+    { 
+      id: 'blue', 
+      colors: ['bg-blue-100', 'bg-blue-600'],
+      label: 'ブルーテーマ'
+    },
+    { 
+      id: 'purple', 
+      colors: ['bg-purple-100', 'bg-purple-600'],
+      label: 'パープルテーマ'
+    },
+    { 
+      id: 'sepia', 
+      colors: ['bg-amber-50', 'bg-amber-700'],
+      label: 'セピアテーマ'
+    }
+  ];
 
   return (
     <div className="absolute bottom-4 right-4 flex gap-2">
@@ -50,37 +69,32 @@ export const ViewControls = () => {
               size="icon"
               className="p-2 rounded-lg hover:bg-blue-100/50 text-blue-500 transition-colors"
             >
-              <Palette className="w-5 h-5" />
+              <div className="w-5 h-5 rounded-full border-2 border-current overflow-hidden">
+                <div className={`w-full h-1/2 ${themeSwatches.find(t => t.id === theme)?.colors[0] || 'bg-white'}`} />
+                <div className={`w-full h-1/2 ${themeSwatches.find(t => t.id === theme)?.colors[1] || 'bg-blue-500'}`} />
+              </div>
             </Button>
           </DropdownMenuTrigger>
         </Tooltip>
-        <DropdownMenuContent align="end">
-          {Object.entries(themeLabels).map(([themeKey, label]) => (
-            <DropdownMenuItem
-              key={themeKey}
-              onClick={() => setTheme(themeKey as any)}
-              className={theme === themeKey ? 'bg-accent' : ''}
+        <DropdownMenuContent align="end" className="p-2 grid grid-cols-1 gap-2 min-w-[150px]">
+          {themeSwatches.map((themeSwatch) => (
+            <button
+              key={themeSwatch.id}
+              onClick={() => setTheme(themeSwatch.id as any)}
+              className={`
+                flex items-center gap-2 p-2 rounded-lg hover:bg-accent transition-colors
+                ${theme === themeSwatch.id ? 'ring-2 ring-primary' : ''}
+              `}
             >
-              {label}
-            </DropdownMenuItem>
+              <div className="w-6 h-6 rounded-full border border-border overflow-hidden">
+                <div className={`w-full h-1/2 ${themeSwatch.colors[0]}`} />
+                <div className={`w-full h-1/2 ${themeSwatch.colors[1]}`} />
+              </div>
+              <span className="text-sm">{themeSwatch.label}</span>
+            </button>
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
-
-      <Tooltip text={theme === 'light' ? "ダークモードに切り替え" : "ライトモードに切り替え"} position="top">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-          className="p-2 rounded-lg hover:bg-blue-100/50 text-blue-500 transition-colors"
-        >
-          {theme === 'light' ? (
-            <Moon className="w-5 h-5" />
-          ) : (
-            <Sun className="w-5 h-5" />
-          )}
-        </Button>
-      </Tooltip>
     </div>
   );
 };
