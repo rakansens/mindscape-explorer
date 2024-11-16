@@ -4,6 +4,8 @@ import { applyNodeChanges, applyEdgeChanges } from 'reactflow';
 import { nanoid } from 'nanoid';
 import { ModelConfig, getDefaultModelConfig } from '../types/models';
 import { NodeData } from '../types/node';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 interface MindMapStore {
   nodes: Node<NodeData>[];
@@ -20,6 +22,12 @@ interface MindMapStore {
   updateNode: (id: string, updates: Partial<NodeData>) => void;
   removeChildNodes: (nodeId: string) => void;
   setModelConfig: (config: ModelConfig | null) => void;
+  exportAsImage: () => Promise<void>;
+  exportAsPDF: () => Promise<void>;
+  exportAsJSON: () => void;
+  importFromJSON: (jsonString: string) => void;
+  saveMap: () => void;
+  loadMap: () => void;
 }
 
 const initialNodes: Node<NodeData>[] = [
@@ -39,10 +47,9 @@ const initialNodes: Node<NodeData>[] = [
 // 初期のモデル設定を環境変数から取得
 const initialModelConfig = getDefaultModelConfig();
 
-export const useMindMapStore = create<MindMapStore>((set) => ({
+export const useMindMapStore = create<MindMapStore>((set, get) => ({
   nodes: initialNodes,
   edges: [],
-  // 初期値を明示的に設定
   modelConfig: initialModelConfig,
 
   onNodesChange: (changes) => {
@@ -156,23 +163,66 @@ export const useMindMapStore = create<MindMapStore>((set) => ({
     });
   },
 
-  // ModelConfigの設定を改善
-  setModelConfig: (config) => {
-    if (config === null) {
-      // nullの場合は環境変数から再度設定を読み込む
-      set({ modelConfig: getDefaultModelConfig() });
-    } else {
-      // configが提供された場合は、既存の設定とマージ
-      set((state) => ({
-        modelConfig: {
-          ...state.modelConfig,
-          ...config,
-          // モデルタイプに応じて適切なAPIキーを設定
-          apiKey: config.type.includes('GEMINI') 
-            ? state.modelConfig?.geminiKey || ''
-            : state.modelConfig?.apiKey || ''
-        }
-      }));
+  exportAsImage: async () => {
+    const element = document.querySelector('.react-flow') as HTMLElement;
+    if (element) {
+      const canvas = await html2canvas(element);
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = 'mindmap.png';
+      link.href = dataUrl;
+      link.click();
+    }
+  },
+
+  exportAsPDF: async () => {
+    const element = document.querySelector('.react-flow') as HTMLElement;
+    if (element) {
+      const canvas = await html2canvas(element);
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('l', 'mm', 'a4');
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save('mindmap.pdf');
+    }
+  },
+
+  exportAsJSON: () => {
+    const { nodes, edges } = get();
+    const data = { nodes, edges };
+    const jsonString = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'mindmap.json';
+    link.click();
+    URL.revokeObjectURL(url);
+  },
+
+  importFromJSON: (jsonString: string) => {
+    try {
+      const data = JSON.parse(jsonString);
+      if (data.nodes && data.edges) {
+        set({ nodes: data.nodes, edges: data.edges });
+      }
+    } catch (error) {
+      console.error('Failed to import JSON:', error);
+    }
+  },
+
+  saveMap: () => {
+    const { nodes, edges } = get();
+    localStorage.setItem('mindmap', JSON.stringify({ nodes, edges }));
+  },
+
+  loadMap: () => {
+    const saved = localStorage.getItem('mindmap');
+    if (saved) {
+      const { nodes, edges } = JSON.parse(saved);
+      set({ nodes, edges });
     }
   },
 }));

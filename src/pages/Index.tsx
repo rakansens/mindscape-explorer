@@ -11,7 +11,7 @@ import { useViewStore } from '../store/viewStore';
 import CustomNode from '../components/CustomNode';
 import CustomEdge from '../components/CustomEdge';
 import { Toolbar } from '../components/Toolbar';
-import ViewControls from '../components/ViewControls';
+import { ViewControls } from '../components/ViewControls';
 
 const nodeTypes = {
   custom: CustomNode,

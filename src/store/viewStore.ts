@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { ReactFlowInstance } from 'reactflow';
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -7,18 +8,21 @@ interface ViewStore {
   showMinimap: boolean;
   animatingNodes: Set<string>;
   loadingNodes: Set<string>;
+  instance: ReactFlowInstance | null;
   setTheme: (theme: Theme) => void;
   toggleMinimap: () => void;
   setNodeAnimating: (nodeId: string, isAnimating: boolean) => void;
   setNodeLoading: (nodeId: string, isLoading: boolean) => void;
+  setInstance: (instance: ReactFlowInstance | null) => void;
   fitView: () => void;
 }
 
-export const useViewStore = create<ViewStore>((set) => ({
+export const useViewStore = create<ViewStore>((set, get) => ({
   theme: 'system',
   showMinimap: false,
   animatingNodes: new Set<string>(),
   loadingNodes: new Set<string>(),
+  instance: null,
   
   setTheme: (theme) => set({ theme }),
   
@@ -45,11 +49,13 @@ export const useViewStore = create<ViewStore>((set) => ({
     }
     return { loadingNodes: newLoadingNodes };
   }),
+
+  setInstance: (instance) => set({ instance }),
   
   fitView: () => {
-    const { fitView } = document.querySelector('.react-flow')?.getBoundingClientRect() || {};
-    if (fitView) {
-      fitView();
+    const { instance } = get();
+    if (instance) {
+      instance.fitView({ padding: 0.2 });
     }
   }
 }));
