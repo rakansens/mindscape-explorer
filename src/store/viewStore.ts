@@ -17,8 +17,26 @@ interface ViewStore {
   fitView: () => void;
 }
 
+// ブラウザの設定に基づいて初期テーマを決定
+const getInitialTheme = (): Theme => {
+  if (typeof window !== 'undefined') {
+    const savedTheme = localStorage.getItem('theme') as Theme;
+    if (savedTheme) {
+      document.documentElement.classList.add(savedTheme);
+      return savedTheme;
+    }
+    
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.classList.add('dark');
+      return 'dark';
+    }
+  }
+  document.documentElement.classList.add('light');
+  return 'light';
+};
+
 export const useViewStore = create<ViewStore>((set, get) => ({
-  theme: 'light',
+  theme: getInitialTheme(),
   showMinimap: false,
   animatingNodes: new Set<string>(),
   loadingNodes: new Set<string>(),
@@ -27,6 +45,7 @@ export const useViewStore = create<ViewStore>((set, get) => ({
   setTheme: (theme) => {
     document.documentElement.classList.remove('light', 'dark', 'blue', 'purple', 'sepia');
     document.documentElement.classList.add(theme);
+    localStorage.setItem('theme', theme);
     set({ theme });
   },
   
