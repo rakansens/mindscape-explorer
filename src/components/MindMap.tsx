@@ -91,17 +91,13 @@ export const MindMap = () => {
         <Controls className="bg-background text-foreground border-border" />
         {showMinimap && (
           <MiniMap
-            className="bg-background/80 backdrop-blur-sm rounded-xl border border-border"
+            className="!absolute !right-4 !bottom-20 bg-background/80 backdrop-blur-sm rounded-xl border border-border"
             maskColor="rgba(0, 0, 0, 0.2)"
             nodeColor={(node) => {
               return theme === 'dark' ? '#ffffff' : '#1a1a1a';
             }}
             nodeStrokeColor={(node) => {
               return theme === 'dark' ? '#333333' : '#e5e5e5';
-            }}
-            style={{
-              right: 24,
-              bottom: 24,
             }}
           />
         )}

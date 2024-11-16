@@ -66,14 +66,14 @@ export const ViewControls = () => {
   ];
 
   return (
-    <div className="absolute bottom-4 right-4 flex gap-2">
+    <div className="absolute bottom-4 right-4 flex gap-2 z-50">
       <Tooltip text={showMinimap ? "ミニマップを非表示" : "ミニマップを表示"} position="top">
         <Button
           variant="ghost"
           size="icon"
           onClick={toggleMinimap}
           className={`
-            p-2 rounded-lg transition-colors
+            p-2 rounded-lg transition-colors backdrop-blur-sm
             ${showMinimap ? 'bg-blue-100/50 text-blue-500' : 'hover:bg-blue-100/50 text-blue-500'}
           `}
         >
@@ -87,7 +87,7 @@ export const ViewControls = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="p-2 rounded-lg hover:bg-blue-100/50 text-blue-500 transition-colors"
+              className="p-2 rounded-lg hover:bg-blue-100/50 text-blue-500 transition-colors backdrop-blur-sm"
             >
               <div className="w-5 h-5 rounded-full border-2 border-current overflow-hidden">
                 <div className={`w-full h-1/2 ${themeSwatches.find(t => t.id === theme)?.colors[0] || 'bg-white'}`} />
@@ -96,7 +96,7 @@ export const ViewControls = () => {
             </Button>
           </DropdownMenuTrigger>
         </Tooltip>
-        <DropdownMenuContent align="end" className="p-2 grid grid-cols-1 gap-2 min-w-[150px]">
+        <DropdownMenuContent align="end" className="p-2 grid grid-cols-1 gap-2 min-w-[150px] z-50">
           {themeSwatches.map((themeSwatch) => (
             <button
               key={themeSwatch.id}
