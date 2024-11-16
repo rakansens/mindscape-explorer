@@ -18,46 +18,41 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
   targetPosition,
   style = {},
   data,
+  sourceHandle,
+  targetHandle,
 }) => {
   const { edgeStyle, lineStyle } = useViewStore();
 
-  // Calculate optimal handle positions based on node positions
-  const getOptimalHandlePositions = () => {
+  // 既存のハンドルIDがある場合はそれを使用し、ない場合のみ最適な位置を計算
+  const getHandlePositions = () => {
+    if (sourceHandle && targetHandle) {
+      return {
+        sourcePos: sourceHandle === 'right' ? Position.Right :
+                  sourceHandle === 'left' ? Position.Left :
+                  sourceHandle === 'top' ? Position.Top :
+                  Position.Bottom,
+        targetPos: targetHandle === 'right' ? Position.Right :
+                  targetHandle === 'left' ? Position.Left :
+                  targetHandle === 'top' ? Position.Top :
+                  Position.Bottom
+      };
+    }
+
     const dx = targetX - sourceX;
     const dy = targetY - sourceY;
     
-    // 水平・垂直の距離を比較して最適な接続点を決定
     if (Math.abs(dx) > Math.abs(dy)) {
-      // 水平距離が大きい場合
-      if (dx > 0) {
-        return {
-          sourcePos: Position.Right,
-          targetPos: Position.Left
-        };
-      } else {
-        return {
-          sourcePos: Position.Left,
-          targetPos: Position.Right
-        };
-      }
+      return dx > 0 
+        ? { sourcePos: Position.Right, targetPos: Position.Left }
+        : { sourcePos: Position.Left, targetPos: Position.Right };
     } else {
-      // 垂直距離が大きい場合
-      if (dy > 0) {
-        return {
-          sourcePos: Position.Bottom,
-          targetPos: Position.Top
-        };
-      } else {
-        return {
-          sourcePos: Position.Top,
-          targetPos: Position.Bottom
-        };
-      }
+      return dy > 0
+        ? { sourcePos: Position.Bottom, targetPos: Position.Top }
+        : { sourcePos: Position.Top, targetPos: Position.Bottom };
     }
   };
 
-  // 最適な接続点を取得
-  const { sourcePos, targetPos } = getOptimalHandlePositions();
+  const { sourcePos, targetPos } = getHandlePositions();
 
   const getPath = () => {
     const params = {
