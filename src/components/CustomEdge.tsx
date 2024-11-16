@@ -26,23 +26,37 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
     const dx = targetX - sourceX;
     const dy = targetY - sourceY;
     
-    // If horizontal distance is greater than vertical distance
+    // 水平・垂直の距離を比較して最適な接続点を決定
     if (Math.abs(dx) > Math.abs(dy)) {
-      return {
-        sourcePos: dx > 0 ? Position.Right : Position.Left,
-        targetPos: dx > 0 ? Position.Left : Position.Right
-      };
-    }
-    // If vertical distance is greater than horizontal distance
-    else {
-      return {
-        sourcePos: dy > 0 ? Position.Bottom : Position.Top,
-        targetPos: dy > 0 ? Position.Top : Position.Bottom
-      };
+      // 水平距離が大きい場合
+      if (dx > 0) {
+        return {
+          sourcePos: Position.Right,
+          targetPos: Position.Left
+        };
+      } else {
+        return {
+          sourcePos: Position.Left,
+          targetPos: Position.Right
+        };
+      }
+    } else {
+      // 垂直距離が大きい場合
+      if (dy > 0) {
+        return {
+          sourcePos: Position.Bottom,
+          targetPos: Position.Top
+        };
+      } else {
+        return {
+          sourcePos: Position.Top,
+          targetPos: Position.Bottom
+        };
+      }
     }
   };
 
-  // Get optimal positions
+  // 最適な接続点を取得
   const { sourcePos, targetPos } = getOptimalHandlePositions();
 
   const getPath = () => {

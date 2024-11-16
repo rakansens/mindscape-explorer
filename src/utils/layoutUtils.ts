@@ -1,5 +1,5 @@
 import dagre from 'dagre';
-import { Node, Edge } from 'reactflow';
+import { Node, Edge, Position } from 'reactflow';
 import { NodeData } from '../types/node';
 
 interface LayoutOptions {
@@ -80,7 +80,47 @@ const getOrthogonalLayout = (
   return { nodes: layoutedNodes, edges };
 };
 
-// 通常のレイアウト
+// エッジの接続点を最適化する関数を追加
+const optimizeEdgeHandles = (nodes: Node<NodeData>[], edges: Edge[]) => {
+  return edges.map(edge => {
+    const sourceNode = nodes.find(n => n.id === edge.source);
+    const targetNode = nodes.find(n => n.id === edge.target);
+    
+    if (!sourceNode || !targetNode) return edge;
+
+    const dx = targetNode.position.x - sourceNode.position.x;
+    const dy = targetNode.position.y - sourceNode.position.y;
+
+    let sourceHandle, targetHandle;
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+      // 水平方向の接続
+      if (dx > 0) {
+        sourceHandle = 'right';
+        targetHandle = 'left';
+      } else {
+        sourceHandle = 'left';
+        targetHandle = 'right';
+      }
+    } else {
+      // 垂直方向の接続
+      if (dy > 0) {
+        sourceHandle = 'bottom';
+        targetHandle = 'top';
+      } else {
+        sourceHandle = 'top';
+        targetHandle = 'bottom';
+      }
+    }
+
+    return {
+      ...edge,
+      sourceHandle,
+      targetHandle,
+    };
+  });
+};
+
 export const getLayoutedElements = (
   nodes: Node<NodeData>[],
   edges: Edge[],
@@ -131,7 +171,13 @@ export const getLayoutedElements = (
     };
   });
 
-  return { nodes: layoutedNodes, edges };
+  // レイアウト適用後にエッジの接続点を最適化
+  const optimizedEdges = optimizeEdgeHandles(layoutedNodes, edges);
+
+  return { 
+    nodes: layoutedNodes, 
+    edges: optimizedEdges 
+  };
 };
 
 export { getCircleLayout, getOrthogonalLayout };
