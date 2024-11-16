@@ -23,7 +23,31 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
   sourceHandle,
   targetHandle,
 }) => {
-  const { edgeStyle, lineStyle } = useViewStore();
+  const { edgeStyle, lineStyle, theme } = useViewStore();
+
+  // テーマに基づいてエッジの色を決定
+  const getEdgeColor = () => {
+    switch(theme) {
+      case 'dark':
+        return '#6366f1'; // indigo-500
+      case 'blue':
+        return '#3b82f6'; // blue-500
+      case 'purple':
+        return '#a855f7'; // purple-500
+      case 'sepia':
+        return '#d97706'; // amber-600
+      case 'mint':
+        return '#10b981'; // emerald-500
+      case 'rose':
+        return '#f43f5e'; // rose-500
+      case 'sunset':
+        return '#f97316'; // orange-500
+      case 'ocean':
+        return '#06b6d4'; // cyan-500
+      default:
+        return '#3b82f6'; // blue-500 (default)
+    }
+  };
 
   const getHandlePositions = () => {
     const dx = targetX - sourceX;
@@ -87,7 +111,7 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
 
   const baseStyle = {
     strokeWidth: 2,
-    stroke: '#2563eb',
+    stroke: getEdgeColor(),
     strokeDasharray: lineStyle === 'dashed' ? '5,5' : 'none',
   };
 
