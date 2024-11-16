@@ -28,23 +28,23 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
   const getEdgeColor = () => {
     switch(theme) {
       case 'dark':
-        return 'url(#gradient-dark)';
+        return 'rgba(255, 255, 255, 0.7)';
       case 'blue':
-        return 'url(#gradient-blue)';
+        return 'rgba(37, 99, 235, 0.7)';
       case 'purple':
-        return 'url(#gradient-purple)';
+        return 'rgba(147, 51, 234, 0.7)';
       case 'sepia':
-        return 'url(#gradient-sepia)';
+        return 'rgba(180, 83, 9, 0.7)';
       case 'mint':
-        return 'url(#gradient-mint)';
+        return 'rgba(16, 185, 129, 0.7)';
       case 'rose':
-        return 'url(#gradient-rose)';
+        return 'rgba(244, 63, 94, 0.7)';
       case 'sunset':
-        return 'url(#gradient-sunset)';
+        return 'rgba(234, 88, 12, 0.7)';
       case 'ocean':
-        return 'url(#gradient-ocean)';
+        return 'rgba(14, 165, 233, 0.7)';
       default:
-        return 'url(#gradient-default)';
+        return 'rgba(59, 130, 246, 0.7)';
     }
   };
 
@@ -126,29 +126,34 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
           strokeWidth: baseWidth,
           stroke: color,
           filter: 'url(#double-line)',
+          opacity: 1,
         };
       case 'wavy':
         return {
           strokeWidth: baseWidth,
           stroke: color,
           filter: 'url(#wavy-line)',
+          opacity: 1,
         };
       case 'gradient':
         return {
           strokeWidth: baseWidth,
           stroke: color,
+          opacity: 1,
         };
       case 'varying':
         return {
           strokeWidth: baseWidth,
           stroke: color,
           filter: 'url(#varying-width)',
+          opacity: 1,
         };
       default:
         return {
           strokeWidth: baseWidth,
           stroke: color,
           strokeDasharray: lineStyle === 'dashed' ? '5,5' : 'none',
+          opacity: 1,
         };
     }
   };
@@ -156,15 +161,6 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
   return (
     <>
       <defs>
-        <linearGradient id="gradient-default" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100%" y2="0">
-          <stop offset="0%" stopColor="#3b82f6" />
-          <stop offset="100%" stopColor="#60a5fa" />
-        </linearGradient>
-        <linearGradient id="gradient-dark" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100%" y2="0">
-          <stop offset="0%" stopColor="#6366f1" />
-          <stop offset="100%" stopColor="#818cf8" />
-        </linearGradient>
-
         <filter id="double-line" x="-20%" y="-20%" width="140%" height="140%">
           <feMorphology operator="dilate" radius="1" />
           <feComposite in="SourceGraphic" />
