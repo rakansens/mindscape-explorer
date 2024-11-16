@@ -59,11 +59,76 @@ export const FileListDialog: React.FC<FileListDialogProps> = ({ isOpen, onClose 
         <ScrollArea className="h-[400px] mt-4">
           <div className="grid grid-cols-1 gap-2">
             {files.map(file => (
-              // ... rest of the component remains the same ...
+              <div
+                key={file.id}
+                onClick={() => handleSelect(file.id)}
+                className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent cursor-pointer"
+              >
+                <div className="flex-1">
+                  {editingId === file.id ? (
+                    <div className="flex items-center gap-2">
+                      <Input
+                        value={editingTitle}
+                        onChange={(e) => setEditingTitle(e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex-1"
+                      />
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSaveTitle(file.id);
+                        }}
+                      >
+                        <Check className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingId(null);
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-4">
+                      <span className="font-medium">{file.title}</span>
+                      <span className="text-sm text-muted-foreground">
+                        {formatDate(file.updatedAt)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                {editingId !== file.id && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(file.id, file.title);
+                      }}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={(e) => handleDelete(file.id, e)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </ScrollArea>
       </DialogContent>
     </Dialog>
   );
-}; 
+};
