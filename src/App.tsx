@@ -20,8 +20,8 @@ const queryClient = new QueryClient({
 const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <ReactFlowProvider>
+      <ReactFlowProvider>
+        <TooltipProvider>
           <div className="flex h-screen overflow-hidden">
             <Sidebar />
             <div className="flex-1 relative">
@@ -34,8 +34,8 @@ const App: React.FC = () => {
               <Sonner />
             </div>
           </div>
-        </ReactFlowProvider>
-      </TooltipProvider>
+        </TooltipProvider>
+      </ReactFlowProvider>
     </QueryClientProvider>
   );
 };

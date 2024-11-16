@@ -65,7 +65,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
       updatedAt: new Date()
     };
     set((state) => ({
-      items: [...state.items, newFolder]
+      items: [...state.items, newFolder] as FileSystemItem[]
     }));
   },
 
@@ -81,7 +81,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
 
   updateItem: (id, updates) => set((state) => ({
     items: state.items.map(item =>
-      item.id === id ? { ...item, ...updates } : item
+      item.id === id ? { ...item, ...updates } as FileSystemItem : item
     )
   })),
 
