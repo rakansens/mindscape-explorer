@@ -21,6 +21,29 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
 }) => {
   const { edgeStyle, lineStyle } = useViewStore();
 
+  // 接続点の最適な位置を計算
+  const getOptimalHandlePositions = () => {
+    const dx = targetX - sourceX;
+    const dy = targetY - sourceY;
+    
+    // 水平方向の距離が垂直方向より大きい場合
+    if (Math.abs(dx) > Math.abs(dy)) {
+      return {
+        source: dx > 0 ? 'right' : 'left',
+        target: dx > 0 ? 'left' : 'right'
+      };
+    }
+    // 垂直方向の距離が水平方向より大きい場合
+    else {
+      return {
+        source: dy > 0 ? 'bottom' : 'top',
+        target: dy > 0 ? 'top' : 'bottom'
+      };
+    }
+  };
+
+  const { source, target } = getOptimalHandlePositions();
+
   const getPath = () => {
     const params = {
       sourceX,
