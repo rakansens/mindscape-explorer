@@ -11,8 +11,7 @@ import { useFileStore } from '../store/fileStore';
 import { useViewStore } from '../store/viewStore';
 import CustomNode from './CustomNode';
 import CustomEdge from './CustomEdge';
-import { applyForceLayout } from '../utils/forceLayout';
-import { getLayoutedElements } from '../utils/layoutUtils';
+import { calculateElkLayout } from '../utils/elkLayout';
 import { ViewControls } from './ViewControls';
 import 'reactflow/dist/style.css';
 
@@ -28,47 +27,20 @@ export const MindMap = () => {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect, updateNodes, updateEdges } = useMindMapStore();
   const { activeFileId, items } = useFileStore();
   const { theme, showMinimap } = useViewStore();
-  const simulationRef = useRef<any>(null);
 
   useEffect(() => {
     if (activeFileId) {
       const activeFile = items.find(item => item.id === activeFileId && item.type === 'file');
       if (activeFile && 'data' in activeFile) {
-        // ファイルが読み込まれたときに階層レイアウトを適用
-        const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
-          activeFile.data.nodes,
-          activeFile.data.edges,
-          {
-            direction: 'TB',
-            nodeWidth: 200,
-            nodeHeight: 100,
-            rankSpacing: 200,
-            nodeSpacing: 100,
-          }
-        );
-        updateNodes(layoutedNodes);
-        updateEdges(layoutedEdges);
+        // ELKレイアウトを適用
+        calculateElkLayout(activeFile.data.nodes, activeFile.data.edges)
+          .then(({ nodes: layoutedNodes, edges: layoutedEdges }) => {
+            updateNodes(layoutedNodes);
+            updateEdges(layoutedEdges);
+          });
       }
     }
   }, [activeFileId]);
-
-  useEffect(() => {
-    if (nodes.length > 0 && !simulationRef.current) {
-      simulationRef.current = applyForceLayout(
-        nodes,
-        edges,
-        window.innerWidth,
-        window.innerHeight,
-        updateNodes
-      );
-    }
-
-    return () => {
-      if (simulationRef.current) {
-        simulationRef.current.stop();
-      }
-    };
-  }, [nodes.length, edges.length]);
 
   return (
     <div className={`w-full h-full ${theme} relative`}>
