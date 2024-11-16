@@ -8,8 +8,9 @@ import { NodeData } from '../types/node';
 import { cn } from '../utils/cn';
 import { NodeContextMenu } from './node/NodeContextMenu';
 import { NodeContent } from './node/NodeContent';
-import { Eye } from 'lucide-react';
+import { NodePreviewButton } from './node/NodePreviewButton';
 import { CodePreviewModal } from './code/CodePreviewModal';
+import { getNodeThemeStyle } from './node/NodeStyles';
 
 interface CustomNodeProps {
   id: string;
@@ -18,7 +19,7 @@ interface CustomNodeProps {
   yPos: number;
 }
 
-const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
+const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(data.label);
   const [showButton, setShowButton] = useState(false);
@@ -36,73 +37,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
   
   const store = useMindMapStore();
   const { theme } = useViewStore();
-  const { 
-    animatingNodes, 
-    loadingNodes,
-    setNodeAnimating,
-    setNodeLoading
-  } = useViewStore();
-  
   const level = getNodeLevel(store.edges, id);
-  const isAnimating = animatingNodes.has(id);
-  const isLoading = loadingNodes.has(id);
-
-  useEffect(() => {
-    if (data.isAppearing) {
-      setNodeAnimating(id, true);
-    } else {
-      setNodeAnimating(id, false);
-    }
-  }, [data.isAppearing, id, setNodeAnimating]);
-
-  useEffect(() => {
-    if (data.isGenerating) {
-      setNodeLoading(id, true);
-    } else {
-      setNodeLoading(id, false);
-    }
-  }, [data.isGenerating, id, setNodeLoading]);
-
-  const handleMenuMouseEnter = () => {
-    setIsHoveringMenu(true);
-  };
-
-  const handleMenuMouseLeave = () => {
-    setIsHoveringMenu(false);
-  };
-
-  const handleNodeMouseEnter = () => {
-    setIsHoveringNode(true);
-    setShowButton(true);
-    store.updateNode(id, {
-      selected: true
-    });
-  };
-
-  const handleNodeMouseLeave = () => {
-    setIsHoveringNode(false);
-  };
-
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    store.selectNode(id);
-  };
-
-  const handleDoubleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsEditing(true);
-  };
-
-  const handleEditComplete = () => {
-    if (inputValue.trim() !== '') {
-      store.updateNodeText(id, inputValue);
-    } else {
-      setInputValue(data.label);
-    }
-    setIsEditing(false);
-  };
 
   useEffect(() => {
     const shouldShowButton = isHoveringNode || isHoveringMenu;
@@ -113,17 +48,13 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
 
     if (shouldShowButton) {
       setShowButton(true);
-      store.updateNode(id, {
-        selected: true
-      });
+      store.updateNode(id, { selected: true });
     }
 
     hideTimeout.current = setTimeout(() => {
       if (!isHoveringNode && !isHoveringMenu) {
         setShowButton(false);
-        store.updateNode(id, {
-          selected: false
-        });
+        store.updateNode(id, { selected: false });
       }
     }, 1000);
 
@@ -157,23 +88,6 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
     }
   };
 
-  const getNodeThemeStyle = (level: number): string => {
-    const baseStyle = "relative min-w-[120px] max-w-[300px] rounded-xl shadow-lg";
-    
-    switch(theme) {
-      case 'dark':
-        return cn(baseStyle, level === 0 ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground');
-      case 'purple':
-        return cn(baseStyle, level === 0 ? 'bg-purple-600 text-white' : 'bg-purple-500 text-white');
-      case 'blue':
-        return cn(baseStyle, level === 0 ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white');
-      case 'sepia':
-        return cn(baseStyle, level === 0 ? 'bg-amber-700 text-white' : 'bg-amber-600 text-white');
-      default: // light
-        return cn(baseStyle, level === 0 ? 'bg-blue-500 text-white' : 'bg-blue-400 text-white');
-    }
-  };
-
   if (!data) {
     console.warn(`Node ${id} has no data`);
     return null;
@@ -183,15 +97,23 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
     <NodeContextMenu nodeId={id}>
       <div
         className={cn(
-          getNodeThemeStyle(level),
+          getNodeThemeStyle(level, theme),
           data.selected ? "ring-2 ring-primary" : "",
           data.isGenerating ? "animate-pulse scale-105" : "",
           "hover:shadow-xl transition-all duration-300 transform"
         )}
-        onMouseEnter={handleNodeMouseEnter}
-        onMouseLeave={handleNodeMouseLeave}
-        onClick={handleClick}
-        onDoubleClick={handleDoubleClick}
+        onMouseEnter={() => setIsHoveringNode(true)}
+        onMouseLeave={() => setIsHoveringNode(false)}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          store.selectNode(id);
+        }}
+        onDoubleClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsEditing(true);
+        }}
       >
         <Handle type="target" position={Position.Left} className="w-2 h-2 bg-primary/50" />
         <Handle type="source" position={Position.Right} className="w-2 h-2 bg-primary/50" />
@@ -202,17 +124,19 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
           isEditing={isEditing}
           inputValue={inputValue}
           setInputValue={setInputValue}
-          handleEditComplete={handleEditComplete}
+          handleEditComplete={() => {
+            if (inputValue.trim() !== '') {
+              store.updateNodeText(id, inputValue);
+            } else {
+              setInputValue(data.label);
+            }
+            setIsEditing(false);
+          }}
           inputRef={inputRef}
         />
 
         {data.isCode && (
-          <button
-            onClick={handleCodePreview}
-            className="absolute -left-8 top-1/2 -translate-y-1/2 p-1.5 bg-background rounded-full shadow-lg hover:bg-muted"
-          >
-            <Eye className="w-4 h-4 text-foreground" />
-          </button>
+          <NodePreviewButton onClick={handleCodePreview} />
         )}
 
         {showButton && (
@@ -221,9 +145,9 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
               nodeId={id}
               onMenuHover={(isHovering) => {
                 if (isHovering) {
-                  handleMenuMouseEnter();
+                  setIsHoveringMenu(true);
                 } else {
-                  handleMenuMouseLeave();
+                  setIsHoveringMenu(false);
                 }
               }}
             />
