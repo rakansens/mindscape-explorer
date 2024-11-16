@@ -28,7 +28,7 @@ export const useLayoutStore = create<LayoutStore>((set, get) => ({
     
     switch (layout.type) {
       case 'force':
-        return applyForceLayout(nodes, edges);
+        return applyForceLayout(nodes, edges, width, height);
       case 'tree':
       case 'circle':
       case 'orthogonal':

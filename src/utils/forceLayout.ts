@@ -5,9 +5,8 @@ import { NodeData } from '../types/node';
 export const applyForceLayout = (
   nodes: Node<NodeData>[],
   edges: Edge[],
-  width: number,
-  height: number,
-  onNodesChange: (nodes: Node<NodeData>[]) => void
+  width: number = window.innerWidth,
+  height: number = window.innerHeight
 ) => {
   const simulation = d3.forceSimulation(nodes as any)
     .force('charge', d3.forceManyBody().strength(-1000))
@@ -15,16 +14,25 @@ export const applyForceLayout = (
     .force('collision', d3.forceCollide().radius(100))
     .force('link', d3.forceLink(edges).id((d: any) => d.id).distance(200));
 
-  simulation.on('tick', () => {
-    const updatedNodes = nodes.map(node => ({
-      ...node,
-      position: {
-        x: (node as any).x,
-        y: (node as any).y
-      }
-    }));
-    onNodesChange(updatedNodes);
-  });
+  // Run the simulation synchronously
+  for (let i = 0; i < 100; i++) {
+    simulation.tick();
+  }
 
-  return simulation;
+  // Update node positions based on simulation
+  const updatedNodes = nodes.map(node => ({
+    ...node,
+    position: {
+      x: (node as any).x,
+      y: (node as any).y
+    }
+  }));
+
+  // Stop the simulation
+  simulation.stop();
+
+  return {
+    nodes: updatedNodes,
+    edges: edges
+  };
 };

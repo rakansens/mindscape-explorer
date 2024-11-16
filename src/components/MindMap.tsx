@@ -41,7 +41,7 @@ export const MindMap = () => {
       updateNodes(layoutedNodes);
       updateEdges(layoutedEdges);
     }
-  }, [layout, applyLayout]);
+  }, [layout.type, nodes, edges, applyLayout, updateNodes, updateEdges]);
 
   // ファイル変更時のレイアウト適用
   useEffect(() => {
@@ -58,7 +58,7 @@ export const MindMap = () => {
         updateEdges(layoutedEdges);
       }
     }
-  }, [activeFileId]);
+  }, [activeFileId, items, applyLayout, updateNodes, updateEdges]);
 
   return (
     <div className={`w-full h-full ${theme} relative`}>
@@ -96,7 +96,6 @@ export const MindMap = () => {
           />
         )}
       </ReactFlow>
-      <ViewControls />
     </div>
   );
 };
