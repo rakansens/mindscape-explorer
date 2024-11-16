@@ -25,8 +25,9 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
 }) => {
   const { edgeStyle, lineStyle } = useViewStore();
 
-  // 既存のハンドルIDがある場合はそれを使用し、ない場合のみ最適な位置を計算
+  // ハンドルの位置を決定する関数を最適化
   const getHandlePositions = () => {
+    // 既存のハンドルIDがある場合は、それを優先して使用
     if (sourceHandle && targetHandle) {
       return {
         sourcePos: sourceHandle === 'right' ? Position.Right :
@@ -40,15 +41,16 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
       };
     }
 
-    const dx = targetX - sourceX;
-    const dy = targetY - sourceY;
+    // ハンドルIDがない場合は、相対位置から最適な位置を計算
+    const dx = Math.abs(targetX - sourceX);
+    const dy = Math.abs(targetY - sourceY);
     
-    if (Math.abs(dx) > Math.abs(dy)) {
-      return dx > 0 
+    if (dx > dy) {
+      return targetX > sourceX 
         ? { sourcePos: Position.Right, targetPos: Position.Left }
         : { sourcePos: Position.Left, targetPos: Position.Right };
     } else {
-      return dy > 0
+      return targetY > sourceY
         ? { sourcePos: Position.Bottom, targetPos: Position.Top }
         : { sourcePos: Position.Top, targetPos: Position.Bottom };
     }
@@ -56,6 +58,7 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
 
   const { sourcePos, targetPos } = getHandlePositions();
 
+  // パスの生成を最適化
   const getPath = () => {
     const params = {
       sourceX,

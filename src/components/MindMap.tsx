@@ -26,7 +26,7 @@ export const MindMap = () => {
   const { activeFileId, items } = useFileStore();
   const { theme, showMinimap } = useViewStore();
 
-  // レイアウト変更時に再レンダリング
+  // レイアウト変更時の処理を最適化
   useEffect(() => {
     if (nodes.length > 0) {
       const { nodes: layoutedNodes, edges: layoutedEdges } = applyLayout(
@@ -36,22 +36,30 @@ export const MindMap = () => {
         window.innerHeight
       );
       
-      // 位置が実際に変更されたかチェック
+      // ノードの位置が実際に変更されたかチェック
       const positionsChanged = layoutedNodes.some((newNode, index) => {
         const oldNode = nodes[index];
         return (
-          newNode.position.x !== oldNode.position.x ||
-          newNode.position.y !== oldNode.position.y
+          Math.abs(newNode.position.x - oldNode.position.x) > 1 ||
+          Math.abs(newNode.position.y - oldNode.position.y) > 1
         );
       });
 
       if (positionsChanged) {
+        // エッジの接続情報を保持したまま更新
+        const updatedEdges = layoutedEdges.map(edge => ({
+          ...edge,
+          sourceHandle: edges.find(e => e.id === edge.id)?.sourceHandle,
+          targetHandle: edges.find(e => e.id === edge.id)?.targetHandle,
+        }));
+
         updateNodes(layoutedNodes);
-        updateEdges(layoutedEdges);
+        updateEdges(updatedEdges);
       }
     }
-  }, [layout.type, layout.direction, layout.nodeSpacing, layout.rankSpacing]); // レイアウトの全パラメータを監視
+  }, [layout.type, layout.direction, layout.nodeSpacing, layout.rankSpacing]);
 
+  // ファイル変更時の処理
   useEffect(() => {
     if (activeFileId) {
       const activeFile = items.find(item => item.id === activeFileId && item.type === 'file');
@@ -66,7 +74,7 @@ export const MindMap = () => {
         updateEdges(layoutedEdges);
       }
     }
-  }, [activeFileId, items]); // Only re-run when file changes
+  }, [activeFileId, items]);
 
   return (
     <div className={`w-full h-full ${theme} relative`}>
