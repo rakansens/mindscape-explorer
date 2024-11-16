@@ -13,6 +13,7 @@ import CustomNode from './CustomNode';
 import CustomEdge from './CustomEdge';
 import { applyForceLayout } from '../utils/forceLayout';
 import { getLayoutedElements } from '../utils/layoutUtils';
+import { ViewControls } from './ViewControls';
 import 'reactflow/dist/style.css';
 
 const nodeTypes = {
@@ -70,7 +71,7 @@ export const MindMap = () => {
   }, [nodes.length, edges.length]);
 
   return (
-    <div className={`w-full h-full ${theme}`}>
+    <div className={`w-full h-full ${theme} relative`}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -105,6 +106,7 @@ export const MindMap = () => {
           />
         )}
       </ReactFlow>
+      <ViewControls />
     </div>
   );
 };
