@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Select } from './ui/select';
 import { useApiKeyStore } from '../store/apiKeyStore';
+import { useToast } from '../hooks/use-toast';
 
 interface APIKeyInputProps {
   onSubmit: (config: { 
@@ -18,27 +19,41 @@ export const APIKeyInput: React.FC<APIKeyInputProps> = ({ onSubmit }) => {
   const [openaiKey, setOpenaiKey] = useState('');
   const [geminiKey, setGeminiKey] = useState('');
   const { setOpenAIKey, setGeminiKey: setGeminiKeyStore } = useApiKeyStore();
+  const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (selectedModel.includes('GEMINI')) {
-      setGeminiKeyStore(geminiKey);
-    } else {
-      setOpenAIKey(openaiKey);
+    try {
+      if (selectedModel.includes('GEMINI')) {
+        if (!geminiKey.trim()) {
+          throw new Error('Gemini APIキーを入力してください');
+        }
+        setGeminiKeyStore(geminiKey);
+      } else {
+        if (!openaiKey.trim()) {
+          throw new Error('OpenAI APIキーを入力してください');
+        }
+        setOpenAIKey(openaiKey);
+      }
+
+      onSubmit({
+        type: selectedModel,
+        apiKey: openaiKey,
+        geminiKey: geminiKey
+      });
+
+      toast({
+        title: "APIキーを設定しました",
+        description: "APIキーの設定が完了しました",
+      });
+    } catch (error) {
+      toast({
+        title: "エラー",
+        description: error instanceof Error ? error.message : "APIキーの設定に失敗しました",
+        variant: "destructive",
+      });
     }
-
-    onSubmit({
-      type: selectedModel,
-      apiKey: openaiKey,
-      geminiKey: geminiKey
-    });
-
-    console.log('API Key submitted:', {
-      model: selectedModel,
-      hasOpenAIKey: !!openaiKey,
-      hasGeminiKey: !!geminiKey
-    });
   };
 
   return (
