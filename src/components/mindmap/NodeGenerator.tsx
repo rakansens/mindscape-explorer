@@ -8,7 +8,8 @@ export const useNodeGenerator = () => {
 
   const generateNodes = async (
     parentNode: Node,
-    items: HierarchyItem[]
+    items: HierarchyItem[],
+    onComplete?: () => void
   ) => {
     // 各アイテムを順番に処理
     for (let i = 0; i < items.length; i++) {
@@ -42,6 +43,10 @@ export const useNodeGenerator = () => {
         await sleep(800);
         await generateNodes(newNode, item.children);
       }
+    }
+
+    if (onComplete) {
+      onComplete();
     }
   };
 
