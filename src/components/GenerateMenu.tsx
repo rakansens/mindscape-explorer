@@ -33,6 +33,7 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
   const { fitView } = useViewStore();
   const { toast } = useToast();
   const { generateNodes } = useNodeGenerator();
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const [isHoveringSparkleButton, setIsHoveringSparkleButton] = useState(false);
   const [isHoveringMenu, setIsHoveringMenu] = useState(false);
@@ -54,6 +55,32 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
       }
     };
   }, [isHoveringSparkleButton, isHoveringMenu]);
+
+  // メニューの位置を調整する関数
+  const adjustMenuPosition = () => {
+    if (menuRef.current) {
+      const rect = menuRef.current.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      if (rect.right > viewportWidth) {
+        menuRef.current.style.left = 'auto';
+        menuRef.current.style.right = '0';
+      }
+      if (rect.bottom > viewportHeight) {
+        menuRef.current.style.top = 'auto';
+        menuRef.current.style.bottom = '0';
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (showMenu) {
+      adjustMenuPosition();
+      window.addEventListener('resize', adjustMenuPosition);
+      return () => window.removeEventListener('resize', adjustMenuPosition);
+    }
+  }, [showMenu]);
 
   const handleGenerate = async (mode: 'quick' | 'detailed' | 'why' | 'how' | 'regenerate' | 'ideas') => {
     try {
@@ -156,7 +183,8 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
 
       {showMenu && (
         <div
-          className="absolute left-1/2 -translate-x-1/2 top-[calc(100%+0.25rem)] bg-white rounded-lg shadow-lg p-2 min-w-[120px] z-[60]"
+          ref={menuRef}
+          className="absolute left-full top-0 bg-white rounded-lg shadow-lg p-2 min-w-[120px] z-[60] ml-2"
           onMouseEnter={() => {
             setIsHoveringMenu(true);
             onMenuHover?.(true);
