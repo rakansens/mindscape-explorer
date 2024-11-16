@@ -50,26 +50,20 @@ export const useFileStore = create<FileStore>((set, get) => ({
       updatedAt: new Date(),
       data: { nodes: [], edges: [] }
     };
-    set((state) => ({
-      ...state,
-      items: [...state.items, newFile]
-    }));
+    get().addFile(newFile);
   },
 
-  createFolder: (title) => {
-    const newFolder: Folder = {
+  createFolder: (title) => set((state) => ({
+    ...state,
+    items: [...state.items, {
       id: generateId(),
       title,
       type: 'folder',
       parentId: null,
       createdAt: new Date(),
       updatedAt: new Date()
-    };
-    set((state) => ({
-      ...state,
-      items: [...state.items, newFolder]
-    }));
-  },
+    } as Folder]
+  })),
 
   removeItem: (id) => set((state) => ({
     ...state,
@@ -105,8 +99,8 @@ export const useFileStore = create<FileStore>((set, get) => ({
 
   saveTitle: (id, e) => {
     e.stopPropagation();
-    const { editingTitle } = get();
-    get().updateItem(id, { title: editingTitle });
+    const store = get();
+    store.updateItem(id, { title: store.editingTitle });
     set((state) => ({
       ...state,
       editingId: null,
