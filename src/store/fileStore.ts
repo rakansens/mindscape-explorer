@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { FileSystemItem, MindMapFile, Folder } from '../types/file';
-import { Node, Edge } from '../types/reactflow';
 import { generateId } from '../utils/idUtils';
 
 interface FileStore {

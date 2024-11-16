@@ -23,4 +23,4 @@ export interface Folder extends BaseItem {
   type: 'folder';
 }
 
-export type FileSystemItem = MindMapFile | Folder; 
+export type FileSystemItem = MindMapFile | Folder;
