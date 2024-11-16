@@ -26,6 +26,22 @@ export const CodePreviewModal: React.FC<CodePreviewModalProps> = ({
   codes,
   preview
 }) => {
+  const getPreviewContent = () => {
+    if (!preview) return '';
+    
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:">
+          <title>Preview</title>
+        </head>
+        <body>${preview}</body>
+      </html>
+    `;
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
@@ -46,10 +62,11 @@ export const CodePreviewModal: React.FC<CodePreviewModalProps> = ({
               <div className="w-full h-full border rounded-lg overflow-hidden bg-white">
                 {preview ? (
                   <iframe
-                    srcDoc={preview}
+                    srcDoc={getPreviewContent()}
                     className="w-full h-full border-none"
                     title="Preview"
-                    sandbox="allow-scripts"
+                    sandbox="allow-scripts allow-same-origin"
+                    referrerPolicy="no-referrer"
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full text-gray-500">
