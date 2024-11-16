@@ -34,43 +34,35 @@ export const GenerateCodeButton: React.FC<GenerateCodeButtonProps> = ({
       ];
 
       // 各コードタイプに対してノードを生成
-      for (let i = 0; i < codeTypes.length; i++) {
-        const type = codeTypes[i];
-        const prompt = `
-以下のトピックに関連する${type.label}のコードを生成してください：
-トピック: ${parentNode.data.label}
-説明: ${type.description}
-
-コードは実用的でシンプルなものにしてください。
-`;
-        
-        // 新しい位置を計算（円形に配置）
-        const angle = (2 * Math.PI * i) / codeTypes.length;
-        const radius = 300; // 円の半径
-        const position = {
-          x: parentNode.position.x + radius * Math.cos(angle),
-          y: parentNode.position.y + radius * Math.sin(angle)
-        };
-
+      for (const type of codeTypes) {
         try {
-          const response = await generateCode(prompt);
-          const codes = {
-            html: response.html || '',
-            css: response.css || '',
-            javascript: response.javascript || ''
+          // 新しい位置を計算（円形に配置）
+          const angle = (2 * Math.PI * codeTypes.indexOf(type)) / codeTypes.length;
+          const radius = 300; // 円の半径
+          const position = {
+            x: parentNode.position.x + radius * Math.cos(angle),
+            y: parentNode.position.y + radius * Math.sin(angle)
           };
 
+          // コードを生成
+          const codes = await generateCode(nodeId);
+          
           // コード内容を整形
-          const codeContent = `${type.description}\n\nHTML:\n${codes.html}\n\nCSS:\n${codes.css}\n\nJavaScript:\n${codes.javascript}`;
+          const codeContent = `${type.description}\n\nHTML:\n${codes.html || ''}\n\nCSS:\n${codes.css || ''}\n\nJavaScript:\n${codes.javascript || ''}`;
           
           // 新しいノードを追加
           addNode(parentNode, `${parentNode.data.label}の${type.label}`, position, {
             detailedText: codeContent,
             isCode: true
           });
+
         } catch (error) {
           console.error(`Error generating code for ${type.label}:`, error);
-          // エラーが発生しても続行
+          toast({
+            title: `${type.label}の生成エラー`,
+            description: "このノードのコード生成に失敗しましたが、他のノードの生成を続行します",
+            variant: "destructive",
+          });
           continue;
         }
       }

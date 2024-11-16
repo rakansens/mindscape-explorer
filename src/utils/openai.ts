@@ -2,54 +2,11 @@ import { create } from 'zustand';
 import { TopicTree, GenerateOptions } from '../types/openai';
 import { getMindMapPrompt } from './prompts/mindMapPrompts';
 import { useMindMapStore } from '../store/mindMapStore';
+import { useApiKeyStore } from '../store/apiKeyStore';
 import OpenAI from 'openai';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { useApiKeyStore } from '../store/apiKeyStore';
 
-// Add the missing generateWithAI function
-export const generateWithAI = async (prompt: string) => {
-  const { openaiKey } = useApiKeyStore.getState();
-  
-  if (!openaiKey) {
-    throw new Error('OpenAI API key not found');
-  }
-
-  const openai = new OpenAI({
-    apiKey: openaiKey,
-    dangerouslyAllowBrowser: true
-  });
-
-  const response = await openai.chat.completions.create({
-    model: 'gpt-3.5-turbo',
-    messages: [
-      {
-        role: "system",
-        content: "You are a helpful assistant that generates code based on descriptions."
-      },
-      {
-        role: "user",
-        content: prompt
-      }
-    ],
-    temperature: 0.7,
-  });
-
-  const content = response.choices[0]?.message?.content;
-  if (!content) throw new Error('No content generated');
-
-  return content;
-};
-
-interface OpenAIStore {
-  apiKey: string | null;
-  geminiKey: string | null;
-  setApiKey: (key: string) => void;
-  setGeminiKey: (key: string) => void;
-  generateSubTopics: (topic: string, options?: GenerateOptions) => Promise<TopicTree>;
-  generateCode: (nodeId: string) => Promise<{ html?: string; css?: string; javascript?: string }>;
-}
-
-export const useOpenAI = create<OpenAIStore>((set) => ({
+export const useOpenAI = create((set) => ({
   apiKey: import.meta.env.VITE_OPENAI_API_KEY || null,
   geminiKey: import.meta.env.VITE_GEMINI_API_KEY || null,
   setApiKey: (key: string) => set({ apiKey: key }),
@@ -90,7 +47,8 @@ export const useOpenAI = create<OpenAIStore>((set) => ({
       "children": []
     }
   ]
-}`;
+}
+`;
 
         const result = await model.generateContent(geminiPrompt);
         const response = await result.response;
@@ -167,8 +125,7 @@ export const useOpenAI = create<OpenAIStore>((set) => ({
 
     if (!modelConfig) throw new Error('Model configuration not set');
 
-    try {
-      const prompt = `
+    const prompt = `
 以下のトピックに関連するコードを生成してください。
 シンプルで実用的なコードを生成してください。
 
@@ -182,6 +139,7 @@ export const useOpenAI = create<OpenAIStore>((set) => ({
   "javascript": "JavaScriptコード"
 }`;
 
+    try {
       // Geminiモデルの場合
       if (modelConfig.type.includes('GEMINI')) {
         if (!geminiKey) throw new Error('Gemini API key not found');
@@ -200,7 +158,12 @@ export const useOpenAI = create<OpenAIStore>((set) => ({
           .replace(/[\s\n]*$/, '')
           .trim();
 
-        return JSON.parse(cleanedContent);
+        try {
+          return JSON.parse(cleanedContent);
+        } catch (parseError) {
+          console.error('Failed to parse Gemini response:', content);
+          throw new Error('Invalid JSON response from Gemini');
+        }
       }
 
       // OpenAIモデルの場合
@@ -211,24 +174,12 @@ export const useOpenAI = create<OpenAIStore>((set) => ({
         dangerouslyAllowBrowser: true
       });
 
-      const openaiModel = (() => {
-        switch (modelConfig.type) {
-          case 'GPT4':
-            return 'gpt-4';
-          case 'GPT4-Turbo':
-            return 'gpt-4-turbo-preview';
-          case 'GPT3.5':
-          default:
-            return 'gpt-3.5-turbo';
-        }
-      })();
-
       const response = await openai.chat.completions.create({
-        model: openaiModel,
+        model: 'gpt-3.5-turbo',
         messages: [
           {
             role: "system",
-            content: "あなたはコード生成を支援するAIアシスタントです。与えられたトピックに関連するコードを生成します。"
+            content: "あなたはコード生成を支援するAIアシスタントです。与えられたトピックに関連するコードを生成します。必ず有効なJSONを返してください。"
           },
           {
             role: "user",
@@ -241,7 +192,12 @@ export const useOpenAI = create<OpenAIStore>((set) => ({
       const content = response.choices[0]?.message?.content;
       if (!content) throw new Error('No content generated');
 
-      return JSON.parse(content);
+      try {
+        return JSON.parse(content);
+      } catch (parseError) {
+        console.error('Failed to parse OpenAI response:', content);
+        throw new Error('Invalid JSON response from OpenAI');
+      }
     } catch (error) {
       console.error('Error generating code:', error);
       throw error;
