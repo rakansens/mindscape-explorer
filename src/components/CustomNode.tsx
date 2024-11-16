@@ -1,17 +1,15 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Handle, Position } from 'reactflow';
+import React, { useState, useRef } from 'react';
 import { useMindMapStore } from '../store/mindMapStore';
 import { useViewStore } from '../store/viewStore';
 import { getNodeLevel } from '../utils/nodeUtils';
 import { GenerateMenu } from './GenerateMenu';
 import { NodeData } from '../types/node';
-import { cn } from '../utils/cn';
 import { NodeContextMenu } from './node/NodeContextMenu';
 import { NodeContent } from './node/NodeContent';
 import { NodePreviewButton } from './node/NodePreviewButton';
 import { CodePreviewModal } from './code/CodePreviewModal';
-import { getNodeThemeStyle } from './node/NodeStyles';
-import { calculateNewNodePosition } from '../utils/nodePositionUtils';
+import { NodeHandles } from './node/NodeHandles';
+import { NodeWrapper } from './node/NodeWrapper';
 
 interface CustomNodeProps {
   id: string;
@@ -40,7 +38,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
   const { theme } = useViewStore();
   const level = getNodeLevel(store.edges, id);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const shouldShowButton = isHoveringNode || isHoveringMenu;
     
     if (hideTimeout.current) {
@@ -107,15 +105,12 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
 
   return (
     <NodeContextMenu nodeId={id}>
-      <div
-        className={cn(
-          getNodeThemeStyle(level, theme),
-          data.selected ? "ring-2 ring-primary" : "",
-          data.isGenerating ? "animate-pulse scale-105" : "",
-          "hover:shadow-xl transition-all duration-300 transform relative"
-        )}
-        onMouseEnter={() => setIsHoveringNode(true)}
-        onMouseLeave={() => setIsHoveringNode(false)}
+      <NodeWrapper
+        data={data}
+        level={level}
+        theme={theme}
+        isHoveringNode={isHoveringNode}
+        setIsHoveringNode={setIsHoveringNode}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -127,32 +122,8 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
           setIsEditing(true);
         }}
         onKeyDown={handleKeyDown}
-        tabIndex={0}
       >
-        <Handle 
-          type="target" 
-          position={Position.Left} 
-          className="w-2 h-2 bg-primary/50" 
-          id="left"
-        />
-        <Handle 
-          type="source" 
-          position={Position.Right} 
-          className="w-2 h-2 bg-primary/50" 
-          id="right"
-        />
-        <Handle 
-          type="target" 
-          position={Position.Top} 
-          className="w-2 h-2 bg-primary/50" 
-          id="top"
-        />
-        <Handle 
-          type="source" 
-          position={Position.Bottom} 
-          className="w-2 h-2 bg-primary/50" 
-          id="bottom"
-        />
+        <NodeHandles id={id} />
         
         <NodeContent
           id={id}
@@ -196,7 +167,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
           codes={previewCodes}
           preview={previewCodes.html}
         />
-      </div>
+      </NodeWrapper>
     </NodeContextMenu>
   );
 };
