@@ -27,24 +27,24 @@ export const useNodeGenerator = () => {
       // 空のノードを作成（位置を指定）
       const newNode = addNode(parentNode, '', position);
       
-      // 視覚的なフィードバックのための待機時間を短縮
-      await sleep(200);
+      // 視覚的なフィードバックの待機時間を最小限に
+      await sleep(50);
       
-      // テキストを一文字ずつアニメーション表示（タイピング速度を上げる）
+      // テキストを一文字ずつアニメーション表示（さらに高速化）
       await animateText(
         item.text,
         async (text) => {
           updateNodeText(newNode.id, text);
         },
-        50  // タイピング速度を速く
+        20  // タイピング速度をさらに高速化
       );
 
-      // テキスト表示完了後の待機時間を短縮
-      await sleep(200);
+      // テキスト表示完了後の待機時間を最小限に
+      await sleep(50);
 
       // 子ノードがある場合は、親ノードの生成完了後に処理
       if (item.children && item.children.length > 0) {
-        await sleep(300);  // 子ノード生成前の待機時間も短縮
+        await sleep(100);  // 子ノード生成前の待機時間も最小限に
         await generateNodes(newNode, item.children);
       }
     }
