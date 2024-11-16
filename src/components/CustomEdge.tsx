@@ -25,12 +25,10 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
 }) => {
   const { edgeStyle, lineStyle } = useViewStore();
 
-  // ハンドルの位置を決定する関数を最適化
   const getHandlePositions = () => {
     const dx = targetX - sourceX;
     const dy = targetY - sourceY;
     
-    // 既存のハンドルIDがある場合は、それを優先して使用
     if (sourceHandle && targetHandle) {
       return {
         sourcePos: sourceHandle === 'right' ? Position.Right :
@@ -44,7 +42,6 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
       };
     }
 
-    // 相対位置から最適な位置を計算
     if (Math.abs(dx) > Math.abs(dy)) {
       return dx > 0 
         ? { sourcePos: Position.Right, targetPos: Position.Left }
@@ -58,7 +55,6 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
 
   const { sourcePos, targetPos } = getHandlePositions();
 
-  // パスの生成を最適化
   const getPath = () => {
     const params = {
       sourceX,
@@ -89,20 +85,23 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
     }
   };
 
-  // 基本のエッジスタイルを定義
+  // 基本スタイルを定義（常に優先される）
   const baseStyle = {
     strokeWidth: 2,
     stroke: '#2563eb', // 青色を維持
     strokeDasharray: lineStyle === 'dashed' ? '5,5' : 'none',
   };
 
+  // スタイルの適用順序を変更し、基本スタイルを最後に適用して確実に上書き
+  const finalStyle = {
+    ...style,
+    ...baseStyle,
+  };
+
   return (
     <path
       id={id}
-      style={{
-        ...baseStyle,
-        ...style, // カスタムスタイルがある場合は上書きを許可しつつ、基本スタイルを優先
-      }}
+      style={finalStyle}
       className={`react-flow__edge-path ${data?.animated ? 'animated' : ''}`}
       d={getPath()}
     />
