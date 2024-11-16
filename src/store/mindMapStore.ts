@@ -11,6 +11,7 @@ interface MindMapStore {
   nodes: Node<NodeData>[];
   edges: Edge[];
   modelConfig: ModelConfig | null;
+  setModelConfig: (config: ModelConfig | null) => void;
   onNodesChange: (changes: any) => void;
   onEdgesChange: (changes: any) => void;
   onConnect: (connection: any) => void;
@@ -21,7 +22,6 @@ interface MindMapStore {
   addNode: (parentNode: Node<NodeData>, label: string, position?: { x: number; y: number }) => Node<NodeData>;
   updateNode: (id: string, updates: Partial<NodeData>) => void;
   removeChildNodes: (nodeId: string) => void;
-  setModelConfig: (config: ModelConfig | null) => void;
   exportAsImage: () => Promise<void>;
   exportAsPDF: () => Promise<void>;
   exportAsJSON: () => void;
@@ -225,4 +225,6 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
       set({ nodes, edges });
     }
   },
+
+  setModelConfig: (config) => set({ modelConfig: config }),
 }));

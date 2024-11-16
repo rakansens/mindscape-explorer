@@ -8,26 +8,34 @@ import { Sidebar } from "./components/sidebar/Sidebar";
 import { MindMap } from "./components/MindMap";
 import { ReactFlowProvider } from 'reactflow';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <ReactFlowProvider>
-        <div className="flex h-screen overflow-hidden">
-          <Sidebar />
-          <div className="flex-1 relative">
-            <Toolbar />
-            <div className="w-full h-full">
-              <MindMap />
+const App: React.FC = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <ReactFlowProvider>
+          <div className="flex h-screen overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 relative">
+              <Toolbar />
+              <div className="w-full h-full">
+                <MindMap />
+              </div>
+              <Toaster />
+              <Sonner />
             </div>
-            <Toaster />
-            <Sonner />
           </div>
-        </div>
-      </ReactFlowProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+        </ReactFlowProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

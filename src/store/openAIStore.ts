@@ -4,10 +4,12 @@ import { TopicTree, GenerateOptions } from '../types/openai';
 import { getMindMapPrompt } from '../utils/prompts/mindMapPrompts';
 
 interface OpenAIStore {
+  apiKey: string | null;
   generateSubTopics: (topic: string, options?: GenerateOptions) => Promise<TopicTree>;
 }
 
 export const useOpenAI = create<OpenAIStore>(() => ({
+  apiKey: null,
   generateSubTopics: async (topic: string, options?: GenerateOptions) => {
     const { openai } = useOpenAIAuth.getState();
     if (!openai) throw new Error('OpenAI API key not set');
@@ -41,12 +43,6 @@ export const useOpenAI = create<OpenAIStore>(() => ({
         if (!parsedContent.label || !Array.isArray(parsedContent.children)) {
           throw new Error('Invalid response structure');
         }
-
-        parsedContent.children = parsedContent.children.filter(child => {
-          return child && typeof child.label === 'string' && 
-                 (!child.description || typeof child.description === 'string') &&
-                 Array.isArray(child.children);
-        });
 
         return parsedContent;
       } catch (e) {
