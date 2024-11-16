@@ -8,6 +8,8 @@ import { NodeData } from '../types/node';
 import { cn } from '../utils/cn';
 import { NodeContextMenu } from './node/NodeContextMenu';
 import { NodeContent } from './node/NodeContent';
+import { Eye } from 'lucide-react';
+import { CodePreviewModal } from './code/CodePreviewModal';
 
 interface CustomNodeProps {
   id: string;
@@ -22,6 +24,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
   const [showButton, setShowButton] = useState(false);
   const [isHoveringNode, setIsHoveringNode] = useState(false);
   const [isHoveringMenu, setIsHoveringMenu] = useState(false);
+  const [showCodePreview, setShowCodePreview] = useState(false);
   const hideTimeout = useRef<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   
@@ -124,6 +127,30 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
     };
   }, [isHoveringNode, isHoveringMenu]);
 
+  const handleCodePreview = () => {
+    if (data.detailedText) {
+      const codeLines = data.detailedText.split('\n');
+      const codes: { html?: string; css?: string; javascript?: string } = {};
+      let currentLanguage = '';
+      
+      codeLines.forEach(line => {
+        if (line.startsWith('HTML:')) {
+          currentLanguage = 'html';
+        } else if (line.startsWith('CSS:')) {
+          currentLanguage = 'css';
+        } else if (line.startsWith('JavaScript:')) {
+          currentLanguage = 'javascript';
+        } else if (currentLanguage && line.trim()) {
+          codes[currentLanguage] = (codes[currentLanguage] || '') + line + '\n';
+        }
+      });
+
+      setShowCodePreview(true);
+      return codes;
+    }
+    return {};
+  };
+
   if (!data) {
     console.warn(`Node ${id} has no data`);
     return null;
@@ -157,6 +184,15 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
           inputRef={inputRef}
         />
 
+        {data.isCode && (
+          <button
+            onClick={() => handleCodePreview()}
+            className="absolute -left-8 top-1/2 -translate-y-1/2 p-1.5 bg-white rounded-full shadow-lg hover:bg-gray-50"
+          >
+            <Eye className="w-4 h-4 text-gray-600" />
+          </button>
+        )}
+
         {showButton && (
           <div className="absolute -right-4 top-1/2 -translate-y-1/2 translate-x-full">
             <GenerateMenu
@@ -171,6 +207,13 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, xPos, yPos }) => {
             />
           </div>
         )}
+
+        <CodePreviewModal
+          isOpen={showCodePreview}
+          onClose={() => setShowCodePreview(false)}
+          codes={handleCodePreview()}
+          preview={handleCodePreview().html}
+        />
       </div>
     </NodeContextMenu>
   );
