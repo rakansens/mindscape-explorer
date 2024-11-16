@@ -6,7 +6,7 @@ import { Button } from './ui/button';
 import { generateId } from '../utils/idUtils';
 
 export const TabBar = () => {
-  const { items, activeFileId, addFile, removeItem, setActiveFile } = useFileStore();
+  const { items, activeFileId, addFile, setActiveFile, removeItem } = useFileStore();
   // itemsからファイルのみをフィルタリング
   const files = items.filter(item => item.type === 'file') as MindMapFile[];
 
@@ -14,8 +14,8 @@ export const TabBar = () => {
     const newFile: MindMapFile = {
       id: generateId(),
       title: '無題のマインドマップ',
-      type: 'file',  // 追加
-      parentId: null,  // 追加
+      type: 'file',
+      parentId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
       data: {

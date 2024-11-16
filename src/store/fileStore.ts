@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { FileSystemItem, MindMapFile, Folder } from '../types/file';
+import { Node, Edge } from '../types/reactflow';
 
 interface FileStore {
   items: FileSystemItem[];
@@ -9,6 +10,7 @@ interface FileStore {
   expandedFolders: Set<string>;
   
   // File operations
+  addFile: (file: MindMapFile) => void;
   createFile: (title: string) => void;
   createFolder: (title: string) => void;
   removeItem: (id: string) => void;
@@ -16,7 +18,7 @@ interface FileStore {
   updateItem: (id: string, updates: Partial<FileSystemItem>) => void;
   
   // Selection and editing
-  selectFile: (id: string) => void;
+  setActiveFile: (id: string) => void;
   startEditing: (id: string, title: string, e: React.MouseEvent) => void;
   saveTitle: (id: string, e: React.MouseEvent) => void;
   cancelEditing: (e: React.MouseEvent) => void;
@@ -37,13 +39,19 @@ export const useFileStore = create<FileStore>((set, get) => ({
   editingTitle: '',
   expandedFolders: new Set(),
 
+  addFile: (file) => set((state) => ({
+    items: [...state.items, file]
+  })),
+
   createFile: (title) => {
     const newFile: MindMapFile = {
       id: crypto.randomUUID(),
       title,
       type: 'file',
       parentId: null,
-      content: { nodes: [], edges: [] }
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      data: { nodes: [], edges: [] }
     };
     set((state) => ({
       items: [...state.items, newFile]
@@ -55,7 +63,9 @@ export const useFileStore = create<FileStore>((set, get) => ({
       id: crypto.randomUUID(),
       title,
       type: 'folder',
-      parentId: null
+      parentId: null,
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
     set((state) => ({
       items: [...state.items, newFolder]
@@ -78,7 +88,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
     )
   })),
 
-  selectFile: (id) => set({ activeFileId: id }),
+  setActiveFile: (id) => set({ activeFileId: id }),
 
   startEditing: (id, title, e) => {
     e.stopPropagation();
