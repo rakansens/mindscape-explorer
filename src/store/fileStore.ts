@@ -10,7 +10,6 @@ interface FileStore {
   editingTitle: string;
   expandedFolders: Set<string>;
   
-  // File operations
   setActiveFileId: (id: string | null) => void;
   setActiveFile: (id: string) => void;
   addFile: (file: MindMapFile) => void;
@@ -18,20 +17,12 @@ interface FileStore {
   createFolder: (title: string) => void;
   removeItem: (id: string) => void;
   updateItem: (id: string, updates: Partial<FileSystemItem>) => void;
-  
-  // Editing operations
   startEditing: (id: string, title: string) => void;
   saveTitle: (id: string) => void;
   cancelEditing: () => void;
   setEditingTitle: (title: string) => void;
-  
-  // Folder operations
   toggleFolder: (id: string) => void;
   getChildren: (parentId: string | null) => FileSystemItem[];
-  
-  // File system operations
-  saveCurrentFile: () => void;
-  openFile: () => void;
   deleteItem: (id: string) => void;
 }
 
@@ -66,16 +57,17 @@ export const useFileStore = create<FileStore>((set, get) => ({
     get().addFile(newFile);
   },
 
-  createFolder: (title) => set((state) => ({
-    items: [...state.items, {
+  createFolder: (title) => set((state) => {
+    const newFolder: Folder = {
       id: uuidv4(),
       title,
       type: 'folder',
       parentId: null,
       createdAt: new Date(),
       updatedAt: new Date()
-    }]
-  })),
+    };
+    return { items: [...state.items, newFolder] };
+  }),
 
   removeItem: (id) => set((state) => ({
     items: state.items.filter(item => item.id !== id)
@@ -84,7 +76,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
   updateItem: (id, updates) => set((state) => ({
     items: state.items.map(item =>
       item.id === id ? { ...item, ...updates, updatedAt: new Date() } : item
-    )
+    ) as FileSystemItem[]
   })),
 
   startEditing: (id, title) => set({ 
@@ -109,22 +101,18 @@ export const useFileStore = create<FileStore>((set, get) => ({
     editingTitle: title 
   }),
 
-  toggleFolder: (id) => set((state) => ({
-    expandedFolders: state.expandedFolders.has(id)
-      ? new Set([...state.expandedFolders].filter(folderId => folderId !== id))
-      : new Set([...state.expandedFolders, id])
-  })),
+  toggleFolder: (id) => set((state) => {
+    const newExpandedFolders = new Set(state.expandedFolders);
+    if (newExpandedFolders.has(id)) {
+      newExpandedFolders.delete(id);
+    } else {
+      newExpandedFolders.add(id);
+    }
+    return { expandedFolders: newExpandedFolders };
+  }),
 
   getChildren: (parentId) => {
     return get().items.filter(item => item.parentId === parentId);
-  },
-
-  saveCurrentFile: () => {
-    console.log('Save current file not implemented');
-  },
-
-  openFile: () => {
-    console.log('Open file not implemented');
   },
 
   deleteItem: (id) => {
