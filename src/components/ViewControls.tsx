@@ -39,10 +39,9 @@ export const ViewControls = () => {
   const handleLayoutChange = (layoutType: LayoutType) => {
     setLayout({ ...layout, type: layoutType });
     
-    // レイアウト変更後、100ms待ってからズーム調整を実行
+    const parentNode = nodes.find(node => node.id === "1");
+    
     setTimeout(() => {
-      const parentNode = nodes.find(node => node.id === "1");
-      
       if (parentNode && instance) {
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
