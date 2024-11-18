@@ -46,19 +46,19 @@ export const ViewControls = () => {
     // 遅延を入れて、レイアウト変更後に中央配置
     setTimeout(() => {
       if (parentNode && instance) {
-        // 親ノードを画面中央に配置
+        // 親ノードを画面中央に配置（オフセットを調整）
         instance.setCenter(
-          parentNode.position.x + 100,  // ノードの中心に調整
-          parentNode.position.y + 50,   // ノードの中心に調整
+          parentNode.position.x,  // オフセットを削除して完全に中央に
+          parentNode.position.y,  // オフセットを削除して完全に中央に
           { 
             zoom: 1,     // デフォルトズーム
-            duration: 1000  // アニメーション時間
+            duration: 800  // アニメーション時間を少し短く
           }
         );
       } else {
         // フォールバック：画面全体にフィット
         fitView({
-          duration: 1000,
+          duration: 800,
           padding: 0.5,
           minZoom: 0.2,
           maxZoom: 1.5,
