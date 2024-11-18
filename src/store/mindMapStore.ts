@@ -144,10 +144,13 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
     }));
   },
 
-  removeChildNodes: (nodeId) => {
+  removeChildNodes: (nodeId: string) => {
     set((state) => {
-      const { nodes, edges } = removeNodeAndDescendants(state.nodes, state.edges, nodeId);
-      return { nodes, edges };
+      const result = removeNodeAndDescendants(state.nodes, state.edges, nodeId);
+      return {
+        nodes: result.nodes,
+        edges: result.edges
+      };
     });
   },
 
