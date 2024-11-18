@@ -26,33 +26,64 @@ export const MindMap = () => {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect, updateNodes, updateEdges } = useMindMapStore();
   const { layout, applyLayout } = useLayoutStore();
   const { activeFileId, items } = useFileStore();
-  const { theme, showMinimap } = useViewStore();
+  const { theme, showMinimap, instance } = useViewStore();
+
+  const centerParentNode = () => {
+    if (instance && nodes.length > 0) {
+      const parentNode = nodes.find(node => node.id === "1");
+      if (parentNode) {
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const zoom = Math.min(
+          viewportWidth / (200 * 2),
+          viewportHeight / (100 * 2)
+        );
+        
+        instance.setCenter(
+          viewportWidth / 2,
+          viewportHeight / 2,
+          { 
+            zoom: Math.min(1, zoom),
+            duration: 800
+          }
+        );
+      }
+    }
+  };
 
   useEffect(() => {
     if (nodes.length > 0) {
-      const { nodes: layoutedNodes, edges: layoutedEdges } = applyLayout(
-        nodes,
-        edges,
-        window.innerWidth,
-        window.innerHeight
-      );
+      try {
+        const { nodes: layoutedNodes, edges: layoutedEdges } = applyLayout(
+          nodes,
+          edges,
+          window.innerWidth,
+          window.innerHeight
+        );
 
-      // エッジの接続情報とスタイルを完全に保持
-      const updatedEdges = edges.map(originalEdge => {
-        const layoutedEdge = layoutedEdges.find(e => e.id === originalEdge.id);
-        if (!layoutedEdge) return originalEdge;
-        
-        return {
-          ...originalEdge,
-          source: layoutedEdge.source,
-          target: layoutedEdge.target,
-          sourceHandle: originalEdge.sourceHandle,
-          targetHandle: originalEdge.targetHandle,
-        };
-      });
+        if (layoutedNodes && layoutedNodes.length > 0) {
+          const updatedEdges = edges.map(originalEdge => {
+            const layoutedEdge = layoutedEdges.find(e => e.id === originalEdge.id);
+            if (!layoutedEdge) return originalEdge;
+            
+            return {
+              ...originalEdge,
+              source: layoutedEdge.source,
+              target: layoutedEdge.target,
+              sourceHandle: originalEdge.sourceHandle,
+              targetHandle: originalEdge.targetHandle,
+            };
+          });
 
-      updateNodes(layoutedNodes);
-      updateEdges(updatedEdges);
+          updateNodes(layoutedNodes);
+          updateEdges(updatedEdges);
+          
+          // レイアウト適用後に中央配置を実行
+          setTimeout(centerParentNode, 100);
+        }
+      } catch (error) {
+        console.error('Layout calculation error:', error);
+      }
     }
   }, [layout.type, layout.direction, layout.nodeSpacing, layout.rankSpacing]);
 
@@ -60,25 +91,33 @@ export const MindMap = () => {
     if (activeFileId) {
       const activeFile = items.find(item => item.id === activeFileId && item.type === 'file');
       if (activeFile && 'data' in activeFile) {
-        const { nodes: layoutedNodes, edges: layoutedEdges } = applyLayout(
-          activeFile.data.nodes,
-          activeFile.data.edges,
-          window.innerWidth,
-          window.innerHeight
-        );
+        try {
+          const { nodes: layoutedNodes, edges: layoutedEdges } = applyLayout(
+            activeFile.data.nodes,
+            activeFile.data.edges,
+            window.innerWidth,
+            window.innerHeight
+          );
 
-        // エッジの接続情報とスタイルを完全に保持
-        const updatedEdges = layoutedEdges.map(edge => ({
-          ...edge,
-          sourceHandle: edge.sourceHandle,
-          targetHandle: edge.targetHandle,
-          type: 'custom',
-          animated: true,
-          style: edge.style || {},
-        }));
+          if (layoutedNodes && layoutedNodes.length > 0) {
+            const updatedEdges = layoutedEdges.map(edge => ({
+              ...edge,
+              sourceHandle: edge.sourceHandle,
+              targetHandle: edge.targetHandle,
+              type: 'custom',
+              animated: true,
+              style: edge.style || {},
+            }));
 
-        updateNodes(layoutedNodes);
-        updateEdges(updatedEdges);
+            updateNodes(layoutedNodes);
+            updateEdges(updatedEdges);
+            
+            // ファイル読み込み後に中央配置を実行
+            setTimeout(centerParentNode, 100);
+          }
+        } catch (error) {
+          console.error('File layout calculation error:', error);
+        }
       }
     }
   }, [activeFileId, items]);
