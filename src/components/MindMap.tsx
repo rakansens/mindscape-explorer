@@ -98,9 +98,11 @@ export const MindMap = () => {
         }}
         fitView
         fitViewOptions={{
-          padding: 0.2,
+          padding: 0.3,
           duration: 800,
-          maxZoom: 1.5,
+          maxZoom: 1,
+          minZoom: 0.1,
+          includeHiddenNodes: false
         }}
         className={`bg-background text-foreground`}
       >
