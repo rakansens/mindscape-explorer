@@ -7,12 +7,41 @@ const NODE_WIDTH = 200;
 const NODE_HEIGHT = 100;
 const PADDING = 100;
 
-const validateGraph = (nodes: Node[], edges: Edge[]) => {
-  // Check if all edge endpoints exist in nodes
-  return edges.every(edge => 
-    nodes.some(node => node.id === edge.source) && 
-    nodes.some(node => node.id === edge.target)
-  );
+// レイアウト全体を中央に配置する関数
+const centerLayout = (
+  nodes: Node<NodeData>[],
+  width: number,
+  height: number
+) => {
+  if (nodes.length === 0) return nodes;
+
+  // レイアウト全体のバウンディングボックスを計算
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+
+  nodes.forEach((node) => {
+    minX = Math.min(minX, node.position.x);
+    maxX = Math.max(maxX, node.position.x + NODE_WIDTH);
+    minY = Math.min(minY, node.position.y);
+    maxY = Math.max(maxY, node.position.y + NODE_HEIGHT);
+  });
+
+  // レイアウトの中心点を計算
+  const layoutWidth = maxX - minX;
+  const layoutHeight = maxY - minY;
+  const offsetX = (width - layoutWidth) / 2 - minX;
+  const offsetY = (height - layoutHeight) / 2 - minY;
+
+  // すべてのノードを中央に移動
+  return nodes.map(node => ({
+    ...node,
+    position: {
+      x: node.position.x + offsetX,
+      y: node.position.y + offsetY
+    }
+  }));
 };
 
 export const getLayoutedElements = (
@@ -25,10 +54,6 @@ export const getLayoutedElements = (
   }
 ) => {
   if (!nodes.length) return { nodes, edges };
-  if (!validateGraph(nodes, edges)) {
-    console.warn('Invalid graph structure detected');
-    return { nodes, edges };
-  }
 
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
@@ -39,30 +64,20 @@ export const getLayoutedElements = (
     rankdir: direction,
     nodesep: nodeSpacing,
     ranksep: rankSpacing,
+    align: 'UDR',
     ranker: 'network-simplex'
   });
 
-  // Add nodes to the graph with their dimensions
   nodes.forEach((node) => {
     dagreGraph.setNode(node.id, { width: NODE_WIDTH, height: NODE_HEIGHT });
   });
 
-  // Add edges to the graph
   edges.forEach((edge) => {
-    if (edge.source && edge.target) {
-      dagreGraph.setEdge(edge.source, edge.target);
-    }
+    dagreGraph.setEdge(edge.source, edge.target);
   });
 
-  // Apply the layout
-  try {
-    dagre.layout(dagreGraph);
-  } catch (error) {
-    console.error('Dagre layout error:', error);
-    return { nodes, edges };
-  }
+  dagre.layout(dagreGraph);
 
-  // Retrieve the positioned nodes
   const layoutedNodes = nodes.map((node) => {
     const nodeWithPosition = dagreGraph.node(node.id);
     if (!nodeWithPosition) {
@@ -77,7 +92,10 @@ export const getLayoutedElements = (
     };
   });
 
-  return { nodes: layoutedNodes, edges };
+  // レイアウト全体を中央に配置
+  const centeredNodes = centerLayout(layoutedNodes, window.innerWidth, window.innerHeight);
+
+  return { nodes: centeredNodes, edges };
 };
 
 export const getCircleLayout = (

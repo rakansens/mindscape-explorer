@@ -30,35 +30,29 @@ export const MindMap = () => {
 
   useEffect(() => {
     if (nodes.length > 0) {
-      try {
-        const { nodes: layoutedNodes, edges: layoutedEdges } = applyLayout(
-          nodes,
-          edges,
-          window.innerWidth,
-          window.innerHeight
-        );
+      const { nodes: layoutedNodes, edges: layoutedEdges } = applyLayout(
+        nodes,
+        edges,
+        window.innerWidth,
+        window.innerHeight
+      );
 
-        // Only update if we got valid layout results
-        if (layoutedNodes && layoutedNodes.length > 0) {
-          const updatedEdges = edges.map(originalEdge => {
-            const layoutedEdge = layoutedEdges.find(e => e.id === originalEdge.id);
-            if (!layoutedEdge) return originalEdge;
-            
-            return {
-              ...originalEdge,
-              source: layoutedEdge.source,
-              target: layoutedEdge.target,
-              sourceHandle: originalEdge.sourceHandle,
-              targetHandle: originalEdge.targetHandle,
-            };
-          });
+      // エッジの接続情報とスタイルを完全に保持
+      const updatedEdges = edges.map(originalEdge => {
+        const layoutedEdge = layoutedEdges.find(e => e.id === originalEdge.id);
+        if (!layoutedEdge) return originalEdge;
+        
+        return {
+          ...originalEdge,
+          source: layoutedEdge.source,
+          target: layoutedEdge.target,
+          sourceHandle: originalEdge.sourceHandle,
+          targetHandle: originalEdge.targetHandle,
+        };
+      });
 
-          updateNodes(layoutedNodes);
-          updateEdges(updatedEdges);
-        }
-      } catch (error) {
-        console.error('Layout calculation error:', error);
-      }
+      updateNodes(layoutedNodes);
+      updateEdges(updatedEdges);
     }
   }, [layout.type, layout.direction, layout.nodeSpacing, layout.rankSpacing]);
 
@@ -66,30 +60,25 @@ export const MindMap = () => {
     if (activeFileId) {
       const activeFile = items.find(item => item.id === activeFileId && item.type === 'file');
       if (activeFile && 'data' in activeFile) {
-        try {
-          const { nodes: layoutedNodes, edges: layoutedEdges } = applyLayout(
-            activeFile.data.nodes,
-            activeFile.data.edges,
-            window.innerWidth,
-            window.innerHeight
-          );
+        const { nodes: layoutedNodes, edges: layoutedEdges } = applyLayout(
+          activeFile.data.nodes,
+          activeFile.data.edges,
+          window.innerWidth,
+          window.innerHeight
+        );
 
-          if (layoutedNodes && layoutedNodes.length > 0) {
-            const updatedEdges = layoutedEdges.map(edge => ({
-              ...edge,
-              sourceHandle: edge.sourceHandle,
-              targetHandle: edge.targetHandle,
-              type: 'custom',
-              animated: true,
-              style: edge.style || {},
-            }));
+        // エッジの接続情報とスタイルを完全に保持
+        const updatedEdges = layoutedEdges.map(edge => ({
+          ...edge,
+          sourceHandle: edge.sourceHandle,
+          targetHandle: edge.targetHandle,
+          type: 'custom',
+          animated: true,
+          style: edge.style || {},
+        }));
 
-            updateNodes(layoutedNodes);
-            updateEdges(updatedEdges);
-          }
-        } catch (error) {
-          console.error('File layout calculation error:', error);
-        }
+        updateNodes(layoutedNodes);
+        updateEdges(updatedEdges);
       }
     }
   }, [activeFileId, items]);
