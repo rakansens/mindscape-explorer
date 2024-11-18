@@ -8,21 +8,20 @@ export const removeNodeAndDescendants = (
 ): { nodes: Node<NodeData>[]; edges: Edge[] } => {
   const nodesToRemove = new Set<string>();
   
-  const collectDescendantIds = (currentId: string) => {
-    nodesToRemove.add(currentId);
-    
-    // Find all child edges for the current node
+  // 再帰的に全ての子孫ノードのIDを収集
+  const collectDescendantIds = (parentId: string) => {
+    nodesToRemove.add(parentId);
     edges.forEach(edge => {
-      if (edge.source === currentId && !nodesToRemove.has(edge.target)) {
+      if (edge.source === parentId) {
         collectDescendantIds(edge.target);
       }
     });
   };
 
-  // Start collecting from the initial node
+  // 指定されたノードとその子孫を収集
   collectDescendantIds(nodeId);
 
-  // Remove all collected nodes and their associated edges
+  // 削除対象のノードとそれに関連するエッジを除外
   return {
     nodes: nodes.filter(node => !nodesToRemove.has(node.id)),
     edges: edges.filter(edge => 

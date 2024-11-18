@@ -4,59 +4,35 @@ import {
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
-} from "../ui/context-menu";
-import { Trash2, Copy, CheckSquare, Square } from 'lucide-react';
+} from "@/components/ui/context-menu";
+import { MessageSquare } from 'lucide-react';
 import { useMindMapStore } from '../../store/mindMapStore';
 
 interface NodeContextMenuProps {
-  nodeId: string;
   children: React.ReactNode;
+  nodeId: string;
 }
 
-export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
-  nodeId,
-  children,
-}) => {
-  const { removeChildNodes, updateNode } = useMindMapStore();
+export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({ children, nodeId }) => {
+  const store = useMindMapStore();
 
-  const handleDelete = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    removeChildNodes(nodeId);
-  };
-
-  const handleToggleTask = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    updateNode(nodeId, {
-      isTask: true,
-      isCompleted: false
-    });
-  };
-
-  const handleCopy = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    // コピー機能の実装は将来的な課題
+  const handleAddDescription = () => {
+    const node = store.nodes.find(n => n.id === nodeId);
+    if (node) {
+      store.updateNode(nodeId, {
+        ...node.data,
+        detailedText: node.data.detailedText || "説明を入力してください"
+      });
+    }
   };
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger asChild>
-        {children}
-      </ContextMenuTrigger>
-      <ContextMenuContent className="w-64">
-        <ContextMenuItem onClick={handleDelete}>
-          <Trash2 className="mr-2 h-4 w-4" />
-          <span>削除</span>
-        </ContextMenuItem>
-        <ContextMenuItem onClick={handleToggleTask}>
-          <CheckSquare className="mr-2 h-4 w-4" />
-          <span>タスクに変換</span>
-        </ContextMenuItem>
-        <ContextMenuItem onClick={handleCopy}>
-          <Copy className="mr-2 h-4 w-4" />
-          <span>複製</span>
+      <ContextMenuTrigger>{children}</ContextMenuTrigger>
+      <ContextMenuContent>
+        <ContextMenuItem onClick={handleAddDescription}>
+          <MessageSquare className="mr-2 h-4 w-4" />
+          説明を追加
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>

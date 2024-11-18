@@ -1,17 +1,44 @@
 import { create } from 'zustand';
-import { Node } from 'reactflow';
-import { NodeData } from '../types/node';
+import { Node, Edge } from 'reactflow';
+import { applyNodeChanges, applyEdgeChanges } from 'reactflow';
+import { nanoid } from 'nanoid';
 import { ModelConfig, getDefaultModelConfig } from '../types/models';
-import { createNodeSlice, NodeState } from './nodeStore';
+import { NodeData } from '../types/node';
+import { removeNodeAndDescendants } from './nodeOperations';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
-interface MindMapStore extends NodeState {
+const initialNodes: Node<NodeData>[] = [
+  {
+    id: '1',
+    type: 'custom',
+    position: { x: window.innerWidth / 2 - 75, y: window.innerHeight / 3 },
+    data: { 
+      label: 'メインテーマ',
+      selected: false,
+      isGenerating: false,
+      isAppearing: false
+    }
+  }
+];
+
+const initialModelConfig = getDefaultModelConfig();
+
+interface MindMapStore {
+  nodes: Node<NodeData>[];
+  edges: Edge[];
   modelConfig: ModelConfig | null;
   setModelConfig: (config: ModelConfig | null) => void;
+  onNodesChange: (changes: any) => void;
+  onEdgesChange: (changes: any) => void;
+  onConnect: (connection: any) => void;
+  updateNodes: (nodes: Node<NodeData>[]) => void;
+  updateEdges: (edges: Edge[]) => void;
   selectNode: (id: string) => void;
   updateNodeText: (id: string, text: string) => void;
   addNode: (parentNode: Node<NodeData>, label: string, position?: { x: number; y: number }, additionalData?: Partial<NodeData>) => Node<NodeData>;
+  updateNode: (id: string, updates: Partial<NodeData>) => void;
+  removeChildNodes: (nodeId: string) => void;
   exportAsImage: () => Promise<void>;
   exportAsPDF: () => Promise<void>;
   exportAsJSON: () => void;
@@ -21,10 +48,37 @@ interface MindMapStore extends NodeState {
 }
 
 export const useMindMapStore = create<MindMapStore>((set, get) => ({
-  ...createNodeSlice(set, get),
-  
-  modelConfig: getDefaultModelConfig(),
-  setModelConfig: (config) => set({ modelConfig: config }),
+  nodes: initialNodes,
+  edges: [],
+  modelConfig: initialModelConfig,
+
+  onNodesChange: (changes) => {
+    set((state) => ({
+      nodes: applyNodeChanges(changes, state.nodes)
+    }));
+  },
+
+  onEdgesChange: (changes) => {
+    set((state) => ({
+      edges: applyEdgeChanges(changes, state.edges)
+    }));
+  },
+
+  onConnect: (connection) => {
+    set((state) => ({
+      edges: [
+        ...state.edges,
+        {
+          ...connection,
+          id: `e${connection.source}-${connection.target}`,
+          type: 'custom',
+        }
+      ]
+    }));
+  },
+
+  updateNodes: (nodes) => set({ nodes }),
+  updateEdges: (edges) => set({ edges }),
 
   selectNode: (id) => {
     set((state) => ({
@@ -48,7 +102,7 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
 
   addNode: (parentNode, label, position, additionalData = {}) => {
     const newNode: Node<NodeData> = {
-      id: crypto.randomUUID(),
+      id: nanoid(),
       type: 'custom',
       position: position || { x: 0, y: 0 },
       data: {
@@ -67,12 +121,34 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
             id: `${parentNode.id}-${newNode.id}`,
             source: parentNode.id,
             target: newNode.id,
-            type: 'custom',
           }]
         : state.edges,
     }));
 
     return newNode;
+  },
+
+  updateNode: (id, updates) => {
+    set((state) => ({
+      nodes: state.nodes.map(node =>
+        node.id === id
+          ? {
+              ...node,
+              data: {
+                ...node.data,
+                ...updates
+              }
+            }
+          : node
+      )
+    }));
+  },
+
+  removeChildNodes: (nodeId) => {
+    set((state) => {
+      const { nodes, edges } = removeNodeAndDescendants(state.nodes, state.edges, nodeId);
+      return { nodes, edges };
+    });
   },
 
   exportAsImage: async () => {
@@ -137,4 +213,6 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
       set({ nodes, edges });
     }
   },
+
+  setModelConfig: (config) => set({ modelConfig: config }),
 }));
