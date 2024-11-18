@@ -21,7 +21,6 @@ export const ViewControls = () => {
     lineStyle,
     setLineStyle,
     fitView,
-    instance
   } = useViewStore();
 
   const { nodes } = useMindMapStore();
@@ -39,31 +38,12 @@ export const ViewControls = () => {
   const handleLayoutChange = (layoutType: LayoutType) => {
     setLayout({ ...layout, type: layoutType });
     
-    const parentNode = nodes.find(node => node.id === "1");
-    
+    // レイアウト変更後に全体を表示するように調整
     setTimeout(() => {
-      if (parentNode && instance) {
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        const zoom = Math.min(
-          viewportWidth / (200 * 2),
-          viewportHeight / (100 * 2)
-        );
-        
-        instance.setCenter(
-          viewportWidth / 2,
-          viewportHeight / 2,
-          { 
-            zoom: Math.min(1, zoom),
-            duration: 600
-          }
-        );
-      } else {
-        fitView({
-          duration: 600,
-          padding: 0.5,
-        });
-      }
+      fitView({
+        duration: 600,
+        padding: 0.5,
+      });
     }, 100);
   };
 
