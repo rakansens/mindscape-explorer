@@ -10,32 +10,39 @@ export const findDescendantNodes = (
   const nodesToRemove = new Set<string>();
   
   const traverse = (nodeId: string) => {
-    // 既に訪問済みのノードはスキップ（循環参照対策）
-    if (visited.has(nodeId)) return;
+    console.log(`[Traverse] Processing node: ${nodeId}`);
     
-    // このノードを訪問済みとしてマーク
+    if (visited.has(nodeId)) {
+      console.log(`[Traverse] Node ${nodeId} already visited, skipping`);
+      return;
+    }
+    
+    console.log(`[Traverse] Marking node ${nodeId} as visited`);
     visited.add(nodeId);
     nodesToRemove.add(nodeId);
 
-    // このノードに関連するすべてのエッジを取得
     const connectedEdges = edges.filter(edge => 
       edge.source === nodeId || edge.target === nodeId
     );
+    
+    console.log(`[Traverse] Found ${connectedEdges.length} connected edges for node ${nodeId}:`, 
+      connectedEdges.map(edge => `${edge.source}->${edge.target}`));
 
-    // 関連する各エッジについて処理
     connectedEdges.forEach(edge => {
-      // このノードの反対側にあるノードを取得
       const nextNodeId = edge.source === nodeId ? edge.target : edge.source;
+      console.log(`[Traverse] Next node to process: ${nextNodeId} (from edge ${edge.source}->${edge.target})`);
       
-      // まだ訪問していないノードのみを処理
       if (!visited.has(nextNodeId)) {
         traverse(nextNodeId);
+      } else {
+        console.log(`[Traverse] Next node ${nextNodeId} already visited, skipping`);
       }
     });
   };
 
-  // 開始ノードから探索を開始
+  console.log(`[FindDescendants] Starting traversal from node: ${startNodeId}`);
   traverse(startNodeId);
+  console.log(`[FindDescendants] Nodes marked for removal:`, Array.from(nodesToRemove));
   return nodesToRemove;
 };
 
@@ -44,13 +51,18 @@ export const removeNodesAndEdges = (
   edges: Edge[],
   nodesToRemove: Set<string>
 ): { nodes: Node<NodeData>[]; edges: Edge[] } => {
-  // 削除対象のノードを除外
+  console.log(`[Remove] Starting removal process for ${nodesToRemove.size} nodes`);
+  console.log(`[Remove] Nodes to remove:`, Array.from(nodesToRemove));
+  
   const remainingNodes = nodes.filter(node => !nodesToRemove.has(node.id));
+  console.log(`[Remove] Remaining nodes: ${remainingNodes.length}`, 
+    remainingNodes.map(node => node.id));
 
-  // 削除対象のノードに接続されているエッジを除外
   const remainingEdges = edges.filter(
     edge => !nodesToRemove.has(edge.source) && !nodesToRemove.has(edge.target)
   );
+  console.log(`[Remove] Remaining edges: ${remainingEdges.length}`, 
+    remainingEdges.map(edge => `${edge.source}->${edge.target}`));
 
   return {
     nodes: remainingNodes,
