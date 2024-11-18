@@ -35,15 +35,18 @@ export const ViewControls = () => {
 
   const handleLayoutChange = (layoutType: LayoutType) => {
     setLayout({ ...layout, type: layoutType });
+    
     // レイアウト変更後に画面中央に表示
+    // タイミングを調整して、レイアウトが完全に適用された後にフィットビューを実行
     setTimeout(() => {
       fitView({
-        duration: 500,
-        padding: 0.1,
-        minZoom: 0.5,
-        maxZoom: 1.5
+        duration: 800, // アニメーション時間を長めに
+        padding: 0.2, // パディングを増やして余白を確保
+        minZoom: 0.3, // より広い範囲を表示できるように最小ズームを調整
+        maxZoom: 2, // より詳細な表示も可能に
+        includeHiddenNodes: true // 非表示のノードも考慮
       });
-    }, 100);
+    }, 300); // レイアウト適用完了までの待機時間を増加
   };
 
   return (
