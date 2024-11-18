@@ -47,6 +47,9 @@ export const MindMap = () => {
             duration: 800
           }
         );
+      } else {
+        // 親ノードが見つからない場合は全体をフィット
+        instance.fitView({ duration: 800 });
       }
     }
   };
@@ -78,8 +81,8 @@ export const MindMap = () => {
           updateNodes(layoutedNodes);
           updateEdges(updatedEdges);
           
-          // レイアウト適用後に中央配置を実行
-          setTimeout(centerParentNode, 100);
+          // レイアウト適用後に中央配置を実行（遅延を長めに設定）
+          setTimeout(centerParentNode, 300);
         }
       } catch (error) {
         console.error('Layout calculation error:', error);
@@ -112,8 +115,8 @@ export const MindMap = () => {
             updateNodes(layoutedNodes);
             updateEdges(updatedEdges);
             
-            // ファイル読み込み後に中央配置を実行
-            setTimeout(centerParentNode, 100);
+            // ファイル読み込み後に中央配置を実行（遅延を長めに設定）
+            setTimeout(centerParentNode, 300);
           }
         } catch (error) {
           console.error('File layout calculation error:', error);
