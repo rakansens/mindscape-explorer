@@ -18,7 +18,8 @@ export const ViewControls = () => {
     edgeStyle,
     setEdgeStyle,
     lineStyle,
-    setLineStyle
+    setLineStyle,
+    fitView
   } = useViewStore();
 
   const { layout, setLayout } = useLayoutStore();
@@ -31,6 +32,17 @@ export const ViewControls = () => {
     { id: 'circle', label: '円形レイアウト', icon: <Layout className="w-4 h-4" /> },
     { id: 'orthogonal', label: '直交レイアウト', icon: <LayoutGrid className="w-4 h-4" /> },
   ];
+
+  const handleLayoutChange = (layoutType: LayoutType) => {
+    setLayout({ ...layout, type: layoutType });
+    // レイアウト変更後に画面中央に表示
+    setTimeout(() => {
+      fitView({ 
+        duration: 500,
+        padding: 0.2
+      });
+    }, 100);
+  };
 
   return (
     <div className="absolute bottom-4 right-4 flex gap-2">
@@ -71,7 +83,7 @@ export const ViewControls = () => {
           {layouts.map((l) => (
             <button
               key={l.id}
-              onClick={() => setLayout({ ...layout, type: l.id })}
+              onClick={() => handleLayoutChange(l.id)}
               className={`
                 flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-accent transition-colors
                 ${layout.type === l.id ? 'ring-2 ring-primary' : ''}
