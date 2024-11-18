@@ -37,35 +37,56 @@ export const ViewControls = () => {
   ];
 
   const handleLayoutChange = (layoutType: LayoutType) => {
-    // レイアウトタイプを更新
     setLayout({ ...layout, type: layoutType });
     
-    // 親ノード（通常はID "1"）を見つける
     const parentNode = nodes.find(node => node.id === "1");
     
-    // 遅延を入れて、レイアウト変更後に中央配置
     setTimeout(() => {
       if (parentNode && instance) {
-        // 親ノードを画面中央に配置（オフセットを調整）
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+        
+        // レイアウトタイプに応じて中央配置を調整
+        let offsetX = 0;
+        let offsetY = 0;
+        
+        switch (layoutType) {
+          case 'circle':
+            offsetX = -100;
+            offsetY = -50;
+            break;
+          case 'force':
+            offsetX = -100;
+            offsetY = -50;
+            break;
+          case 'horizontal':
+            offsetX = -150;
+            offsetY = -50;
+            break;
+          case 'layered':
+            offsetX = -100;
+            offsetY = -100;
+            break;
+          default:
+            offsetX = -100;
+            offsetY = -50;
+        }
+
         instance.setCenter(
-          parentNode.position.x,  // オフセットを削除して完全に中央に
-          parentNode.position.y,  // オフセットを削除して完全に中央に
+          centerX + offsetX,
+          centerY + offsetY,
           { 
-            zoom: 1,     // デフォルトズーム
-            duration: 800  // アニメーション時間を少し短く
+            zoom: 1,
+            duration: 600
           }
         );
       } else {
-        // フォールバック：画面全体にフィット
         fitView({
-          duration: 800,
+          duration: 600,
           padding: 0.5,
-          minZoom: 0.2,
-          maxZoom: 1.5,
-          includeHiddenNodes: true
         });
       }
-    }, 500);
+    }, 100);
   };
 
   return (
