@@ -14,11 +14,16 @@ export const findDescendantNodes = (
     visited.add(nodeId);
     nodesToRemove.add(nodeId);
 
-    // Find all edges where this node is the source
+    // 両方向のエッジを探索
     edges
-      .filter(edge => edge.source === nodeId)
+      .filter(edge => 
+        // sourceからtargetとtargetからsourceの両方向を確認
+        edge.source === nodeId || edge.target === nodeId
+      )
       .forEach(edge => {
-        traverse(edge.target);
+        // エッジの反対側のノードを探索
+        const nextNodeId = edge.source === nodeId ? edge.target : edge.source;
+        traverse(nextNodeId);
       });
   };
 
