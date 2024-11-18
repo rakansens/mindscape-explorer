@@ -7,6 +7,7 @@ interface FitViewOptions {
   padding?: number;
   minZoom?: number;
   maxZoom?: number;
+  includeHiddenNodes?: boolean; // Add this line
 }
 
 interface ViewState {
