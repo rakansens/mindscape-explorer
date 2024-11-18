@@ -17,15 +17,62 @@ export const GenerateCodeButton: React.FC<GenerateCodeButtonProps> = ({
   const [isLoading, setIsLoading] = React.useState(false);
   const { generateCode } = useOpenAI();
   const { toast } = useToast();
-  const { nodes } = useMindMapStore();
+  const { nodes, addNode } = useMindMapStore();
 
   const handleClick = async () => {
     try {
       setIsLoading(true);
-      const codes = await generateCode(nodeId);
-      onGenerate(codes);
+      const parentNode = nodes.find(n => n.id === nodeId);
+      if (!parentNode) return;
+
+      // トピックに基づいて生成するコードの種類を定義
+      const codeTypes = [
+        { label: 'コンポーネント', description: 'Reactコンポーネントの実装' },
+        { label: 'スタイル', description: 'スタイリングとアニメーション' },
+        { label: 'ユーティリティ', description: 'ヘルパー関数と型定義' },
+        { label: 'テスト', description: 'ユニットテストとE2Eテスト' }
+      ];
+
+      // 各コードタイプに対してノードを生成
+      for (const type of codeTypes) {
+        try {
+          // 新しい位置を計算（円形に配置）
+          const angle = (2 * Math.PI * codeTypes.indexOf(type)) / codeTypes.length;
+          const radius = 300; // 円の半径
+          const position = {
+            x: parentNode.position.x + radius * Math.cos(angle),
+            y: parentNode.position.y + radius * Math.sin(angle)
+          };
+
+          // コードを生成
+          const codes = await generateCode(nodeId);
+          
+          // コード内容を整形
+          const codeContent = `${type.description}\n\nHTML:\n${codes.html || ''}\n\nCSS:\n${codes.css || ''}\n\nJavaScript:\n${codes.javascript || ''}`;
+          
+          // 新しいノードを追加
+          addNode(parentNode, `${parentNode.data.label}の${type.label}`, position, {
+            detailedText: codeContent,
+            isCode: true
+          });
+
+        } catch (error) {
+          console.error(`Error generating code for ${type.label}:`, error);
+          toast({
+            title: `${type.label}の生成エラー`,
+            description: "このノードのコード生成に失敗しましたが、他のノードの生成を続行します",
+            variant: "destructive",
+          });
+          continue;
+        }
+      }
+
+      toast({
+        title: "コード生成完了",
+        description: "関連するコードノードが生成されました",
+      });
+
     } catch (error) {
-      console.error('Error generating code:', error);
       toast({
         title: "エラー",
         description: "コードの生成に失敗しました",

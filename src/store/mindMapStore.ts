@@ -1,131 +1,229 @@
 import { create } from 'zustand';
-import { Node, Edge, NodeChange, EdgeChange, Connection, applyNodeChanges, applyEdgeChanges, addEdge } from 'reactflow';
+import { Node, Edge } from 'reactflow';
+import { applyNodeChanges, applyEdgeChanges } from 'reactflow';
+import { nanoid } from 'nanoid';
+import { ModelConfig, getDefaultModelConfig } from '../types/models';
 import { NodeData } from '../types/node';
-import { ModelConfig } from '../types/models';
+import { collectNodesToRemove, removeNodesAndEdges } from './operations/nodeOperations';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
-interface MindMapState {
+const initialNodes: Node<NodeData>[] = [
+  {
+    id: '1',
+    type: 'custom',
+    position: { x: window.innerWidth / 2 - 75, y: window.innerHeight / 3 },
+    data: { 
+      label: 'メインテーマ',
+      selected: false,
+      isGenerating: false,
+      isAppearing: false
+    }
+  }
+];
+
+const initialModelConfig = getDefaultModelConfig();
+
+interface MindMapStore {
   nodes: Node<NodeData>[];
   edges: Edge[];
-  selectedNodeId: string | null;
   modelConfig: ModelConfig | null;
-  onNodesChange: (changes: NodeChange[]) => void;
-  onEdgesChange: (changes: EdgeChange[]) => void;
-  onConnect: (connection: Connection) => void;
+  setModelConfig: (config: ModelConfig | null) => void;
+  onNodesChange: (changes: any) => void;
+  onEdgesChange: (changes: any) => void;
+  onConnect: (connection: any) => void;
   updateNodes: (nodes: Node<NodeData>[]) => void;
   updateEdges: (edges: Edge[]) => void;
-  updateNode: (nodeId: string, updates: Partial<NodeData>) => void;
-  updateNodeText: (nodeId: string, text: string) => void;
-  addNode: (parentNode: Node<NodeData>, label: string, position: { x: number; y: number }) => Node<NodeData>;
+  selectNode: (id: string) => void;
+  updateNodeText: (id: string, text: string) => void;
+  addNode: (parentNode: Node<NodeData>, label: string, position?: { x: number; y: number }, additionalData?: Partial<NodeData>) => Node<NodeData>;
+  updateNode: (id: string, updates: Partial<NodeData>) => void;
   removeChildNodes: (nodeId: string) => void;
-  selectNode: (nodeId: string | null) => void;
-  setModelConfig: (config: ModelConfig) => void;
+  exportAsImage: () => Promise<void>;
+  exportAsPDF: () => Promise<void>;
+  exportAsJSON: () => void;
+  importFromJSON: (jsonString: string) => void;
   saveMap: () => void;
   loadMap: () => void;
-  exportAsImage: () => void;
-  exportAsPDF: () => void;
-  exportAsJSON: () => void;
-  importFromJSON: (json: string) => void;
-  undo: () => void;
-  redo: () => void;
 }
 
-export const useMindMapStore = create<MindMapState>((set, get) => ({
-  nodes: [],
+export const useMindMapStore = create<MindMapStore>((set, get) => ({
+  nodes: initialNodes,
   edges: [],
-  selectedNodeId: null,
-  modelConfig: null,
+  modelConfig: initialModelConfig,
 
   onNodesChange: (changes) => {
-    set({
-      nodes: applyNodeChanges(changes, get().nodes),
-    });
+    set((state) => ({
+      nodes: applyNodeChanges(changes, state.nodes)
+    }));
   },
 
   onEdgesChange: (changes) => {
-    set({
-      edges: applyEdgeChanges(changes, get().edges),
-    });
+    set((state) => ({
+      edges: applyEdgeChanges(changes, state.edges)
+    }));
   },
 
   onConnect: (connection) => {
-    set({
-      edges: addEdge(connection, get().edges),
-    });
+    set((state) => ({
+      edges: [
+        ...state.edges,
+        {
+          ...connection,
+          id: `e${connection.source}-${connection.target}`,
+          type: 'custom',
+        }
+      ]
+    }));
   },
 
   updateNodes: (nodes) => set({ nodes }),
   updateEdges: (edges) => set({ edges }),
 
-  updateNode: (nodeId, updates) => {
-    set(state => ({
-      nodes: state.nodes.map(node =>
-        node.id === nodeId ? { ...node, data: { ...node.data, ...updates } } : node
-      ),
+  selectNode: (id) => {
+    set((state) => ({
+      nodes: state.nodes.map(node => ({
+        ...node,
+        data: {
+          ...node.data,
+          selected: node.id === id
+        }
+      }))
     }));
   },
 
-  updateNodeText: (nodeId, text) => {
-    set(state => ({
+  updateNodeText: (id, text) => {
+    set((state) => ({
       nodes: state.nodes.map(node =>
-        node.id === nodeId ? { ...node, data: { ...node.data, label: text } } : node
-      ),
+        node.id === id ? { ...node, data: { ...node.data, label: text } } : node
+      )
     }));
   },
 
-  addNode: (parentNode, label, position) => {
+  addNode: (parentNode, label, position, additionalData = {}) => {
     const newNode: Node<NodeData> = {
-      id: crypto.randomUUID(),
+      id: nanoid(),
       type: 'custom',
-      position,
-      data: { label, isGenerating: false, isAppearing: false, selected: false }
+      position: position || { x: 0, y: 0 },
+      data: {
+        label,
+        isGenerating: false,
+        isAppearing: false,
+        selected: false,
+        ...additionalData
+      },
     };
 
-    const newEdge: Edge = {
-      id: `${parentNode.id}-${newNode.id}`,
-      source: parentNode.id,
-      target: newNode.id,
-      type: 'custom'
-    };
-
-    set(state => ({
+    set((state) => ({
       nodes: [...state.nodes, newNode],
-      edges: [...state.edges, newEdge]
+      edges: parentNode
+        ? [...state.edges, {
+            id: `${parentNode.id}-${newNode.id}`,
+            source: parentNode.id,
+            target: newNode.id,
+            type: 'custom',
+          }]
+        : state.edges,
     }));
 
     return newNode;
   },
 
-  removeChildNodes: (nodeId) => {
-    set(state => {
-      const nodesToRemove = new Set<string>();
-      const traverse = (id: string) => {
-        nodesToRemove.add(id);
-        state.edges
-          .filter(edge => edge.source === id)
-          .forEach(edge => traverse(edge.target));
-      };
-      traverse(nodeId);
+  updateNode: (id, updates) => {
+    set((state) => ({
+      nodes: state.nodes.map(node =>
+        node.id === id
+          ? {
+              ...node,
+              data: {
+                ...node.data,
+                ...updates
+              }
+            }
+          : node
+      )
+    }));
+  },
+
+  removeChildNodes: (nodeId: string) => {
+    set((state) => {
+      const nodeIdsToRemove = collectNodesToRemove(state.nodes, state.edges, nodeId);
+      
+      const { nodes: updatedNodes, edges: updatedEdges } = removeNodesAndEdges(
+        state.nodes,
+        state.edges,
+        nodeIdsToRemove
+      );
 
       return {
-        nodes: state.nodes.filter(node => !nodesToRemove.has(node.id)),
-        edges: state.edges.filter(edge => 
-          !nodesToRemove.has(edge.source) && !nodesToRemove.has(edge.target)
-        )
+        nodes: updatedNodes,
+        edges: updatedEdges
       };
     });
   },
 
-  selectNode: (nodeId) => set({ selectedNodeId: nodeId }),
-  
-  setModelConfig: (config) => set({ modelConfig: config }),
+  exportAsImage: async () => {
+    const element = document.querySelector('.react-flow') as HTMLElement;
+    if (element) {
+      const canvas = await html2canvas(element);
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = 'mindmap.png';
+      link.href = dataUrl;
+      link.click();
+    }
+  },
 
-  // Stub implementations for file operations
-  saveMap: () => console.log('Save map not implemented'),
-  loadMap: () => console.log('Load map not implemented'),
-  exportAsImage: () => console.log('Export as image not implemented'),
-  exportAsPDF: () => console.log('Export as PDF not implemented'),
-  exportAsJSON: () => console.log('Export as JSON not implemented'),
-  importFromJSON: () => console.log('Import from JSON not implemented'),
-  undo: () => console.log('Undo not implemented'),
-  redo: () => console.log('Redo not implemented'),
+  exportAsPDF: async () => {
+    const element = document.querySelector('.react-flow') as HTMLElement;
+    if (element) {
+      const canvas = await html2canvas(element);
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('l', 'mm', 'a4');
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save('mindmap.pdf');
+    }
+  },
+
+  exportAsJSON: () => {
+    const { nodes, edges } = get();
+    const data = { nodes, edges };
+    const jsonString = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'mindmap.json';
+    link.click();
+    URL.revokeObjectURL(url);
+  },
+
+  importFromJSON: (jsonString: string) => {
+    try {
+      const data = JSON.parse(jsonString);
+      if (data.nodes && data.edges) {
+        set({ nodes: data.nodes, edges: data.edges });
+      }
+    } catch (error) {
+      console.error('Failed to import JSON:', error);
+    }
+  },
+
+  saveMap: () => {
+    const { nodes, edges } = get();
+    localStorage.setItem('mindmap', JSON.stringify({ nodes, edges }));
+  },
+
+  loadMap: () => {
+    const saved = localStorage.getItem('mindmap');
+    if (saved) {
+      const { nodes, edges } = JSON.parse(saved);
+      set({ nodes, edges });
+    }
+  },
+
+  setModelConfig: (config) => set({ modelConfig: config }),
 }));

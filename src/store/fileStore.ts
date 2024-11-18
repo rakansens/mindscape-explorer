@@ -1,7 +1,6 @@
 import { create } from 'zustand';
-import { Node, Edge } from 'reactflow';
-import { v4 as uuidv4 } from 'uuid';
 import { FileSystemItem, MindMapFile, Folder } from '../types/file';
+import { generateId } from '../utils/idUtils';
 
 interface FileStore {
   items: FileSystemItem[];
@@ -10,20 +9,23 @@ interface FileStore {
   editingTitle: string;
   expandedFolders: Set<string>;
   
-  setActiveFileId: (id: string | null) => void;
-  setActiveFile: (id: string) => void;
   addFile: (file: MindMapFile) => void;
   createFile: (title: string) => void;
   createFolder: (title: string) => void;
   removeItem: (id: string) => void;
+  deleteItem: (id: string, e: React.MouseEvent) => void;
   updateItem: (id: string, updates: Partial<FileSystemItem>) => void;
-  startEditing: (id: string, title: string) => void;
-  saveTitle: (id: string) => void;
-  cancelEditing: () => void;
-  setEditingTitle: (title: string) => void;
+  
+  setActiveFile: (id: string) => void;
+  startEditing: (id: string, title: string, e: React.MouseEvent) => void;
+  saveTitle: (id: string, e: React.MouseEvent) => void;
+  cancelEditing: (e: React.MouseEvent) => void;
+  setEditingTitle: (value: string) => void;
+  
   toggleFolder: (id: string) => void;
   getChildren: (parentId: string | null) => FileSystemItem[];
-  deleteItem: (id: string) => void;
+  
+  autoSave: () => void;
 }
 
 export const useFileStore = create<FileStore>((set, get) => ({
@@ -33,17 +35,13 @@ export const useFileStore = create<FileStore>((set, get) => ({
   editingTitle: '',
   expandedFolders: new Set(),
 
-  setActiveFileId: (id) => set({ activeFileId: id }),
-  
-  setActiveFile: (id) => set({ activeFileId: id }),
-
   addFile: (file) => set((state) => ({
     items: [...state.items, file]
   })),
 
   createFile: (title) => {
     const newFile: MindMapFile = {
-      id: uuidv4(),
+      id: generateId(),
       title,
       type: 'file',
       parentId: null,
@@ -57,49 +55,65 @@ export const useFileStore = create<FileStore>((set, get) => ({
     get().addFile(newFile);
   },
 
-  createFolder: (title) => set((state) => {
+  createFolder: (title) => {
     const newFolder: Folder = {
-      id: uuidv4(),
+      id: generateId(),
       title,
       type: 'folder',
       parentId: null,
       createdAt: new Date(),
       updatedAt: new Date()
     };
-    return { items: [...state.items, newFolder] };
-  }),
+    set((state) => ({
+      items: [...state.items, newFolder] as FileSystemItem[]
+    }));
+  },
 
   removeItem: (id) => set((state) => ({
-    items: state.items.filter(item => item.id !== id)
+    items: state.items.filter(item => item.id !== id),
+    activeFileId: state.activeFileId === id ? null : state.activeFileId
   })),
+
+  deleteItem: (id, e) => {
+    e.stopPropagation();
+    get().removeItem(id);
+  },
 
   updateItem: (id, updates) => set((state) => ({
     items: state.items.map(item =>
-      item.id === id ? { ...item, ...updates, updatedAt: new Date() } : item
-    ) as FileSystemItem[]
+      item.id === id ? { ...item, ...updates } as FileSystemItem : item
+    )
   })),
 
-  startEditing: (id, title) => set({ 
-    editingId: id, 
-    editingTitle: title 
-  }),
+  setActiveFile: (id) => set({ activeFileId: id }),
 
-  saveTitle: (id) => {
-    const { editingTitle } = get();
-    if (editingTitle.trim()) {
-      get().updateItem(id, { title: editingTitle.trim() });
-    }
-    set({ editingId: null, editingTitle: '' });
+  startEditing: (id, title, e) => {
+    e.stopPropagation();
+    set({
+      editingId: id,
+      editingTitle: title
+    });
   },
 
-  cancelEditing: () => set({ 
-    editingId: null, 
-    editingTitle: '' 
-  }),
+  saveTitle: (id, e) => {
+    e.stopPropagation();
+    const store = get();
+    store.updateItem(id, { title: store.editingTitle });
+    set({
+      editingId: null,
+      editingTitle: ''
+    });
+  },
 
-  setEditingTitle: (title) => set({ 
-    editingTitle: title 
-  }),
+  cancelEditing: (e) => {
+    e.stopPropagation();
+    set({
+      editingId: null,
+      editingTitle: ''
+    });
+  },
+
+  setEditingTitle: (value) => set({ editingTitle: value }),
 
   toggleFolder: (id) => set((state) => {
     const newExpandedFolders = new Set(state.expandedFolders);
@@ -115,7 +129,8 @@ export const useFileStore = create<FileStore>((set, get) => ({
     return get().items.filter(item => item.parentId === parentId);
   },
 
-  deleteItem: (id) => {
-    get().removeItem(id);
+  autoSave: () => {
+    const { items, activeFileId } = get();
+    localStorage.setItem('mindmap-files', JSON.stringify({ items, activeFileId }));
   }
 }));

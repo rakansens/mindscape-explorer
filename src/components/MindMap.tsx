@@ -3,12 +3,13 @@ import ReactFlow, {
   Background, 
   Controls, 
   MiniMap,
+  Edge,
+  Connection,
 } from 'reactflow';
 import { useMindMapStore } from '../store/mindMapStore';
 import { useLayoutStore } from '../store/layoutStore';
 import { useFileStore } from '../store/fileStore';
 import { useViewStore } from '../store/viewStore';
-import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import CustomNode from './CustomNode';
 import CustomEdge from './CustomEdge';
 import 'reactflow/dist/style.css';
@@ -26,9 +27,6 @@ export const MindMap = () => {
   const { layout, applyLayout } = useLayoutStore();
   const { activeFileId, items } = useFileStore();
   const { theme, showMinimap } = useViewStore();
-
-  // キーボードショートカットを有効化
-  useKeyboardShortcuts();
 
   useEffect(() => {
     if (nodes.length > 0) {
