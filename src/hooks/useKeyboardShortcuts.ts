@@ -18,6 +18,7 @@ export const useKeyboardShortcuts = () => {
           data: { ...node.data, selected: true }
         }));
         updateNodes(updatedNodes);
+        return;
       }
 
       // Arrow keys: Navigate between nodes
@@ -34,47 +35,49 @@ export const useKeyboardShortcuts = () => {
           return;
         }
 
-        // Get connected nodes
-        const connectedEdges = edges.filter(
-          edge => edge.source === selectedNode.id || edge.target === selectedNode.id
-        );
+        const getConnectedNodeInDirection = (direction: 'up' | 'down' | 'left' | 'right'): Node<NodeData> | undefined => {
+          // Get all connected edges for the current node
+          const connectedEdges = edges.filter(
+            edge => edge.source === selectedNode.id || edge.target === selectedNode.id
+          );
 
-        const getClosestNode = (direction: 'up' | 'down' | 'left' | 'right'): Node<NodeData> | undefined => {
-          const currentX = selectedNode.position.x;
-          const currentY = selectedNode.position.y;
+          // Get all connected nodes
+          const connectedNodes = connectedEdges.map(edge => {
+            const nodeId = edge.source === selectedNode.id ? edge.target : edge.source;
+            return nodes.find(node => node.id === nodeId);
+          }).filter((node): node is Node<NodeData> => node !== undefined);
 
-          // Filter nodes based on direction
-          const possibleNodes = nodes.filter(node => {
-            if (node.id === selectedNode.id) return false;
-
-            const dx = node.position.x - currentX;
-            const dy = node.position.y - currentY;
+          // Filter nodes based on direction relative to selected node
+          const filteredNodes = connectedNodes.filter(node => {
+            const dx = node.position.x - selectedNode.position.x;
+            const dy = node.position.y - selectedNode.position.y;
+            const angle = Math.atan2(dy, dx) * (180 / Math.PI);
 
             switch (direction) {
               case 'up':
-                return dy < 0 && Math.abs(dx) < Math.abs(dy);
+                return angle < -45 && angle > -135;
               case 'down':
-                return dy > 0 && Math.abs(dx) < Math.abs(dy);
+                return angle > 45 && angle < 135;
               case 'left':
-                return dx < 0 && Math.abs(dy) < Math.abs(dx);
+                return angle > 135 || angle < -135;
               case 'right':
-                return dx > 0 && Math.abs(dy) < Math.abs(dx);
+                return angle > -45 && angle < 45;
               default:
                 return false;
             }
           });
 
           // Return the closest node in that direction
-          return possibleNodes.reduce((closest, current) => {
+          return filteredNodes.reduce((closest, current) => {
             if (!closest) return current;
 
             const closestDist = Math.hypot(
-              closest.position.x - currentX,
-              closest.position.y - currentY
+              closest.position.x - selectedNode.position.x,
+              closest.position.y - selectedNode.position.y
             );
             const currentDist = Math.hypot(
-              current.position.x - currentX,
-              current.position.y - currentY
+              current.position.x - selectedNode.position.x,
+              current.position.y - selectedNode.position.y
             );
 
             return currentDist < closestDist ? current : closest;
@@ -85,16 +88,16 @@ export const useKeyboardShortcuts = () => {
 
         switch (e.key) {
           case 'ArrowUp':
-            nextNode = getClosestNode('up');
+            nextNode = getConnectedNodeInDirection('up');
             break;
           case 'ArrowDown':
-            nextNode = getClosestNode('down');
+            nextNode = getConnectedNodeInDirection('down');
             break;
           case 'ArrowLeft':
-            nextNode = getClosestNode('left');
+            nextNode = getConnectedNodeInDirection('left');
             break;
           case 'ArrowRight':
-            nextNode = getClosestNode('right');
+            nextNode = getConnectedNodeInDirection('right');
             break;
         }
 
