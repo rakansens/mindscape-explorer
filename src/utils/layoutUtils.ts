@@ -1,7 +1,6 @@
 import dagre from 'dagre';
 import { Node, Edge } from 'reactflow';
 import { NodeData } from '../types/node';
-import * as d3Force from 'd3-force';
 
 const NODE_WIDTH = 200;
 const NODE_HEIGHT = 100;
@@ -91,78 +90,43 @@ export const getCircleLayout = (
   const centerX = width / 2;
   const centerY = height / 2;
   
-  // ノード数に応じて半径を動的に調整
+  // 親ノードを中心に配置
+  const parentNode = nodes.find(node => node.id === "1");
+  const childNodes = nodes.filter(node => node.id !== "1");
+  
+  // ノード数に応じて半径を動的に調整（親ノードを除く）
   const radius = Math.min(
-    (Math.min(width, height) - PADDING * 2) / 2,
-    nodes.length * NODE_WIDTH / (2 * Math.PI)
+    (Math.min(width, height) - PADDING * 4) / 2,
+    childNodes.length * NODE_WIDTH / (2 * Math.PI)
   );
 
-  const layoutedNodes = nodes.map((node, index) => {
-    const angle = (index * 2 * Math.PI) / nodes.length;
-    return {
-      ...node,
-      position: {
-        x: centerX + radius * Math.cos(angle) - NODE_WIDTH / 2,
-        y: centerY + radius * Math.sin(angle) - NODE_HEIGHT / 2
-      }
-    };
+  const layoutedNodes = nodes.map(node => {
+    if (node.id === "1") {
+      // 親ノードは中心に配置
+      return {
+        ...node,
+        position: {
+          x: centerX - NODE_WIDTH / 2,
+          y: centerY - NODE_HEIGHT / 2
+        }
+      };
+    } else {
+      // 子ノードを円周上に配置
+      const index = childNodes.findIndex(n => n.id === node.id);
+      const totalNodes = childNodes.length;
+      const angle = (index * 2 * Math.PI) / totalNodes;
+      
+      return {
+        ...node,
+        position: {
+          x: centerX + radius * Math.cos(angle) - NODE_WIDTH / 2,
+          y: centerY + radius * Math.sin(angle) - NODE_HEIGHT / 2
+        }
+      };
+    }
   });
 
   return { nodes: layoutedNodes, edges };
-};
-
-export const applyForceLayout = (
-  nodes: Node<NodeData>[],
-  edges: Edge[],
-  width: number,
-  height: number
-) => {
-  if (!nodes.length) return { nodes, edges };
-
-  // ノードとエッジのコピーを作成
-  const nodesCopy = nodes.map(node => ({ ...node }));
-  const edgesCopy = edges.map(edge => ({ ...edge }));
-
-  // シミュレーション用のデータ構造を作成
-  const simulation = d3Force.forceSimulation(nodesCopy as any)
-    .force('charge', d3Force.forceManyBody().strength(-300))
-    .force('center', d3Force.forceCenter(width / 2, height / 2).strength(0.1))
-    .force('collision', d3Force.forceCollide().radius(80))
-    .force('link', d3Force.forceLink(edgesCopy).id((d: any) => d.id).distance(150));
-
-  // シミュレーションを実行
-  for (let i = 0; i < 300; i++) {
-    simulation.tick();
-  }
-
-  // 新しい位置を元のノードに適用
-  const updatedNodes = nodes.map((originalNode, i) => ({
-    ...originalNode,
-    position: {
-      x: Math.max(0, Math.min(width - 200, (nodesCopy[i] as any).x)),
-      y: Math.max(0, Math.min(height - 100, (nodesCopy[i] as any).y))
-    }
-  }));
-
-  simulation.stop();
-
-  // エッジの属性を完全に保持
-  const updatedEdges = edges.map(originalEdge => ({
-    ...originalEdge,
-    id: originalEdge.id,
-    source: originalEdge.source,
-    target: originalEdge.target,
-    type: originalEdge.type || 'custom',
-    animated: true,
-    sourceHandle: originalEdge.sourceHandle,
-    targetHandle: originalEdge.targetHandle,
-    style: originalEdge.style
-  }));
-
-  return {
-    nodes: updatedNodes,
-    edges: updatedEdges
-  };
 };
 
 export const getOrthogonalLayout = (
