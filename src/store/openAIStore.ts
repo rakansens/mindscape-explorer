@@ -82,7 +82,8 @@ export const useOpenAI = create<OpenAIStore>((set) => ({
 
       const openai = new OpenAI({
         apiKey: openaiKey,
-        dangerouslyAllowBrowser: true
+        dangerouslyAllowBrowser: true,
+        baseURL: 'https://api.openai.com/v1' // Explicitly set the base URL
       });
 
       const openaiModel = (() => {
