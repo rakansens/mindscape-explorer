@@ -4,7 +4,7 @@ import { NodeData } from '../types/node';
 
 const NODE_WIDTH = 200;
 const NODE_HEIGHT = 100;
-const PADDING = 100;
+const PADDING = 50; // パディング値を100から50に減少
 
 const validateGraph = (nodes: Node[], edges: Edge[]) => {
   // Check if all edge endpoints exist in nodes
@@ -96,8 +96,8 @@ export const getCircleLayout = (
   
   // ノード数に応じて半径を動的に調整（親ノードを除く）
   const radius = Math.min(
-    (Math.min(width, height) - PADDING * 4) / 2,
-    childNodes.length * NODE_WIDTH / (2 * Math.PI)
+    (Math.min(width, height) - PADDING * 2) / 2.5, // 2.5で割ることで、より小さな円を作成
+    childNodes.length * 50 // ノードごとの必要なスペースを考慮
   );
 
   const layoutedNodes = nodes.map(node => {
@@ -114,7 +114,7 @@ export const getCircleLayout = (
       // 子ノードを円周上に配置
       const index = childNodes.findIndex(n => n.id === node.id);
       const totalNodes = childNodes.length;
-      const angle = (index * 2 * Math.PI) / totalNodes;
+      const angle = (index * 2 * Math.PI) / totalNodes - Math.PI / 2; // -Math.PI/2 で上から配置開始
       
       return {
         ...node,
