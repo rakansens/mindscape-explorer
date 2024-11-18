@@ -1,7 +1,18 @@
 import { create } from 'zustand';
-import { Node, Edge, Connection } from 'reactflow';
+import { 
+  Node, 
+  Edge, 
+  Connection,
+  applyNodeChanges,
+  applyEdgeChanges,
+  addEdge,
+  OnNodesChange,
+  OnEdgesChange,
+  OnConnect
+} from 'reactflow';
 import { NodeData } from '../types/node';
 import { useHistoryStore } from './historyStore';
+import { ModelConfig } from '../types/models';
 import {
   addNodeOperation,
   removeNodesOperation,
@@ -12,16 +23,24 @@ interface MindMapState {
   nodes: Node<NodeData>[];
   edges: Edge[];
   selectedNodeId: string | null;
-  onNodesChange: (changes: any) => void;
-  onEdgesChange: (changes: any) => void;
-  onConnect: (connection: Connection) => void;
+  modelConfig: ModelConfig | null;
+  onNodesChange: OnNodesChange;
+  onEdgesChange: OnEdgesChange;
+  onConnect: OnConnect;
   updateNodes: (nodes: Node<NodeData>[]) => void;
   updateEdges: (edges: Edge[]) => void;
   selectNode: (id: string | null) => void;
   updateNodeText: (id: string, text: string) => void;
-  addNode: (parentNode: Node<NodeData>, label: string, position: { x: number; y: number }) => void;
+  addNode: (parentNode: Node<NodeData>, label: string, position: { x: number; y: number }) => Node<NodeData>;
   updateNode: (id: string, updates: Partial<NodeData>) => void;
   removeChildNodes: (nodeId: string) => void;
+  setModelConfig: (config: ModelConfig) => void;
+  exportAsImage: () => void;
+  exportAsPDF: () => void;
+  exportAsJSON: () => void;
+  importFromJSON: (json: string) => void;
+  saveMap: () => void;
+  loadMap: () => void;
   undo: () => void;
   redo: () => void;
 }
@@ -151,4 +170,37 @@ export const useMindMapStore = create<MindMapState>((set, get) => ({
       set({ nodes: next.nodes, edges: next.edges });
     }
   },
+
+  modelConfig: null,
+  setModelConfig: (config) => set({ modelConfig: config }),
+
+  exportAsImage: () => {
+    // Implementation will be added later
+    console.log('Export as image');
+  },
+
+  exportAsPDF: () => {
+    // Implementation will be added later
+    console.log('Export as PDF');
+  },
+
+  exportAsJSON: () => {
+    // Implementation will be added later
+    console.log('Export as JSON');
+  },
+
+  importFromJSON: (json) => {
+    // Implementation will be added later
+    console.log('Import from JSON', json);
+  },
+
+  saveMap: () => {
+    // Implementation will be added later
+    console.log('Save map');
+  },
+
+  loadMap: () => {
+    // Implementation will be added later
+    console.log('Load map');
+  }
 }));
