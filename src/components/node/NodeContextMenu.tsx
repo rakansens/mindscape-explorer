@@ -19,19 +19,24 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
 }) => {
   const { removeChildNodes, updateNode } = useMindMapStore();
 
-  const handleDelete = (e: Event) => {
+  const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     removeChildNodes(nodeId);
   };
 
-  const handleToggleTask = () => {
+  const handleToggleTask = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     updateNode(nodeId, {
       isTask: true,
       isCompleted: false
     });
   };
 
-  const handleCopy = () => {
+  const handleCopy = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     // コピー機能の実装は将来的な課題
   };
 
@@ -41,15 +46,15 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
         {children}
       </ContextMenuTrigger>
       <ContextMenuContent className="w-64">
-        <ContextMenuItem onSelect={handleDelete}>
+        <ContextMenuItem onClick={handleDelete}>
           <Trash2 className="mr-2 h-4 w-4" />
           <span>削除</span>
         </ContextMenuItem>
-        <ContextMenuItem onSelect={handleToggleTask}>
+        <ContextMenuItem onClick={handleToggleTask}>
           <CheckSquare className="mr-2 h-4 w-4" />
           <span>タスクに変換</span>
         </ContextMenuItem>
-        <ContextMenuItem onSelect={handleCopy}>
+        <ContextMenuItem onClick={handleCopy}>
           <Copy className="mr-2 h-4 w-4" />
           <span>複製</span>
         </ContextMenuItem>
