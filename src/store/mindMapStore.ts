@@ -4,8 +4,25 @@ import { applyNodeChanges, applyEdgeChanges } from 'reactflow';
 import { nanoid } from 'nanoid';
 import { ModelConfig, getDefaultModelConfig } from '../types/models';
 import { NodeData } from '../types/node';
+import { removeNodeAndDescendants } from './nodeOperations';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+
+const initialNodes: Node<NodeData>[] = [
+  {
+    id: '1',
+    type: 'custom',
+    position: { x: window.innerWidth / 2 - 75, y: window.innerHeight / 3 },
+    data: { 
+      label: 'メインテーマ',
+      selected: false,
+      isGenerating: false,
+      isAppearing: false
+    }
+  }
+];
+
+const initialModelConfig = getDefaultModelConfig();
 
 interface MindMapStore {
   nodes: Node<NodeData>[];
@@ -29,23 +46,6 @@ interface MindMapStore {
   saveMap: () => void;
   loadMap: () => void;
 }
-
-const initialNodes: Node<NodeData>[] = [
-  {
-    id: '1',
-    type: 'custom',
-    position: { x: window.innerWidth / 2 - 75, y: window.innerHeight / 3 },
-    data: { 
-      label: 'メインテーマ',
-      selected: false,
-      isGenerating: false,
-      isAppearing: false
-    }
-  }
-];
-
-// 初期のモデル設定を環境変数から取得
-const initialModelConfig = getDefaultModelConfig();
 
 export const useMindMapStore = create<MindMapStore>((set, get) => ({
   nodes: initialNodes,
@@ -146,29 +146,8 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
 
   removeChildNodes: (nodeId) => {
     set((state) => {
-      const nodesToRemove = new Set<string>();
-      
-      // 再帰的に全ての子孫ノードのIDを収集
-      const collectDescendantIds = (parentId: string) => {
-        nodesToRemove.add(parentId);
-        state.edges.forEach(edge => {
-          if (edge.source === parentId) {
-            collectDescendantIds(edge.target);
-          }
-        });
-      };
-
-      // 指定されたノードの子孫を収集
-      collectDescendantIds(nodeId);
-
-      return {
-        // 削除対象のノードを除外
-        nodes: state.nodes.filter(node => !nodesToRemove.has(node.id)),
-        // 削除対象のノードに関連するエッジを除外
-        edges: state.edges.filter(edge => 
-          !nodesToRemove.has(edge.source) && !nodesToRemove.has(edge.target)
-        )
-      };
+      const { nodes, edges } = removeNodeAndDescendants(state.nodes, state.edges, nodeId);
+      return { nodes, edges };
     });
   },
 
