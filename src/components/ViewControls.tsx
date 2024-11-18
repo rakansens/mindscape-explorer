@@ -43,40 +43,18 @@ export const ViewControls = () => {
     
     setTimeout(() => {
       if (parentNode && instance) {
-        const centerX = window.innerWidth / 2;
-        const centerY = window.innerHeight / 2;
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const zoom = Math.min(
+          viewportWidth / (200 * 2),
+          viewportHeight / (100 * 2)
+        );
         
-        // レイアウトタイプに応じて中央配置を調整
-        let offsetX = 0;
-        let offsetY = 0;
-        
-        switch (layoutType) {
-          case 'circle':
-            offsetX = -100;
-            offsetY = -50;
-            break;
-          case 'force':
-            offsetX = -100;
-            offsetY = -50;
-            break;
-          case 'horizontal':
-            offsetX = -150;
-            offsetY = -50;
-            break;
-          case 'layered':
-            offsetX = -100;
-            offsetY = -100;
-            break;
-          default:
-            offsetX = -100;
-            offsetY = -50;
-        }
-
         instance.setCenter(
-          centerX + offsetX,
-          centerY + offsetY,
+          viewportWidth / 2,
+          viewportHeight / 2,
           { 
-            zoom: 1,
+            zoom: Math.min(1, zoom),
             duration: 600
           }
         );

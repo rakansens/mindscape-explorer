@@ -4,11 +4,23 @@ import { NodeData } from '../types/node';
 
 const NODE_WIDTH = 200;
 const NODE_HEIGHT = 100;
+const PADDING = 100; // 画面端からの余白
 
 // 中央配置のための共通関数
 const calculateCenterPosition = (width: number, height: number) => ({
-  x: width / 2 - NODE_WIDTH / 2,
-  y: height / 2 - NODE_HEIGHT / 2
+  x: (width - NODE_WIDTH) / 2,
+  y: (height - NODE_HEIGHT) / 2
+});
+
+// ビューポート内に収まるように位置を調整
+const adjustPositionToViewport = (
+  x: number,
+  y: number,
+  width: number,
+  height: number
+) => ({
+  x: Math.max(PADDING, Math.min(width - NODE_WIDTH - PADDING, x)),
+  y: Math.max(PADDING, Math.min(height - NODE_HEIGHT - PADDING, y))
 });
 
 export const getLayoutedElements = (
@@ -44,12 +56,16 @@ export const getLayoutedElements = (
 
   const layoutedNodes = nodes.map((node) => {
     const nodeWithPosition = dagreGraph.node(node.id);
+    const position = adjustPositionToViewport(
+      nodeWithPosition.x - NODE_WIDTH / 2,
+      nodeWithPosition.y - NODE_HEIGHT / 2,
+      window.innerWidth,
+      window.innerHeight
+    );
+    
     return {
       ...node,
-      position: {
-        x: nodeWithPosition.x - NODE_WIDTH / 2,
-        y: nodeWithPosition.y - NODE_HEIGHT / 2,
-      },
+      position
     };
   });
 
@@ -67,12 +83,16 @@ export const getCircleLayout = (
   
   const layoutedNodes = nodes.map((node, index) => {
     const angle = (index * 2 * Math.PI) / nodes.length;
+    const position = adjustPositionToViewport(
+      center.x + radius * Math.cos(angle),
+      center.y + radius * Math.sin(angle),
+      width,
+      height
+    );
+    
     return {
       ...node,
-      position: {
-        x: center.x + radius * Math.cos(angle),
-        y: center.y + radius * Math.sin(angle),
-      },
+      position
     };
   });
 
@@ -102,13 +122,19 @@ export const applyForceLayout = (
   height: number
 ) => {
   const center = calculateCenterPosition(width, height);
-  const layoutedNodes = nodes.map((node, index) => ({
-    ...node,
-    position: {
-      x: center.x + (index % 3) * NODE_WIDTH,
-      y: center.y + Math.floor(index / 3) * NODE_HEIGHT,
-    },
-  }));
+  const layoutedNodes = nodes.map((node, index) => {
+    const position = adjustPositionToViewport(
+      center.x + (index % 3) * (NODE_WIDTH + 50),
+      center.y + Math.floor(index / 3) * (NODE_HEIGHT + 50),
+      width,
+      height
+    );
+    
+    return {
+      ...node,
+      position
+    };
+  });
 
   return { nodes: layoutedNodes, edges };
 };
