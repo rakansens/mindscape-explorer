@@ -20,8 +20,7 @@ export const ViewControls = () => {
     setEdgeStyle,
     lineStyle,
     setLineStyle,
-    instance,
-    fitView
+    instance
   } = useViewStore();
 
   const { nodes } = useMindMapStore();
@@ -38,32 +37,6 @@ export const ViewControls = () => {
 
   const handleLayoutChange = (layoutType: LayoutType) => {
     setLayout({ ...layout, type: layoutType });
-    
-    // レイアウト変更後、少し待ってからフィットビューを実行
-    setTimeout(() => {
-      if (instance) {
-        const parentNode = nodes.find(node => node.id === "1");
-        if (parentNode) {
-          const viewportWidth = window.innerWidth;
-          const viewportHeight = window.innerHeight;
-          const zoom = Math.min(
-            viewportWidth / (200 * 2),
-            viewportHeight / (100 * 2)
-          );
-          
-          instance.setCenter(
-            viewportWidth / 2,
-            viewportHeight / 2,
-            { 
-              zoom: Math.min(1, zoom),
-              duration: 800
-            }
-          );
-        } else {
-          fitView();
-        }
-      }
-    }, 100);
   };
 
   return (
