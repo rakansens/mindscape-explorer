@@ -2,6 +2,13 @@ import { create } from 'zustand';
 
 type LineStyle = 'solid' | 'dashed' | 'double' | 'wavy' | 'gradient' | 'varying';
 
+interface FitViewOptions {
+  duration?: number;
+  padding?: number;
+  minZoom?: number;
+  maxZoom?: number;
+}
+
 interface ViewState {
   theme: string;
   setTheme: (theme: string) => void;
@@ -13,14 +20,14 @@ interface ViewState {
   setLineStyle: (style: LineStyle) => void;
   instance: any;
   setInstance: (instance: any) => void;
-  fitView: () => void;
+  fitView: (options?: FitViewOptions) => void;
   setNodeAnimating: (nodeId: string, isAnimating: boolean) => void;
 }
 
 export const useViewStore = create<ViewState>((set, get) => ({
   theme: 'light',
   setTheme: (theme) => set({ theme }),
-  showMinimap: false, // Changed to false as default
+  showMinimap: false,
   toggleMinimap: () => set((state) => ({ showMinimap: !state.showMinimap })),
   edgeStyle: 'custom',
   setEdgeStyle: (style) => set({ edgeStyle: style }),
@@ -28,10 +35,10 @@ export const useViewStore = create<ViewState>((set, get) => ({
   setLineStyle: (style) => set({ lineStyle: style }),
   instance: null,
   setInstance: (instance) => set({ instance }),
-  fitView: () => {
+  fitView: (options) => {
     const { instance } = get();
     if (instance) {
-      instance.fitView({ duration: 500, padding: 0.1 });
+      instance.fitView(options);
     }
   },
   setNodeAnimating: (nodeId, isAnimating) => {
