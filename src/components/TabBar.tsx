@@ -7,7 +7,6 @@ import { generateId } from '../utils/idUtils';
 
 export const TabBar = () => {
   const { items, activeFileId, addFile, setActiveFile, removeItem } = useFileStore();
-  // itemsからファイルのみをフィルタリング
   const files = items.filter(item => item.type === 'file') as MindMapFile[];
 
   const handleNewFile = () => {
@@ -56,7 +55,7 @@ export const TabBar = () => {
             className="w-4 h-4 opacity-0 group-hover:opacity-100"
             onClick={(e) => {
               e.stopPropagation();
-              removeItem(file.id);  // removeFileをremoveItemに変更
+              removeItem(file.id);
             }}
           >
             <X className="w-3 h-3" />
@@ -74,4 +73,4 @@ export const TabBar = () => {
       </Button>
     </div>
   );
-}; 
+};

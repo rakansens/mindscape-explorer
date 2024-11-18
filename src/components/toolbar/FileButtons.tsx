@@ -44,5 +44,5 @@ export const FileButtons: React.FC<FileButtonsProps> = ({
     setIsSaveDialogOpen(false);
   };
 
-  return null; // Component implementation will be added later
+  return null;
 };
