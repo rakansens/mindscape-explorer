@@ -1,6 +1,7 @@
 import dagre from 'dagre';
 import { Node, Edge } from 'reactflow';
 import { NodeData } from '../types/node';
+import * as d3Force from 'd3-force';
 
 const NODE_WIDTH = 200;
 const NODE_HEIGHT = 100;
@@ -52,6 +53,8 @@ export const getLayoutedElements = (
     rankSpacing?: number;
   }
 ) => {
+  if (!nodes.length) return { nodes, edges };
+
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
 
@@ -61,7 +64,7 @@ export const getLayoutedElements = (
     rankdir: direction,
     nodesep: nodeSpacing,
     ranksep: rankSpacing,
-    align: 'UDR', // 中央寄せに変更
+    align: 'UDR',
     ranker: 'network-simplex'
   });
 
@@ -77,6 +80,9 @@ export const getLayoutedElements = (
 
   const layoutedNodes = nodes.map((node) => {
     const nodeWithPosition = dagreGraph.node(node.id);
+    if (!nodeWithPosition) {
+      return node;
+    }
     return {
       ...node,
       position: {
@@ -98,6 +104,8 @@ export const getCircleLayout = (
   width: number,
   height: number
 ) => {
+  if (!nodes.length) return { nodes, edges };
+
   const centerX = width / 2;
   const centerY = height / 2;
   
@@ -127,16 +135,18 @@ export const applyForceLayout = (
   width: number,
   height: number
 ) => {
+  if (!nodes.length) return { nodes, edges };
+
   // ノードとエッジのコピーを作成
   const nodesCopy = nodes.map(node => ({ ...node }));
   const edgesCopy = edges.map(edge => ({ ...edge }));
 
   // シミュレーション用のデータ構造を作成
-  const simulation = d3.forceSimulation(nodesCopy as any)
-    .force('charge', d3.forceManyBody().strength(-300))
-    .force('center', d3.forceCenter(width / 2, height / 2).strength(0.1))
-    .force('collision', d3.forceCollide().radius(80))
-    .force('link', d3.forceLink(edgesCopy).id((d: any) => d.id).distance(150));
+  const simulation = d3Force.forceSimulation(nodesCopy as any)
+    .force('charge', d3Force.forceManyBody().strength(-300))
+    .force('center', d3Force.forceCenter(width / 2, height / 2).strength(0.1))
+    .force('collision', d3Force.forceCollide().radius(80))
+    .force('link', d3Force.forceLink(edgesCopy).id((d: any) => d.id).distance(150));
 
   // シミュレーションを実行
   for (let i = 0; i < 300; i++) {
