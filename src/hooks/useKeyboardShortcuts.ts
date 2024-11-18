@@ -84,7 +84,6 @@ export const useKeyboardShortcuts = () => {
         }
 
         if (nextNode) {
-          // Update selection without moving nodes
           selectNode(nextNode.id);
         }
       }
