@@ -7,7 +7,7 @@ interface FitViewOptions {
   padding?: number;
   minZoom?: number;
   maxZoom?: number;
-  includeHiddenNodes?: boolean; // Add this line
+  includeHiddenNodes?: boolean; // ここにプロパティを追加
 }
 
 interface ViewState {
@@ -43,7 +43,7 @@ export const useViewStore = create<ViewState>((set, get) => ({
     }
   },
   setNodeAnimating: (nodeId, isAnimating) => {
-    // This function is used to track node animation states
-    // Implementation can be expanded based on needs
+    // この関数はノードのアニメーション状態を追跡するために使用されます
+    // 必要に応じて実装を拡張できます
   }
 }));
