@@ -4,7 +4,7 @@ import { applyNodeChanges, applyEdgeChanges } from 'reactflow';
 import { nanoid } from 'nanoid';
 import { ModelConfig, getDefaultModelConfig } from '../types/models';
 import { NodeData } from '../types/node';
-import { removeNodeAndDescendants } from './nodeOperations';
+import { findDescendantNodes, removeNodesAndEdges } from './operations/nodeRemovalOperations';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -121,6 +121,7 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
             id: `${parentNode.id}-${newNode.id}`,
             source: parentNode.id,
             target: newNode.id,
+            type: 'custom',
           }]
         : state.edges,
     }));
@@ -146,8 +147,8 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
 
   removeChildNodes: (nodeId) => {
     set((state) => {
-      const { nodes, edges } = removeNodeAndDescendants(state.nodes, state.edges, nodeId);
-      return { nodes, edges };
+      const nodesToRemove = findDescendantNodes(state.nodes, state.edges, nodeId);
+      return removeNodesAndEdges(state.nodes, state.edges, nodesToRemove);
     });
   },
 
