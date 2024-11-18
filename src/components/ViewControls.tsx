@@ -37,7 +37,12 @@ export const ViewControls = () => {
     setLayout({ ...layout, type: layoutType });
     // レイアウト変更後に画面中央に表示
     setTimeout(() => {
-      fitView();
+      fitView({
+        duration: 500,
+        padding: 0.1,
+        minZoom: 0.5,
+        maxZoom: 1.5
+      });
     }, 100);
   };
 
