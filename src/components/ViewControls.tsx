@@ -20,6 +20,7 @@ export const ViewControls = () => {
     setEdgeStyle,
     lineStyle,
     setLineStyle,
+    fitView,
     instance
   } = useViewStore();
 
@@ -37,6 +38,33 @@ export const ViewControls = () => {
 
   const handleLayoutChange = (layoutType: LayoutType) => {
     setLayout({ ...layout, type: layoutType });
+    
+    const parentNode = nodes.find(node => node.id === "1");
+    
+    setTimeout(() => {
+      if (parentNode && instance) {
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const zoom = Math.min(
+          viewportWidth / (200 * 2),
+          viewportHeight / (100 * 2)
+        );
+        
+        instance.setCenter(
+          viewportWidth / 2,
+          viewportHeight / 2,
+          { 
+            zoom: Math.min(1, zoom),
+            duration: 600
+          }
+        );
+      } else {
+        fitView({
+          duration: 600,
+          padding: 0.5,
+        });
+      }
+    }, 100);
   };
 
   return (

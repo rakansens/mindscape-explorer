@@ -26,30 +26,7 @@ export const MindMap = () => {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect, updateNodes, updateEdges } = useMindMapStore();
   const { layout, applyLayout } = useLayoutStore();
   const { activeFileId, items } = useFileStore();
-  const { theme, showMinimap, instance } = useViewStore();
-
-  const centerParentNode = () => {
-    if (instance && nodes.length > 0) {
-      const parentNode = nodes.find(node => node.id === "1");
-      if (parentNode) {
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        const zoom = Math.min(
-          viewportWidth / (200 * 2),
-          viewportHeight / (100 * 2)
-        );
-        
-        instance.setCenter(
-          viewportWidth / 2,
-          viewportHeight / 2,
-          { 
-            zoom: Math.min(1, zoom),
-            duration: 800
-          }
-        );
-      }
-    }
-  };
+  const { theme, showMinimap } = useViewStore();
 
   useEffect(() => {
     if (nodes.length > 0) {
@@ -61,6 +38,7 @@ export const MindMap = () => {
           window.innerHeight
         );
 
+        // Only update if we got valid layout results
         if (layoutedNodes && layoutedNodes.length > 0) {
           const updatedEdges = edges.map(originalEdge => {
             const layoutedEdge = layoutedEdges.find(e => e.id === originalEdge.id);
@@ -77,9 +55,6 @@ export const MindMap = () => {
 
           updateNodes(layoutedNodes);
           updateEdges(updatedEdges);
-          
-          // レイアウト適用後に中央配置を実行
-          setTimeout(centerParentNode, 100);
         }
       } catch (error) {
         console.error('Layout calculation error:', error);
@@ -111,9 +86,6 @@ export const MindMap = () => {
 
             updateNodes(layoutedNodes);
             updateEdges(updatedEdges);
-            
-            // ファイル読み込み後に中央配置を実行
-            setTimeout(centerParentNode, 100);
           }
         } catch (error) {
           console.error('File layout calculation error:', error);
