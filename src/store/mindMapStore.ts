@@ -3,6 +3,8 @@ import { Node } from 'reactflow';
 import { NodeData } from '../types/node';
 import { ModelConfig, getDefaultModelConfig } from '../types/models';
 import { createNodeSlice, NodeState } from './nodeStore';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 interface MindMapStore extends NodeState {
   modelConfig: ModelConfig | null;
