@@ -36,16 +36,16 @@ export const ViewControls = () => {
   const handleLayoutChange = (layoutType: LayoutType) => {
     setLayout({ ...layout, type: layoutType });
     
-    // レイアウト変更後に画面中央に表示するための処理を追加
+    // レイアウト変更後に画面内に収まるように調整
     setTimeout(() => {
       fitView({
-        duration: 800,
-        padding: 0.2,
-        minZoom: 0.3,
-        maxZoom: 2,
+        duration: 1000,
+        padding: 0.5,
+        minZoom: 0.2,
+        maxZoom: 1.5,
         includeHiddenNodes: true
       });
-    }, 300);
+    }, 500);
   };
 
   return (
