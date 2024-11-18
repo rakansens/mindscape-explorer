@@ -146,20 +146,28 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
 
   removeChildNodes: (nodeId) => {
     set((state) => {
-      const childIds = new Set<string>();
-      const getChildIds = (parentId: string) => {
+      const nodesToRemove = new Set<string>();
+      
+      // 再帰的に全ての子孫ノードのIDを収集
+      const collectDescendantIds = (parentId: string) => {
+        nodesToRemove.add(parentId);
         state.edges.forEach(edge => {
           if (edge.source === parentId) {
-            childIds.add(edge.target);
-            getChildIds(edge.target);
+            collectDescendantIds(edge.target);
           }
         });
       };
-      getChildIds(nodeId);
+
+      // 指定されたノードの子孫を収集
+      collectDescendantIds(nodeId);
 
       return {
-        nodes: state.nodes.filter(node => !childIds.has(node.id)),
-        edges: state.edges.filter(edge => !childIds.has(edge.target))
+        // 削除対象のノードを除外
+        nodes: state.nodes.filter(node => !nodesToRemove.has(node.id)),
+        // 削除対象のノードに関連するエッジを除外
+        edges: state.edges.filter(edge => 
+          !nodesToRemove.has(edge.source) && !nodesToRemove.has(edge.target)
+        )
       };
     });
   },
