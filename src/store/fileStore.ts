@@ -1,114 +1,87 @@
 import { create } from 'zustand';
-import { FileSystemItem, MindMapFile, Folder } from '../types/file';
-import { generateId } from '../utils/idUtils';
+import { Node, Edge } from 'reactflow';
+import { v4 as uuidv4 } from 'uuid';
+
+export type FileType = 'file' | 'folder';
+
+export interface FileSystemItemBase {
+  id: string;
+  title: string;
+  parentId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface MindMapFile extends FileSystemItemBase {
+  type: 'file';
+  data?: {
+    nodes: Node[];
+    edges: Edge[];
+  };
+}
+
+export interface Folder extends FileSystemItemBase {
+  type: 'folder';
+}
+
+export type FileSystemItem = MindMapFile | Folder;
 
 interface FileStore {
   items: FileSystemItem[];
   activeFileId: string | null;
-  editingId: string | null;
-  editingTitle: string;
-  expandedFolders: Set<string>;
-  setActiveFile: (id: string) => void;
-  createFolder: (title: string) => void;
-  createFile: (title: string) => void;
-  addFile: (file: MindMapFile) => void;
-  deleteItem: (id: string) => void;
+  setActiveFileId: (id: string | null) => void;
+  addFile: (title: string, parentId: string | null) => void;
+  addFolder: (title: string, parentId: string | null) => void;
   removeItem: (id: string) => void;
-  updateItem: (id: string, updates: Partial<MindMapFile | Folder>) => void;
-  startEditing: (id: string) => void;
-  saveTitle: () => void;
-  cancelEditing: () => void;
-  setEditingTitle: (title: string) => void;
-  toggleFolder: (id: string) => void;
-  getChildren: (parentId: string | null) => FileSystemItem[];
+  updateItem: (id: string, updates: Partial<FileSystemItem>) => void;
+  saveCurrentFile: () => void;
+  openFile: () => void;
 }
 
-export const useFileStore = create<FileStore>((set, get) => ({
+export const useFileStore = create<FileStore>((set) => ({
   items: [],
   activeFileId: null,
-  editingId: null,
-  editingTitle: '',
-  expandedFolders: new Set(),
 
-  setActiveFile: (id) => set({ activeFileId: id }),
-  
-  createFolder: (title) => {
-    const newFolder: Folder = {
-      id: generateId(),
-      title,
-      type: 'folder',
-      parentId: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    set(state => ({ items: [...state.items, newFolder] }));
-  },
+  setActiveFileId: (id) => set({ activeFileId: id }),
 
-  createFile: (title) => {
-    const newFile: MindMapFile = {
-      id: generateId(),
+  addFile: (title, parentId) => set((state) => ({
+    items: [...state.items, {
+      id: uuidv4(),
       title,
-      type: 'file',
-      parentId: null,
+      parentId,
+      type: 'file' as const,
       createdAt: new Date(),
       updatedAt: new Date(),
       data: { nodes: [], edges: [] }
-    };
-    set(state => ({ items: [...state.items, newFile] }));
+    }]
+  })),
+
+  addFolder: (title, parentId) => set((state) => ({
+    items: [...state.items, {
+      id: uuidv4(),
+      title,
+      parentId,
+      type: 'folder' as const,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }]
+  })),
+
+  removeItem: (id) => set((state) => ({
+    items: state.items.filter(item => item.id !== id)
+  })),
+
+  updateItem: (id, updates) => set((state) => ({
+    items: state.items.map(item =>
+      item.id === id ? { ...item, ...updates, updatedAt: new Date() } : item
+    )
+  })),
+
+  saveCurrentFile: () => {
+    console.log('Save current file not implemented');
   },
 
-  addFile: (file) => {
-    set(state => ({ items: [...state.items, file] }));
-  },
-
-  deleteItem: (id) => {
-    set(state => ({ items: state.items.filter(item => item.id !== id) }));
-  },
-
-  removeItem: (id) => {
-    set(state => ({ items: state.items.filter(item => item.id !== id) }));
-  },
-
-  updateItem: (id, updates) => {
-    set(state => ({
-      items: state.items.map(item =>
-        item.id === id ? { ...item, ...updates, updatedAt: new Date() } : item
-      )
-    }));
-  },
-
-  startEditing: (id) => set({ editingId: id }),
-  
-  saveTitle: () => {
-    const { editingId, editingTitle, items } = get();
-    if (editingId && editingTitle.trim()) {
-      set(state => ({
-        items: state.items.map(item =>
-          item.id === editingId ? { ...item, title: editingTitle.trim() } : item
-        ),
-        editingId: null,
-        editingTitle: ''
-      }));
-    }
-  },
-
-  cancelEditing: () => set({ editingId: null, editingTitle: '' }),
-  
-  setEditingTitle: (title) => set({ editingTitle: title }),
-  
-  toggleFolder: (id) => {
-    set(state => {
-      const expandedFolders = new Set(state.expandedFolders);
-      if (expandedFolders.has(id)) {
-        expandedFolders.delete(id);
-      } else {
-        expandedFolders.add(id);
-      }
-      return { expandedFolders };
-    });
-  },
-
-  getChildren: (parentId) => {
-    return get().items.filter(item => item.parentId === parentId);
-  },
+  openFile: () => {
+    console.log('Open file not implemented');
+  }
 }));
