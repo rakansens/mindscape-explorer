@@ -35,73 +35,56 @@ export const useKeyboardShortcuts = () => {
           return;
         }
 
-        const getConnectedNodeInDirection = (direction: 'up' | 'down' | 'left' | 'right'): Node<NodeData> | undefined => {
-          // Get all connected edges for the current node
-          const connectedEdges = edges.filter(
-            edge => edge.source === selectedNode.id || edge.target === selectedNode.id
-          );
+        // Get connected nodes through edges
+        const connectedNodes = edges
+          .filter(edge => edge.source === selectedNode.id || edge.target === selectedNode.id)
+          .map(edge => {
+            const connectedId = edge.source === selectedNode.id ? edge.target : edge.source;
+            return nodes.find(node => node.id === connectedId);
+          })
+          .filter((node): node is Node<NodeData> => node !== undefined);
 
-          // Get all connected nodes
-          const connectedNodes = connectedEdges.map(edge => {
-            const nodeId = edge.source === selectedNode.id ? edge.target : edge.source;
-            return nodes.find(node => node.id === nodeId);
-          }).filter((node): node is Node<NodeData> => node !== undefined);
-
-          // Filter nodes based on direction relative to selected node
-          const filteredNodes = connectedNodes.filter(node => {
-            const dx = node.position.x - selectedNode.position.x;
-            const dy = node.position.y - selectedNode.position.y;
-            const angle = Math.atan2(dy, dx) * (180 / Math.PI);
-
-            switch (direction) {
-              case 'up':
-                return angle < -45 && angle > -135;
-              case 'down':
-                return angle > 45 && angle < 135;
-              case 'left':
-                return angle > 135 || angle < -135;
-              case 'right':
-                return angle > -45 && angle < 45;
-              default:
-                return false;
-            }
-          });
-
-          // Return the closest node in that direction
-          return filteredNodes.reduce((closest, current) => {
-            if (!closest) return current;
-
-            const closestDist = Math.hypot(
-              closest.position.x - selectedNode.position.x,
-              closest.position.y - selectedNode.position.y
-            );
-            const currentDist = Math.hypot(
-              current.position.x - selectedNode.position.x,
-              current.position.y - selectedNode.position.y
-            );
-
-            return currentDist < closestDist ? current : closest;
-          }, undefined as Node<NodeData> | undefined);
-        };
+        if (connectedNodes.length === 0) return;
 
         let nextNode: Node<NodeData> | undefined;
 
         switch (e.key) {
-          case 'ArrowUp':
-            nextNode = getConnectedNodeInDirection('up');
+          case 'ArrowUp': {
+            nextNode = connectedNodes.reduce((closest, current) => {
+              if (current.position.y >= selectedNode.position.y) return closest;
+              if (!closest || current.position.y > closest.position.y) return current;
+              return closest;
+            }, undefined as Node<NodeData> | undefined);
             break;
-          case 'ArrowDown':
-            nextNode = getConnectedNodeInDirection('down');
+          }
+          case 'ArrowDown': {
+            nextNode = connectedNodes.reduce((closest, current) => {
+              if (current.position.y <= selectedNode.position.y) return closest;
+              if (!closest || current.position.y < closest.position.y) return current;
+              return closest;
+            }, undefined as Node<NodeData> | undefined);
             break;
-          case 'ArrowLeft':
-            nextNode = getConnectedNodeInDirection('left');
+          }
+          case 'ArrowLeft': {
+            nextNode = connectedNodes.reduce((closest, current) => {
+              if (current.position.x >= selectedNode.position.x) return closest;
+              if (!closest || current.position.x > closest.position.x) return current;
+              return closest;
+            }, undefined as Node<NodeData> | undefined);
             break;
-          case 'ArrowRight':
-            nextNode = getConnectedNodeInDirection('right');
+          }
+          case 'ArrowRight': {
+            nextNode = connectedNodes.reduce((closest, current) => {
+              if (current.position.x <= selectedNode.position.x) return closest;
+              if (!closest || current.position.x < closest.position.x) return current;
+              return closest;
+            }, undefined as Node<NodeData> | undefined);
             break;
+          }
         }
 
         if (nextNode) {
+          // Update selection without moving nodes
           selectNode(nextNode.id);
         }
       }
