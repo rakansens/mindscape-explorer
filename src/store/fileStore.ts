@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { FileSystemItem, MindMapFile } from '../types/file';
+import { FileSystemItem, MindMapFile, Folder } from '../types/file';
+import { generateId } from '../utils/idUtils';
 
 interface FileStore {
   items: FileSystemItem[];
@@ -10,16 +11,16 @@ interface FileStore {
   setActiveFile: (id: string) => void;
   createFolder: (title: string) => void;
   createFile: (title: string) => void;
+  addFile: (file: MindMapFile) => void;
   deleteItem: (id: string) => void;
-  updateItem: (id: string, updates: Partial<MindMapFile>) => void;
+  removeItem: (id: string) => void;
+  updateItem: (id: string, updates: Partial<MindMapFile | Folder>) => void;
   startEditing: (id: string) => void;
   saveTitle: () => void;
   cancelEditing: () => void;
   setEditingTitle: (title: string) => void;
   toggleFolder: (id: string) => void;
   getChildren: (parentId: string | null) => FileSystemItem[];
-  saveCurrentFile: () => void;
-  openFile: () => void;
 }
 
 export const useFileStore = create<FileStore>((set, get) => ({
@@ -32,39 +33,46 @@ export const useFileStore = create<FileStore>((set, get) => ({
   setActiveFile: (id) => set({ activeFileId: id }),
   
   createFolder: (title) => {
-    // Implementation for creating a folder
-    const newFolder = {
-      id: crypto.randomUUID(),
+    const newFolder: Folder = {
+      id: generateId(),
       title,
+      type: 'folder',
       parentId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
-      type: 'folder'
     };
     set(state => ({ items: [...state.items, newFolder] }));
   },
 
   createFile: (title) => {
     const newFile: MindMapFile = {
-      id: crypto.randomUUID(),
+      id: generateId(),
       title,
       type: 'file',
       parentId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
-      data: { nodes: [], edges: [] } // initialize with empty data
+      data: { nodes: [], edges: [] }
     };
     set(state => ({ items: [...state.items, newFile] }));
+  },
+
+  addFile: (file) => {
+    set(state => ({ items: [...state.items, file] }));
   },
 
   deleteItem: (id) => {
     set(state => ({ items: state.items.filter(item => item.id !== id) }));
   },
 
+  removeItem: (id) => {
+    set(state => ({ items: state.items.filter(item => item.id !== id) }));
+  },
+
   updateItem: (id, updates) => {
     set(state => ({
-      items: state.items.map(item => 
-        item.id === id ? { ...item, ...updates } : item
+      items: state.items.map(item =>
+        item.id === id ? { ...item, ...updates, updatedAt: new Date() } : item
       )
     }));
   },
@@ -72,14 +80,16 @@ export const useFileStore = create<FileStore>((set, get) => ({
   startEditing: (id) => set({ editingId: id }),
   
   saveTitle: () => {
-    // Implementation for saving the editing title
-    set(state => ({
-      items: state.items.map(item => 
-        item.id === state.editingId ? { ...item, title: state.editingTitle } : item
-      ),
-      editingId: null,
-      editingTitle: ''
-    }));
+    const { editingId, editingTitle, items } = get();
+    if (editingId && editingTitle.trim()) {
+      set(state => ({
+        items: state.items.map(item =>
+          item.id === editingId ? { ...item, title: editingTitle.trim() } : item
+        ),
+        editingId: null,
+        editingTitle: ''
+      }));
+    }
   },
 
   cancelEditing: () => set({ editingId: null, editingTitle: '' }),
@@ -101,12 +111,4 @@ export const useFileStore = create<FileStore>((set, get) => ({
   getChildren: (parentId) => {
     return get().items.filter(item => item.parentId === parentId);
   },
-
-  saveCurrentFile: () => {
-    console.log('Save current file');
-  },
-
-  openFile: () => {
-    console.log('Open file');
-  }
 }));
