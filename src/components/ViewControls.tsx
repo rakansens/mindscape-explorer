@@ -1,6 +1,7 @@
 import React from 'react';
 import { useViewStore } from '../store/viewStore';
 import { useLayoutStore } from '../store/layoutStore';
+import { useMindMapStore } from '../store/mindMapStore';
 import { Button } from './ui/button';
 import { Map, Layout, GitBranch, Waves, ArrowRight, Grid, LayoutGrid, LayoutList } from 'lucide-react';
 import { Tooltip } from './Tooltip';
@@ -19,9 +20,11 @@ export const ViewControls = () => {
     setEdgeStyle,
     lineStyle,
     setLineStyle,
-    fitView
+    fitView,
+    instance
   } = useViewStore();
 
+  const { nodes } = useMindMapStore();
   const { layout, setLayout } = useLayoutStore();
 
   const layouts: { id: LayoutType; label: string; icon: React.ReactNode }[] = [
@@ -34,17 +37,34 @@ export const ViewControls = () => {
   ];
 
   const handleLayoutChange = (layoutType: LayoutType) => {
+    // レイアウトタイプを更新
     setLayout({ ...layout, type: layoutType });
     
-    // レイアウト変更後に画面内に収まるように調整
+    // 親ノード（通常はID "1"）を見つける
+    const parentNode = nodes.find(node => node.id === "1");
+    
+    // 遅延を入れて、レイアウト変更後に中央配置
     setTimeout(() => {
-      fitView({
-        duration: 1000,
-        padding: 0.5,
-        minZoom: 0.2,
-        maxZoom: 1.5,
-        includeHiddenNodes: true
-      });
+      if (parentNode && instance) {
+        // 親ノードを画面中央に配置
+        instance.setCenter(
+          parentNode.position.x + 100,  // ノードの中心に調整
+          parentNode.position.y + 50,   // ノードの中心に調整
+          { 
+            zoom: 1,     // デフォルトズーム
+            duration: 1000  // アニメーション時間
+          }
+        );
+      } else {
+        // フォールバック：画面全体にフィット
+        fitView({
+          duration: 1000,
+          padding: 0.5,
+          minZoom: 0.2,
+          maxZoom: 1.5,
+          includeHiddenNodes: true
+        });
+      }
     }, 500);
   };
 
