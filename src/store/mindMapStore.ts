@@ -145,10 +145,20 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
     }));
   },
 
-  removeChildNodes: (nodeId) => {
+  removeChildNodes: (nodeId: string) => {
     set((state) => {
       const nodeIdsToRemove = collectNodesToRemove(state.nodes, state.edges, nodeId);
-      return removeNodesAndEdges(state.nodes, state.edges, nodeIdsToRemove);
+      
+      const { nodes: updatedNodes, edges: updatedEdges } = removeNodesAndEdges(
+        state.nodes,
+        state.edges,
+        nodeIdsToRemove
+      );
+
+      return {
+        nodes: updatedNodes,
+        edges: updatedEdges
+      };
     });
   },
 
