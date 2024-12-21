@@ -1,59 +1,8 @@
 import { create } from 'zustand';
-import { 
-  Node, 
-  Edge, 
-  Connection, 
-  addEdge, 
-  applyNodeChanges, 
-  applyEdgeChanges,
-  NodeChange,
-  EdgeChange
-} from 'reactflow';
-import { NodeData } from '../types/node';
-import { calculateNodePosition } from '../utils/nodeUtils';
-import { ModelType } from '../types/models';
-import { downloadJson, downloadImage, downloadPDF } from '../utils/fileUtils';
-
-interface ModelConfig {
-  type: ModelType;
-  apiKey: string;
-  geminiKey?: string;
-}
-
-interface MindMapState {
-  nodes: Node<NodeData>[];
-  edges: Edge[];
-  modelConfig?: ModelConfig;
-  selectedNodeId: string | null;
-}
-
-interface MindMapActions {
-  // ノードの基本操作
-  onNodesChange: (changes: NodeChange[]) => void;
-  onEdgesChange: (changes: EdgeChange[]) => void;
-  onConnect: (connection: Connection) => void;
-  updateNodes: (nodes: Node<NodeData>[]) => void;
-  updateEdges: (edges: Edge[]) => void;
-  
-  // 個別ノードの操作
-  updateNode: (id: string, data: Partial<NodeData>) => void;
-  updateNodeText: (id: string, text: string) => void;
-  addNode: (parentNode: Node, label: string, position: { x: number; y: number }) => Node;
-  selectNode: (id: string) => void;
-  
-  // ファイル操作
-  saveMap: () => void;
-  loadMap: () => void;
-  exportAsImage: () => void;
-  exportAsPDF: () => void;
-  exportAsJSON: () => void;
-  importFromJSON: (jsonString: string) => void;
-  
-  // モデル設定
-  setModelConfig: (config: ModelConfig) => void;
-}
-
-type MindMapStore = MindMapState & MindMapActions;
+import { Connection, applyNodeChanges, applyEdgeChanges } from 'reactflow';
+import { MindMapStore, ModelConfig } from './mindmap/types';
+import * as nodeOps from './mindmap/nodeOperations';
+import * as fileOps from './mindmap/fileOperations';
 
 export const useMindMapStore = create<MindMapStore>((set, get) => ({
   // 初期状態
@@ -75,9 +24,9 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
     }));
   },
 
-  onConnect: (connection) => {
+  onConnect: (connection: Connection) => {
     set((state) => ({
-      edges: addEdge(connection, state.edges)
+      edges: [...state.edges, { ...connection, type: 'custom', animated: true }]
     }));
   },
 
@@ -86,122 +35,63 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
 
   // 個別ノードの操作
   updateNode: (id, data) => {
-    set((state) => ({
-      nodes: state.nodes.map((node) =>
-        node.id === id ? { ...node, data: { ...node.data, ...data } } : node
-      ),
-    }));
+    set((state) => nodeOps.updateNode(state, id, data));
   },
 
   updateNodeText: (id, text) => {
-    set((state) => ({
-      nodes: state.nodes.map((node) =>
-        node.id === id ? { ...node, data: { ...node.data, label: text } } : node
-      ),
-    }));
+    set((state) => nodeOps.updateNodeText(state, id, text));
   },
 
   addNode: (parentNode, label, position) => {
-    const newNode: Node<NodeData> = {
-      id: String(Date.now()),
-      type: 'custom',
-      position,
-      data: { 
-        label,
-        isGenerating: false,
-        isAppearing: true
-      },
-    };
-
-    set((state) => ({
-      nodes: [...state.nodes, newNode],
-      edges: [
-        ...state.edges,
-        {
-          id: `e${parentNode.id}-${newNode.id}`,
-          source: parentNode.id,
-          target: newNode.id,
-          type: 'custom',
-          animated: true
-        },
-      ],
-    }));
-
-    return newNode;
+    let newNode;
+    set((state) => {
+      const result = nodeOps.addNode(state, parentNode, label, position);
+      newNode = result.newNode;
+      return {
+        nodes: result.nodes,
+        edges: result.edges,
+      };
+    });
+    return newNode!;
   },
 
   selectNode: (id) => {
-    set((state) => ({
-      selectedNodeId: id,
-      nodes: state.nodes.map((node) => ({
-        ...node,
-        data: { ...node.data, selected: node.id === id },
-      })),
-    }));
+    set((state) => nodeOps.selectNode(state, id));
   },
 
   // ファイル操作
   saveMap: () => {
-    const { nodes, edges } = get();
-    try {
-      localStorage.setItem('mindmap', JSON.stringify({ nodes, edges }));
-    } catch (error) {
-      console.error('Failed to save mindmap:', error);
-    }
+    const state = get();
+    fileOps.saveMap(state);
   },
 
   loadMap: () => {
-    try {
-      const saved = localStorage.getItem('mindmap');
-      if (saved) {
-        const { nodes, edges } = JSON.parse(saved);
-        set({ nodes, edges });
-      }
-    } catch (error) {
-      console.error('Failed to load mindmap:', error);
+    const result = fileOps.loadMap();
+    if (result) {
+      set(result);
     }
   },
 
   exportAsImage: async () => {
-    try {
-      const element = document.querySelector('.react-flow') as HTMLElement;
-      if (element) {
-        await downloadImage(element, 'mindmap.png');
-      }
-    } catch (error) {
-      console.error('Failed to export image:', error);
-    }
+    await fileOps.exportAsImage();
   },
 
   exportAsPDF: async () => {
-    try {
-      const element = document.querySelector('.react-flow') as HTMLElement;
-      if (element) {
-        await downloadPDF(element, 'mindmap.pdf');
-      }
-    } catch (error) {
-      console.error('Failed to export PDF:', error);
-    }
+    await fileOps.exportAsPDF();
   },
 
   exportAsJSON: () => {
-    try {
-      const { nodes, edges } = get();
-      downloadJson({ nodes, edges }, 'mindmap.json');
-    } catch (error) {
-      console.error('Failed to export JSON:', error);
-    }
+    const state = get();
+    fileOps.exportAsJSON(state);
   },
 
   importFromJSON: (jsonString) => {
-    try {
-      const { nodes, edges } = JSON.parse(jsonString);
-      set({ nodes, edges });
-    } catch (error) {
-      console.error('Failed to import JSON:', error);
+    const result = fileOps.importFromJSON(jsonString);
+    if (result) {
+      set(result);
     }
   },
 
   // モデル設定
-  setModelConfig: (config) => set({ modelConfig: config }),
+  setModelConfig: (config: ModelConfig) => set({ modelConfig: config }),
 }));
