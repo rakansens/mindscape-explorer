@@ -6,8 +6,6 @@ import { Button } from './ui/button';
 import { useToast } from '../hooks/use-toast';
 import { Sparkles, Plus } from 'lucide-react';
 import { GenerateMenuButtons } from './generate/GenerateMenuButtons';
-import { GenerateCodeButton } from './code/GenerateCodeButton';
-import { CodePreviewModal } from './code/CodePreviewModal';
 import { useNodeGenerator } from '../components/mindmap/NodeGenerator';
 import { parseTopicTree } from '../utils/parseUtils';
 import { calculateNewNodePosition } from '../utils/nodePositionUtils';
@@ -20,16 +18,10 @@ interface GenerateMenuProps {
 export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  const [showCodePreview, setShowCodePreview] = useState(false);
-  const [generatedCodes, setGeneratedCodes] = useState<{
-    html?: string;
-    css?: string;
-    javascript?: string;
-  }>({});
-
+  
   const hideTimeout = useRef<NodeJS.Timeout | null>(null);
   const { generateSubTopics } = useOpenAI();
-  const { nodes, edges, addNode, updateNode, removeChildNodes } = useMindMapStore();
+  const { nodes, edges, addNode, updateNode } = useMindMapStore();
   const { fitView } = useViewStore();
   const { toast } = useToast();
   const { generateNodes } = useNodeGenerator();
@@ -143,11 +135,6 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
     }
   };
 
-  const handleCodeGenerate = (codes: { html?: string; css?: string; javascript?: string }) => {
-    setGeneratedCodes(codes);
-    setShowCodePreview(true);
-  };
-
   return (
     <div 
       className="relative flex flex-col gap-1 z-50" 
@@ -200,21 +187,9 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
               isLoading={isLoading}
               onGenerate={handleGenerate}
             />
-            <div className="w-full h-px bg-gray-200" />
-            <GenerateCodeButton
-              nodeId={nodeId}
-              onGenerate={handleCodeGenerate}
-            />
           </div>
         </div>
       )}
-
-      <CodePreviewModal
-        isOpen={showCodePreview}
-        onClose={() => setShowCodePreview(false)}
-        codes={generatedCodes}
-        preview={generatedCodes.html}
-      />
     </div>
   );
 };
