@@ -47,6 +47,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
     "d3-force": "^3.0.0",
+    "d3-hierarchy": "^3.1.2",
     "dagre": "^0.8.5",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.3.0",

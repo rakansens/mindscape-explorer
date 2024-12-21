@@ -2,6 +2,7 @@ import dagre from 'dagre';
 import { Node, Edge } from 'reactflow';
 import { NodeData } from '../types/node';
 import * as d3Force from 'd3-force';
+import * as d3Hierarchy from 'd3-hierarchy';
 
 const NODE_WIDTH = 200;
 const NODE_HEIGHT = 100;
@@ -30,54 +31,62 @@ export const getLayoutedElements = (
     return { nodes, edges };
   }
 
-  const dagreGraph = new dagre.graphlib.Graph();
-  dagreGraph.setDefaultEdgeLabel(() => ({}));
+  // Create hierarchy data structure
+  const hierarchyData = createHierarchyData(nodes, edges);
+  const root = d3Hierarchy.hierarchy(hierarchyData);
 
-  const { direction = 'LR', nodeSpacing = 100, rankSpacing = 200 } = options;
+  // Apply tree layout
+  const treeLayout = d3Hierarchy.tree<any>()
+    .nodeSize([NODE_HEIGHT + (options.nodeSpacing || 100), NODE_WIDTH + (options.rankSpacing || 200)]);
 
-  dagreGraph.setGraph({
-    rankdir: direction,
-    nodesep: nodeSpacing,
-    ranksep: rankSpacing,
-    ranker: 'network-simplex'
-  });
+  treeLayout(root);
 
-  // Add nodes to the graph with their dimensions
-  nodes.forEach((node) => {
-    dagreGraph.setNode(node.id, { width: NODE_WIDTH, height: NODE_HEIGHT });
-  });
+  // Transform coordinates based on direction
+  const isHorizontal = options.direction === 'LR' || options.direction === 'RL';
+  const layoutedNodes = nodes.map(node => {
+    const hierarchyNode = root.find(d => d.data.id === node.id);
+    if (!hierarchyNode) return node;
 
-  // Add edges to the graph
-  edges.forEach((edge) => {
-    if (edge.source && edge.target) {
-      dagreGraph.setEdge(edge.source, edge.target);
+    let x = hierarchyNode.x;
+    let y = hierarchyNode.y;
+
+    if (isHorizontal) {
+      [x, y] = [y, x];
     }
-  });
 
-  // Apply the layout
-  try {
-    dagre.layout(dagreGraph);
-  } catch (error) {
-    console.error('Dagre layout error:', error);
-    return { nodes, edges };
-  }
-
-  // Retrieve the positioned nodes
-  const layoutedNodes = nodes.map((node) => {
-    const nodeWithPosition = dagreGraph.node(node.id);
-    if (!nodeWithPosition) {
-      return node;
+    if (options.direction === 'RL') {
+      x = -x;
     }
+
     return {
       ...node,
       position: {
-        x: nodeWithPosition.x - NODE_WIDTH / 2,
-        y: nodeWithPosition.y - NODE_HEIGHT / 2
+        x: x,
+        y: y
       }
     };
   });
 
   return { nodes: layoutedNodes, edges };
+};
+
+// Helper function to create hierarchy data structure
+const createHierarchyData = (nodes: Node<NodeData>[], edges: Edge[]) => {
+  const rootNode = nodes.find(node => !edges.some(edge => edge.target === node.id));
+  if (!rootNode) return { id: 'root', children: [] };
+
+  const buildHierarchy = (nodeId: string): any => {
+    const children = edges
+      .filter(edge => edge.source === nodeId)
+      .map(edge => buildHierarchy(edge.target));
+
+    return {
+      id: nodeId,
+      children: children.length ? children : undefined
+    };
+  };
+
+  return buildHierarchy(rootNode.id);
 };
 
 export const getCircleLayout = (
