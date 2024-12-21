@@ -9,6 +9,7 @@ export interface NodeData {
   isCompleted?: boolean;
   isCollapsed?: boolean;
   isCode?: boolean;
+  showBox?: boolean; // New property for box visibility
 }
 
 export interface CustomNode {

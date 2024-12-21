@@ -1,7 +1,7 @@
 import { cn } from '../../utils/cn';
 
 export const getNodeThemeStyle = (level: number, theme: string): string => {
-  const baseStyle = "relative min-w-[120px] max-w-[300px] rounded-xl shadow-lg";
+  const baseStyle = "relative min-w-[120px] max-w-[300px] rounded-xl";
   
   switch(theme) {
     case 'dark':
