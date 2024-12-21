@@ -40,7 +40,7 @@ const CustomNode = memo(({ data, id }: CustomNodeProps) => {
   const { theme } = useViewStore();
   const level = getNodeLevel(store.edges, id);
 
-  useEffect(() => {
+  const updateNodeVisibility = useCallback(() => {
     if (!isHoveringNode && !isHoveringMenu) {
       hideTimeout.current = setTimeout(() => {
         setShowButton(false);
@@ -53,13 +53,16 @@ const CustomNode = memo(({ data, id }: CustomNodeProps) => {
       setShowButton(true);
       store.updateNode(id, { selected: true });
     }
+  }, [isHoveringNode, isHoveringMenu, id, store]);
 
+  useEffect(() => {
+    updateNodeVisibility();
     return () => {
       if (hideTimeout.current) {
         clearTimeout(hideTimeout.current);
       }
     };
-  }, [isHoveringNode, isHoveringMenu, id, store]);
+  }, [updateNodeVisibility]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Tab') {

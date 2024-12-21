@@ -109,11 +109,8 @@ export const MindMap = () => {
   }, [activeFileId, items, applyLayoutWithFit]);
 
   const handleConnect = useCallback((params: Connection) => {
-    onConnect({
-      ...params,
-      style: { stroke: theme === 'dark' ? '#ffffff' : '#000000' }
-    });
-  }, [onConnect, theme]);
+    onConnect(params);
+  }, [onConnect]);
 
   return (
     <div className={`w-full h-full ${theme} relative`}>
@@ -127,7 +124,6 @@ export const MindMap = () => {
         edgeTypes={edgeTypes}
         defaultEdgeOptions={{
           type: 'custom',
-          animated: true,
         }}
         fitView
         fitViewOptions={{
