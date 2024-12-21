@@ -5,7 +5,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { MessageSquare, Square, X } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 import { useMindMapStore } from '../../store/mindMapStore';
 
 interface NodeContextMenuProps {
@@ -15,8 +15,6 @@ interface NodeContextMenuProps {
 
 export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({ children, nodeId }) => {
   const store = useMindMapStore();
-  const node = store.nodes.find(n => n.id === nodeId);
-  const showBox = node?.data.showBox !== false; // デフォルトはtrue
 
   const handleAddDescription = () => {
     const node = store.nodes.find(n => n.id === nodeId);
@@ -28,12 +26,6 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({ children, node
     }
   };
 
-  const handleToggleBox = () => {
-    store.updateNode(nodeId, {
-      showBox: !showBox
-    });
-  };
-
   return (
     <ContextMenu>
       <ContextMenuTrigger>{children}</ContextMenuTrigger>
@@ -41,19 +33,6 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({ children, node
         <ContextMenuItem onClick={handleAddDescription}>
           <MessageSquare className="mr-2 h-4 w-4" />
           説明を追加
-        </ContextMenuItem>
-        <ContextMenuItem onClick={handleToggleBox}>
-          {showBox ? (
-            <>
-              <X className="mr-2 h-4 w-4" />
-              ボックスを非表示
-            </>
-          ) : (
-            <>
-              <Square className="mr-2 h-4 w-4" />
-              ボックスを表示
-            </>
-          )}
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>

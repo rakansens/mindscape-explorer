@@ -101,10 +101,6 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
   },
 
   addNode: (parentNode, label, position, additionalData = {}) => {
-    const showBox = get().nodes.length > 0 
-      ? get().nodes[0].data.showBox !== false 
-      : true;
-
     const newNode: Node<NodeData> = {
       id: nanoid(),
       type: 'custom',
@@ -114,7 +110,6 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
         isGenerating: false,
         isAppearing: false,
         selected: false,
-        showBox,  // 既存のノードのshowBox状態を継承
         ...additionalData
       },
     };

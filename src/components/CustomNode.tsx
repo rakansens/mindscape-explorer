@@ -117,18 +117,15 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
     setIsEditing(true);
   };
 
-  const nodeStyle = cn(
-    getNodeThemeStyle(level, theme),
-    data.selected ? "ring-2 ring-primary" : "",
-    data.isGenerating ? "animate-pulse scale-105" : "",
-    !data.showBox ? "border-0 shadow-none bg-transparent p-0" : "",
-    "transition-all duration-300 transform relative"
-  );
-
   return (
     <NodeContextMenu nodeId={id}>
       <div
-        className={nodeStyle}
+        className={cn(
+          getNodeThemeStyle(level, theme),
+          data.selected ? "ring-2 ring-primary" : "",
+          data.isGenerating ? "animate-pulse scale-105" : "",
+          "hover:shadow-xl transition-all duration-300 transform relative"
+        )}
         onMouseEnter={() => setIsHoveringNode(true)}
         onMouseLeave={() => setIsHoveringNode(false)}
         onClick={handleNodeClick}
