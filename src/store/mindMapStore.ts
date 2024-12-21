@@ -1,9 +1,38 @@
 import { create } from 'zustand';
-import { Connection, applyNodeChanges, applyEdgeChanges } from 'reactflow';
-import { MindMapStore } from './mindmap/types';
-import { createEdge } from '../utils/edgeManagement';
-import { addNodeWithPosition, updateNodeWithData } from '../utils/nodeManagement';
+import { Connection, Edge, Node, applyNodeChanges, applyEdgeChanges } from 'reactflow';
+import { NodeData } from '../types/node';
+import { ModelConfig } from '../types/models';
+import { addNodeWithPosition, updateNodeWithData } from '../utils/nodeOperations';
+import { createEdge } from '../utils/edgeOperations';
 import * as fileOps from './mindmap/fileOperations';
+
+interface MindMapState {
+  nodes: Node<NodeData>[];
+  edges: Edge[];
+  modelConfig?: ModelConfig;
+  selectedNodeId: string | null;
+}
+
+interface MindMapActions {
+  onNodesChange: (changes: any[]) => void;
+  onEdgesChange: (changes: any[]) => void;
+  onConnect: (connection: Connection) => void;
+  updateNodes: (nodes: Node<NodeData>[]) => void;
+  updateEdges: (edges: Edge[]) => void;
+  updateNode: (id: string, data: Partial<NodeData>) => void;
+  updateNodeText: (id: string, text: string) => void;
+  addNode: (parentNode: Node, label: string, position: { x: number; y: number }) => Node;
+  selectNode: (id: string) => void;
+  saveMap: () => void;
+  loadMap: () => void;
+  exportAsImage: () => Promise<void>;
+  exportAsPDF: () => Promise<void>;
+  exportAsJSON: () => void;
+  importFromJSON: (jsonString: string) => void;
+  setModelConfig: (config: ModelConfig) => void;
+}
+
+type MindMapStore = MindMapState & MindMapActions;
 
 export const useMindMapStore = create<MindMapStore>((set, get) => ({
   nodes: [],
@@ -79,7 +108,6 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
     }));
   },
 
-  // ファイル操作関連のメソッドは既存のものを維持
   saveMap: () => {
     const state = get();
     fileOps.saveMap(state);
