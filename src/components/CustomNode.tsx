@@ -7,23 +7,6 @@ import { NodeData } from '../types/node';
 import { cn } from '../utils/cn';
 import { NodeContextMenu } from './node/NodeContextMenu';
 import { NodeContent } from './node/NodeContent';
-import { NodePreviewButton } from './node/
-
-ボックスの表示・非表示が反映されていない問題を修正します。現在の実装では、スタイルの変更が正しく適用されていないようです。
-
-<lov-code>
-Let's update the CustomNode.tsx file to properly handle the box visibility:
-
-<lov-write file_path="src/components/CustomNode.tsx">
-import React, { useState, useRef, useEffect } from 'react';
-import { useMindMapStore } from '../store/mindMapStore';
-import { useViewStore } from '../store/viewStore';
-import { getNodeLevel } from '../utils/nodeUtils';
-import { GenerateMenu } from './GenerateMenu';
-import { NodeData } from '../types/node';
-import { cn } from '../utils/cn';
-import { NodeContextMenu } from './node/NodeContextMenu';
-import { NodeContent } from './node/NodeContent';
 import { NodePreviewButton } from './node/NodePreviewButton';
 import { CodePreviewModal } from './code/CodePreviewModal';
 import { getNodeThemeStyle } from './node/NodeStyles';
