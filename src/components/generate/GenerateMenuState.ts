@@ -2,10 +2,12 @@ import { create } from 'zustand';
 
 interface GenerateMenuState {
   isVisible: boolean;
-  setVisible: (visible: boolean) => void;
+  hoveredNodeId: string | null;
+  setVisible: (visible: boolean, nodeId: string | null) => void;
 }
 
 export const useGenerateMenuState = create<GenerateMenuState>((set) => ({
   isVisible: false,
-  setVisible: (visible) => set({ isVisible: visible }),
+  hoveredNodeId: null,
+  setVisible: (visible, nodeId) => set({ isVisible: visible, hoveredNodeId: nodeId }),
 }));

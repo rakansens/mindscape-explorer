@@ -86,12 +86,12 @@ export const GenerateMenu = memo(({ nodeId, onVisibilityChange }: GenerateMenuPr
   }, [nodeId, nodes, edges, addNode, fitView]);
 
   const handleMouseEnter = useCallback(() => {
-    setVisible(true);
+    setVisible(true, nodeId);
     onVisibilityChange?.(true);
-  }, [onVisibilityChange, setVisible]);
+  }, [nodeId, onVisibilityChange, setVisible]);
 
   const handleMouseLeave = useCallback(() => {
-    setVisible(false);
+    setVisible(false, null);
     onVisibilityChange?.(false);
   }, [onVisibilityChange, setVisible]);
 
