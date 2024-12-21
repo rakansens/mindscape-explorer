@@ -65,22 +65,15 @@ const CustomEdge = memo(({
       };
     }
 
-    // インテリジェントな接続ポイントの決定
-    const angle = Math.atan2(dy, dx);
-    const PI = Math.PI;
-
-    // 角度に基づいて最適な接続ポイントを決定
-    const getOptimalPosition = (angle: number) => {
-      if (angle > -PI/4 && angle <= PI/4) return Position.Right;
-      if (angle > PI/4 && angle <= 3*PI/4) return Position.Bottom;
-      if (angle > 3*PI/4 || angle <= -3*PI/4) return Position.Left;
-      return Position.Top;
-    };
-
-    return {
-      sourcePos: getOptimalPosition(angle),
-      targetPos: getOptimalPosition(angle + PI)
-    };
+    if (Math.abs(dx) > Math.abs(dy)) {
+      return dx > 0 
+        ? { sourcePos: Position.Right, targetPos: Position.Left }
+        : { sourcePos: Position.Left, targetPos: Position.Right };
+    } else {
+      return dy > 0
+        ? { sourcePos: Position.Bottom, targetPos: Position.Top }
+        : { sourcePos: Position.Top, targetPos: Position.Bottom };
+    }
   }, [sourceX, sourceY, targetX, targetY, sourceHandle, targetHandle]);
 
   const path = useMemo(() => {

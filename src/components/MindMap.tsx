@@ -1,11 +1,10 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import ReactFlow, { 
   Background, 
   Controls, 
   MiniMap,
   Edge,
   Connection,
-  Panel,
 } from 'reactflow';
 import { useMindMapStore } from '../store/mindMapStore';
 import { useLayoutStore } from '../store/layoutStore';
@@ -14,8 +13,6 @@ import { useViewStore } from '../store/viewStore';
 import CustomNode from './CustomNode';
 import CustomEdge from './CustomEdge';
 import { INITIAL_NODE } from '../constants';
-import { Button } from './ui/button';
-import { Layout } from 'lucide-react';
 import 'reactflow/dist/style.css';
 
 const nodeTypes = {
@@ -26,37 +23,20 @@ const edgeTypes = {
   custom: CustomEdge,
 };
 
-const GROUP_PADDING = 30;
-
 export const MindMap = () => {
-  const { 
-    nodes, 
-    edges, 
-    onNodesChange, 
-    onEdgesChange, 
-    onConnect, 
-    updateNodes, 
-    updateEdges,
-    groupSelectedNodes 
-  } = useMindMapStore();
+  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, updateNodes, updateEdges } = useMindMapStore();
   const { layout, applyLayout } = useLayoutStore();
   const { activeFileId, items } = useFileStore();
   const { theme, showMinimap } = useViewStore();
 
+  // 初期ノードがない場合は追加
   useEffect(() => {
     if (nodes.length === 0) {
       updateNodes([INITIAL_NODE]);
     }
-  }, [nodes.length, updateNodes]);
+  }, []);
 
-  const handleCreateGroup = useCallback(() => {
-    const selectedNodes = nodes.filter(node => node.selected);
-    if (selectedNodes.length > 1) {
-      groupSelectedNodes(selectedNodes, GROUP_PADDING);
-    }
-  }, [nodes, groupSelectedNodes]);
-
-  const applyLayoutWithFit = useCallback((currentNodes: any[], currentEdges: any[]) => {
+  const applyLayoutWithFit = (currentNodes: any[], currentEdges: any[]) => {
     try {
       const { nodes: layoutedNodes, edges: layoutedEdges } = applyLayout(
         currentNodes,
@@ -66,6 +46,7 @@ export const MindMap = () => {
       );
 
       if (layoutedNodes && layoutedNodes.length > 0) {
+        // 親ノード（id: '1'）を中央に配置
         const rootNode = layoutedNodes.find(node => node.id === '1');
         if (rootNode) {
           const centerX = window.innerWidth / 2;
@@ -73,6 +54,7 @@ export const MindMap = () => {
           const offsetX = centerX - rootNode.position.x;
           const offsetY = centerY - rootNode.position.y;
 
+          // すべてのノードを調整して親ノードが中央に来るようにする
           const adjustedNodes = layoutedNodes.map(node => ({
             ...node,
             position: {
@@ -91,13 +73,13 @@ export const MindMap = () => {
     } catch (error) {
       console.error('Layout calculation error:', error);
     }
-  }, [applyLayout, updateNodes, updateEdges]);
+  };
 
   useEffect(() => {
     if (nodes.length > 0) {
       applyLayoutWithFit(nodes, edges);
     }
-  }, [layout.type, layout.direction, layout.nodeSpacing, layout.rankSpacing, applyLayoutWithFit, nodes, edges]);
+  }, [layout.type, layout.direction, layout.nodeSpacing, layout.rankSpacing]);
 
   useEffect(() => {
     if (activeFileId) {
@@ -106,11 +88,7 @@ export const MindMap = () => {
         applyLayoutWithFit(activeFile.data.nodes, activeFile.data.edges);
       }
     }
-  }, [activeFileId, items, applyLayoutWithFit]);
-
-  const handleConnect = useCallback((params: Connection) => {
-    onConnect(params);
-  }, [onConnect]);
+  }, [activeFileId, items]);
 
   return (
     <div className={`w-full h-full ${theme} relative`}>
@@ -119,11 +97,12 @@ export const MindMap = () => {
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        onConnect={handleConnect}
+        onConnect={onConnect}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         defaultEdgeOptions={{
           type: 'custom',
+          animated: true,
         }}
         fitView
         fitViewOptions={{
@@ -135,17 +114,6 @@ export const MindMap = () => {
         }}
         className={`bg-background text-foreground`}
       >
-        <Panel position="top-left" className="bg-background/80 backdrop-blur-sm p-2 rounded-lg border border-border">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleCreateGroup}
-            className="flex items-center gap-2"
-          >
-            <Layout className="w-4 h-4" />
-            グループ化
-          </Button>
-        </Panel>
         <Background className="bg-background" />
         <Controls className="bg-background text-foreground border-border" />
         {showMinimap && (

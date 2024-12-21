@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, memo } from 'react';
+import React, { useState, useRef, useEffect, memo, useCallback } from 'react';
 import { useMindMapStore } from '../store/mindMapStore';
 import { useViewStore } from '../store/viewStore';
 import { getNodeLevel } from '../utils/nodeUtils';
@@ -23,6 +23,9 @@ interface CustomNodeProps {
 const CustomNode = memo(({ data, id }: CustomNodeProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(data.label);
+  const [showButton, setShowButton] = useState(false);
+  const [isHoveringNode, setIsHoveringNode] = useState(false);
+  const [isHoveringMenu, setIsHoveringMenu] = useState(false);
   const [showCodePreview, setShowCodePreview] = useState(false);
   const [previewCodes, setPreviewCodes] = useState<{
     html?: string;
@@ -30,16 +33,38 @@ const CustomNode = memo(({ data, id }: CustomNodeProps) => {
     javascript?: string;
   }>({});
   
+  const hideTimeout = useRef<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  
   const store = useMindMapStore();
   const { theme } = useViewStore();
   const level = getNodeLevel(store.edges, id);
 
-  const handleNodeVisibility = useCallback((isVisible: boolean) => {
-    if (data.selected !== isVisible) {
-      store.updateNode(id, { selected: isVisible });
+  useEffect(() => {
+    const shouldShowButton = isHoveringNode || isHoveringMenu;
+    
+    if (hideTimeout.current) {
+      clearTimeout(hideTimeout.current);
     }
-  }, [id, store, data.selected]);
+
+    if (shouldShowButton) {
+      setShowButton(true);
+      store.updateNode(id, { selected: true });
+    }
+
+    hideTimeout.current = setTimeout(() => {
+      if (!isHoveringNode && !isHoveringMenu) {
+        setShowButton(false);
+        store.updateNode(id, { selected: false });
+      }
+    }, 1000);
+
+    return () => {
+      if (hideTimeout.current) {
+        clearTimeout(hideTimeout.current);
+      }
+    };
+  }, [isHoveringNode, isHoveringMenu, id, store]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Tab') {
@@ -101,6 +126,8 @@ const CustomNode = memo(({ data, id }: CustomNodeProps) => {
           data.isGenerating ? "animate-pulse scale-105" : "",
           "hover:shadow-xl transition-all duration-300 transform relative"
         )}
+        onMouseEnter={() => setIsHoveringNode(true)}
+        onMouseLeave={() => setIsHoveringNode(false)}
         onClick={handleNodeClick}
         onDoubleClick={handleDoubleClick}
         onKeyDown={handleKeyDown}
@@ -129,10 +156,16 @@ const CustomNode = memo(({ data, id }: CustomNodeProps) => {
           <NodePreviewButton onClick={handleCodePreview} />
         )}
 
-        <GenerateMenu
-          nodeId={id}
-          onVisibilityChange={handleNodeVisibility}
-        />
+        {showButton && (
+          <div className="absolute -right-4 top-1/2 -translate-y-1/2 translate-x-full">
+            <GenerateMenu
+              nodeId={id}
+              onMenuHover={(isHovering) => {
+                setIsHoveringMenu(isHovering);
+              }}
+            />
+          </div>
+        )}
 
         <CodePreviewModal
           isOpen={showCodePreview}

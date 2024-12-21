@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Connection, Edge, Node, applyNodeChanges, applyEdgeChanges, Position, CoordinateExtent } from 'reactflow';
+import { Connection, Edge, Node, applyNodeChanges, applyEdgeChanges } from 'reactflow';
 import { NodeData } from '../types/node';
 import { ModelConfig } from '../types/models';
 import { addNodeWithPosition, updateNodeWithData } from '../utils/nodeOperations';
@@ -30,7 +30,6 @@ interface MindMapActions {
   exportAsJSON: () => void;
   importFromJSON: (jsonString: string) => void;
   setModelConfig: (config: ModelConfig) => void;
-  groupSelectedNodes: (selectedNodes: Node[], padding: number) => void;
 }
 
 type MindMapStore = MindMapState & MindMapActions;
@@ -142,45 +141,4 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
   },
 
   setModelConfig: (config) => set({ modelConfig: config }),
-
-  groupSelectedNodes: (selectedNodes, padding) => {
-    if (selectedNodes.length < 2) return;
-
-    const minX = Math.min(...selectedNodes.map(node => node.position.x));
-    const minY = Math.min(...selectedNodes.map(node => node.position.y));
-    const maxX = Math.max(...selectedNodes.map(node => node.position.x + (node.width || 0)));
-    const maxY = Math.max(...selectedNodes.map(node => node.position.y + (node.height || 0)));
-
-    const groupNode: Node<NodeData> = {
-      id: `group-${Date.now()}`,
-      type: 'group',
-      position: { x: minX - padding, y: minY - padding },
-      style: {
-        width: maxX - minX + padding * 2,
-        height: maxY - minY + padding * 2,
-        backgroundColor: 'rgba(240, 240, 240, 0.1)',
-        border: '1px dashed #ccc',
-        borderRadius: '8px',
-      },
-      data: { label: 'Group' },
-    };
-
-    const updatedNodes = selectedNodes.map(node => ({
-      ...node,
-      parentNode: groupNode.id,
-      extent: 'parent' as 'parent' | CoordinateExtent,
-      position: {
-        x: node.position.x - minX + padding,
-        y: node.position.y - minY + padding,
-      },
-    })) as Node<NodeData>[];
-
-    set(state => ({
-      nodes: [
-        ...state.nodes.filter(node => !selectedNodes.find(n => n.id === node.id)),
-        groupNode,
-        ...updatedNodes,
-      ]
-    }));
-  },
 }));
