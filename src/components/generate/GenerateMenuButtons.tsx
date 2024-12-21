@@ -6,27 +6,27 @@ import {
   BookOpen,
   HelpCircle,
   ListTodo,
-  RefreshCw,
   Lightbulb,
-  Loader2
+  RefreshCw,
+  Loader2,
 } from 'lucide-react';
 
 interface GenerateMenuButtonsProps {
+  onGenerate: (type: string) => void;
   isLoading: boolean;
-  onGenerate: (mode: 'quick' | 'detailed' | 'why' | 'how' | 'regenerate' | 'ideas') => void;
 }
 
 export const GenerateMenuButtons: React.FC<GenerateMenuButtonsProps> = ({
-  isLoading,
   onGenerate,
+  isLoading,
 }) => {
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-wrap gap-3 p-1">
       <Tooltip text="クイック生成：簡単な展開" position="top">
         <Button
           variant="ghost"
           size="icon"
-          className="w-8 h-8 p-0"
+          className="w-8 h-8 p-0 hover:bg-blue-100/50"
           onClick={() => onGenerate('quick')}
           disabled={isLoading}
         >
@@ -38,7 +38,7 @@ export const GenerateMenuButtons: React.FC<GenerateMenuButtonsProps> = ({
         <Button
           variant="ghost"
           size="icon"
-          className="w-8 h-8 p-0"
+          className="w-8 h-8 p-0 hover:bg-blue-100/50"
           onClick={() => onGenerate('detailed')}
           disabled={isLoading}
         >
@@ -50,7 +50,7 @@ export const GenerateMenuButtons: React.FC<GenerateMenuButtonsProps> = ({
         <Button
           variant="ghost"
           size="icon"
-          className="w-8 h-8 p-0"
+          className="w-8 h-8 p-0 hover:bg-blue-100/50"
           onClick={() => onGenerate('why')}
           disabled={isLoading}
         >
@@ -62,7 +62,7 @@ export const GenerateMenuButtons: React.FC<GenerateMenuButtonsProps> = ({
         <Button
           variant="ghost"
           size="icon"
-          className="w-8 h-8 p-0"
+          className="w-8 h-8 p-0 hover:bg-blue-100/50"
           onClick={() => onGenerate('how')}
           disabled={isLoading}
         >
@@ -74,7 +74,7 @@ export const GenerateMenuButtons: React.FC<GenerateMenuButtonsProps> = ({
         <Button
           variant="ghost"
           size="icon"
-          className="w-8 h-8 p-0"
+          className="w-8 h-8 p-0 hover:bg-blue-100/50"
           onClick={() => onGenerate('ideas')}
           disabled={isLoading}
         >
@@ -86,7 +86,7 @@ export const GenerateMenuButtons: React.FC<GenerateMenuButtonsProps> = ({
         <Button
           variant="ghost"
           size="icon"
-          className="w-8 h-8 p-0"
+          className="w-8 h-8 p-0 hover:bg-blue-100/50"
           onClick={() => onGenerate('regenerate')}
           disabled={isLoading}
         >
