@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Connection, Edge, Node, applyNodeChanges, applyEdgeChanges } from 'reactflow';
+import { Connection, Edge, Node, applyNodeChanges, applyEdgeChanges, Position, CoordinateExtent } from 'reactflow';
 import { NodeData } from '../types/node';
 import { ModelConfig } from '../types/models';
 import { addNodeWithPosition, updateNodeWithData } from '../utils/nodeOperations';
@@ -151,7 +151,7 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
     const maxX = Math.max(...selectedNodes.map(node => node.position.x + (node.width || 0)));
     const maxY = Math.max(...selectedNodes.map(node => node.position.y + (node.height || 0)));
 
-    const groupNode: Node = {
+    const groupNode: Node<NodeData> = {
       id: `group-${Date.now()}`,
       type: 'group',
       position: { x: minX - padding, y: minY - padding },
@@ -168,19 +168,19 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
     const updatedNodes = selectedNodes.map(node => ({
       ...node,
       parentNode: groupNode.id,
-      extent: 'parent',
+      extent: 'parent' as 'parent' | CoordinateExtent,
       position: {
         x: node.position.x - minX + padding,
         y: node.position.y - minY + padding,
       },
-    }));
+    })) as Node<NodeData>[];
 
     set(state => ({
       nodes: [
         ...state.nodes.filter(node => !selectedNodes.find(n => n.id === node.id)),
         groupNode,
         ...updatedNodes,
-      ],
+      ]
     }));
   },
 }));

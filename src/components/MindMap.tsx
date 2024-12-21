@@ -43,12 +43,11 @@ export const MindMap = () => {
   const { activeFileId, items } = useFileStore();
   const { theme, showMinimap } = useViewStore();
 
-  // 初期ノードがない場合は追加
   useEffect(() => {
     if (nodes.length === 0) {
       updateNodes([INITIAL_NODE]);
     }
-  }, []);
+  }, [nodes.length, updateNodes]);
 
   const handleCreateGroup = useCallback(() => {
     const selectedNodes = nodes.filter(node => node.selected);
@@ -98,7 +97,7 @@ export const MindMap = () => {
     if (nodes.length > 0) {
       applyLayoutWithFit(nodes, edges);
     }
-  }, [layout.type, layout.direction, layout.nodeSpacing, layout.rankSpacing]);
+  }, [layout.type, layout.direction, layout.nodeSpacing, layout.rankSpacing, applyLayoutWithFit, nodes, edges]);
 
   useEffect(() => {
     if (activeFileId) {
@@ -107,12 +106,11 @@ export const MindMap = () => {
         applyLayoutWithFit(activeFile.data.nodes, activeFile.data.edges);
       }
     }
-  }, [activeFileId, items]);
+  }, [activeFileId, items, applyLayoutWithFit]);
 
   const handleConnect = useCallback((params: Connection) => {
     onConnect({
       ...params,
-      type: 'custom',
       animated: true,
       style: { stroke: theme === 'dark' ? '#ffffff' : '#000000' }
     });
