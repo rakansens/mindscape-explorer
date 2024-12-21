@@ -9,7 +9,9 @@ import {
   ArrowDown,
   Circle,
   Network,
-  GitFork
+  GitFork,
+  Minimize2,
+  Maximize2
 } from 'lucide-react';
 import { Tooltip } from './Tooltip';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "./ui/dropdown-menu";
@@ -31,7 +33,7 @@ export const ViewControls = () => {
   } = useViewStore();
 
   const { nodes } = useMindMapStore();
-  const { layout, setLayout } = useLayoutStore();
+  const { layout, setLayout, toggleCompactMode } = useLayoutStore();
 
   const layouts: { id: LayoutType; label: string; icon: React.ReactNode }[] = [
     { id: 'horizontal', label: '右方向レイアウト', icon: <ArrowRight className="w-4 h-4" /> },
@@ -45,7 +47,6 @@ export const ViewControls = () => {
   const handleLayoutChange = (layoutType: LayoutType) => {
     setLayout({ ...layout, type: layoutType });
     
-    // レイアウト変更後に全体を表示するように調整
     setTimeout(() => {
       fitView({
         duration: 600,
@@ -67,6 +68,21 @@ export const ViewControls = () => {
           `}
         >
           <Map className="w-5 h-5" />
+        </Button>
+      </Tooltip>
+
+      <Tooltip text={layout.isCompact ? "標準間隔に戻す" : "ノード間隔を詰める"} position="top">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleCompactMode}
+          className="p-2 rounded-lg hover:bg-blue-100/50 text-blue-500 transition-colors"
+        >
+          {layout.isCompact ? (
+            <Maximize2 className="w-5 h-5" />
+          ) : (
+            <Minimize2 className="w-5 h-5" />
+          )}
         </Button>
       </Tooltip>
 

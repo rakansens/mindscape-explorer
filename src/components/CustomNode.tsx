@@ -59,16 +59,20 @@ const CustomNode = memo(({ data, id }: CustomNodeProps) => {
   }, [isHoveringNode, updateNodeSelection]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    // Prevent tab navigation
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      return;
+    }
+
     if (e.key === 'Enter') {
       e.preventDefault();
       const currentNode = store.nodes.find(n => n.id === id);
       if (currentNode) {
-        // Find parent node
         const parentEdge = store.edges.find(edge => edge.target === id);
         if (parentEdge) {
           const parentNode = store.nodes.find(n => n.id === parentEdge.source);
           if (parentNode) {
-            // Calculate position for new sibling node
             const siblingNodes = store.nodes.filter(n => 
               store.edges.some(e => e.source === parentNode.id && e.target === n.id)
             );

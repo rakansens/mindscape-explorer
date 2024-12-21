@@ -1,59 +1,26 @@
 import { create } from 'zustand';
-import { LayoutType, LayoutConfig } from '../types/layout';
-import { getLayoutedElements } from '../utils/layouts/treeLayout';
-import { getCircleLayout } from '../utils/layouts/circleLayout';
-import { getRadialLayout } from '../utils/layouts/radialLayout';
-import { applyForceLayout } from '../utils/layouts/forceLayout';
-import { Node, Edge } from 'reactflow';
-import { NodeData } from '../types/node';
+import { LayoutType } from '../types/layout';
 
-interface LayoutStore {
-  layout: LayoutConfig;
-  setLayout: (layout: LayoutConfig) => void;
-  applyLayout: (nodes: Node<NodeData>[], edges: Edge[], width: number, height: number) => { nodes: Node<NodeData>[]; edges: Edge[] };
+interface LayoutState {
+  layout: {
+    type: LayoutType;
+    isCompact: boolean;
+  };
+  setLayout: (layout: { type: LayoutType }) => void;
+  toggleCompactMode: () => void;
 }
 
-export const useLayoutStore = create<LayoutStore>((set, get) => ({
+export const useLayoutStore = create<LayoutState>((set) => ({
   layout: {
     type: 'horizontal',
-    direction: 'LR',
-    nodeSpacing: 100,
-    rankSpacing: 200,
+    isCompact: false,
   },
-
-  setLayout: (layout) => {
-    set({ layout });
-  },
-
-  applyLayout: (nodes, edges, width, height) => {
-    const { layout } = get();
-    
-    switch (layout.type) {
-      case 'force':
-        return applyForceLayout(nodes, edges, width, height);
-      case 'horizontal':
-        return getLayoutedElements(nodes, edges, {
-          direction: 'LR',
-          nodeSpacing: layout.nodeSpacing,
-          rankSpacing: layout.rankSpacing,
-        });
-      case 'layered':
-        return getLayoutedElements(nodes, edges, {
-          direction: 'TB',
-          nodeSpacing: layout.nodeSpacing,
-          rankSpacing: layout.rankSpacing,
-        });
-      case 'circle':
-        return getCircleLayout(nodes, edges, width, height);
-      case 'radial':
-        return getRadialLayout(nodes, edges, width, height);
-      case 'tree':
-      default:
-        return getLayoutedElements(nodes, edges, {
-          direction: layout.direction,
-          nodeSpacing: layout.nodeSpacing,
-          rankSpacing: layout.rankSpacing,
-        });
-    }
-  },
+  setLayout: (newLayout) =>
+    set((state) => ({
+      layout: { ...state.layout, ...newLayout },
+    })),
+  toggleCompactMode: () =>
+    set((state) => ({
+      layout: { ...state.layout, isCompact: !state.layout.isCompact },
+    })),
 }));
