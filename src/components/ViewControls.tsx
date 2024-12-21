@@ -3,7 +3,14 @@ import { useViewStore } from '../store/viewStore';
 import { useLayoutStore } from '../store/layoutStore';
 import { useMindMapStore } from '../store/mindMapStore';
 import { Button } from './ui/button';
-import { Map, Layout, GitBranch, Waves, ArrowRight, Grid, LayoutGrid, LayoutList } from 'lucide-react';
+import { 
+  Map,
+  ArrowRight,
+  ArrowDown,
+  Circle,
+  Network,
+  GitFork
+} from 'lucide-react';
 import { Tooltip } from './Tooltip';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { EdgeStyleMenu } from './controls/EdgeStyleMenu';
@@ -28,11 +35,11 @@ export const ViewControls = () => {
 
   const layouts: { id: LayoutType; label: string; icon: React.ReactNode }[] = [
     { id: 'horizontal', label: '右方向レイアウト', icon: <ArrowRight className="w-4 h-4" /> },
-    { id: 'layered', label: '階層レイアウト', icon: <LayoutList className="w-4 h-4" /> },
-    { id: 'force', label: 'フォースレイアウト', icon: <Grid className="w-4 h-4" /> },
-    { id: 'tree', label: 'ツリーレイアウト', icon: <GitBranch className="w-4 h-4" /> },
-    { id: 'circle', label: '円形レイアウト', icon: <Layout className="w-4 h-4" /> },
-    { id: 'orthogonal', label: '直交レイアウト', icon: <LayoutGrid className="w-4 h-4" /> },
+    { id: 'layered', label: '階層レイアウト', icon: <ArrowDown className="w-4 h-4" /> },
+    { id: 'force', label: 'フォースレイアウト', icon: <Network className="w-4 h-4" /> },
+    { id: 'tree', label: 'ツリーレイアウト', icon: <GitFork className="w-4 h-4" /> },
+    { id: 'circle', label: '円形レイアウト', icon: <Circle className="w-4 h-4" /> },
+    { id: 'radial', label: '放射状レイアウト', icon: <Network className="w-4 h-4" rotate={45} /> },
   ];
 
   const handleLayoutChange = (layoutType: LayoutType) => {
@@ -78,7 +85,7 @@ export const ViewControls = () => {
               size="icon"
               className="p-2 rounded-lg hover:bg-blue-100/50 text-blue-500 transition-colors"
             >
-              <Layout className="w-5 h-5" />
+              <Network className="w-5 h-5" />
             </Button>
           </DropdownMenuTrigger>
         </Tooltip>
