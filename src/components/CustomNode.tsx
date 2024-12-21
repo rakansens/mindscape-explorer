@@ -36,8 +36,10 @@ const CustomNode = memo(({ data, id }: CustomNodeProps) => {
   const level = getNodeLevel(store.edges, id);
 
   const handleNodeVisibility = useCallback((isVisible: boolean) => {
-    store.updateNode(id, { selected: isVisible });
-  }, [id, store]);
+    if (data.selected !== isVisible) {
+      store.updateNode(id, { selected: isVisible });
+    }
+  }, [id, store, data.selected]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Tab') {

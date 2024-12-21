@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import { useOpenAI } from '../utils/openai';
 import { useMindMapStore } from '../store/mindMapStore';
 import { useViewStore } from '../store/viewStore';
@@ -16,7 +16,7 @@ interface GenerateMenuProps {
   onVisibilityChange?: (isVisible: boolean) => void;
 }
 
-export const GenerateMenu = React.memo(({ nodeId, onVisibilityChange }: GenerateMenuProps) => {
+export const GenerateMenu = memo(({ nodeId, onVisibilityChange }: GenerateMenuProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { generateSubTopics } = useOpenAI();
   const { nodes, edges, addNode, updateNode } = useMindMapStore();
@@ -109,7 +109,6 @@ export const GenerateMenu = React.memo(({ nodeId, onVisibilityChange }: Generate
           className="w-8 h-8 p-0 bg-white/80 backdrop-blur-sm shadow-lg border border-gray-200 hover:bg-white"
           onClick={handleAddNode}
           onMouseDown={e => e.stopPropagation()}
-          onDoubleClick={e => e.stopPropagation()}
         >
           <Plus className="w-4 h-4 text-gray-600" />
         </Button>
