@@ -87,6 +87,10 @@ export default {
           '0%, 100%': { transform: 'translateX(0)' },
           '25%': { transform: 'translateX(-2px)' },
           '75%': { transform: 'translateX(2px)' }
+        },
+        circularExpand: {
+          '0%': { transform: 'scale(0) rotate(0deg)' },
+          '100%': { transform: 'scale(1) rotate(360deg)' }
         }
       },
       animation: {
@@ -96,7 +100,8 @@ export default {
         typing: 'typing 1s steps(20, end)',
         spin: 'spin 2s linear infinite',
         softPulse: 'softPulse 2s ease-in-out infinite',
-        wiggle: 'wiggle 1s ease-in-out infinite'
+        wiggle: 'wiggle 1s ease-in-out infinite',
+        circularExpand: 'circularExpand 0.3s ease-out'
       },
     },
   },
