@@ -161,11 +161,7 @@ const CustomNode = memo(({ data, id }: CustomNodeProps) => {
             <GenerateMenu
               nodeId={id}
               onMenuHover={(isHovering) => {
-                if (isHovering) {
-                  setIsHoveringMenu(true);
-                } else {
-                  setIsHoveringMenu(false);
-                }
+                setIsHoveringMenu(isHovering);
               }}
             />
           </div>

@@ -15,10 +15,9 @@ interface GenerateMenuProps {
   onMenuHover?: (isHovering: boolean) => void;
 }
 
-export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover }) => {
+export const GenerateMenu = React.memo(({ nodeId, onMenuHover }: GenerateMenuProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  
   const hideTimeout = useRef<NodeJS.Timeout | null>(null);
   const { generateSubTopics } = useOpenAI();
   const { nodes, edges, addNode, updateNode } = useMindMapStore();
@@ -32,6 +31,11 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
 
   useEffect(() => {
     const shouldShowMenu = isHoveringSparkleButton || isHoveringMenu;
+    
+    if (hideTimeout.current) {
+      clearTimeout(hideTimeout.current);
+      hideTimeout.current = null;
+    }
 
     if (shouldShowMenu && !showMenu) {
       setShowMenu(true);
@@ -46,9 +50,8 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
         clearTimeout(hideTimeout.current);
       }
     };
-  }, [isHoveringSparkleButton, isHoveringMenu]);
+  }, [isHoveringSparkleButton, isHoveringMenu, showMenu]);
 
-  // メニューの位置を調整する関数
   const adjustMenuPosition = () => {
     if (menuRef.current) {
       const rect = menuRef.current.getBoundingClientRect();
@@ -192,4 +195,6 @@ export const GenerateMenu: React.FC<GenerateMenuProps> = ({ nodeId, onMenuHover 
       )}
     </div>
   );
-};
+});
+
+GenerateMenu.displayName = 'GenerateMenu';
