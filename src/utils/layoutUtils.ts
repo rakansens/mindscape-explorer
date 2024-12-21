@@ -31,17 +31,14 @@ export const getLayoutedElements = (
     return { nodes, edges };
   }
 
-  // Create hierarchy data structure
   const hierarchyData = createHierarchyData(nodes, edges);
   const root = d3Hierarchy.hierarchy(hierarchyData);
 
-  // Apply tree layout
   const treeLayout = d3Hierarchy.tree<any>()
     .nodeSize([NODE_HEIGHT + (options.nodeSpacing || 100), NODE_WIDTH + (options.rankSpacing || 200)]);
 
   treeLayout(root);
 
-  // Transform coordinates based on direction
   const isHorizontal = options.direction === 'LR' || options.direction === 'RL';
   const layoutedNodes = nodes.map(node => {
     const hierarchyNode = root.find(d => d.data.id === node.id);
@@ -60,17 +57,13 @@ export const getLayoutedElements = (
 
     return {
       ...node,
-      position: {
-        x: x,
-        y: y
-      }
+      position: { x, y }
     };
   });
 
   return { nodes: layoutedNodes, edges };
 };
 
-// Helper function to create hierarchy data structure
 const createHierarchyData = (nodes: Node<NodeData>[], edges: Edge[]) => {
   const rootNode = nodes.find(node => !edges.some(edge => edge.target === node.id));
   if (!rootNode) return { id: 'root', children: [] };
@@ -118,6 +111,68 @@ export const getCircleLayout = (
   });
 
   return { nodes: layoutedNodes, edges };
+};
+
+export const getRadialLayout = (
+  nodes: Node<NodeData>[],
+  edges: Edge[],
+  width: number,
+  height: number
+) => {
+  if (!nodes.length) return { nodes, edges };
+
+  const hierarchyData = createHierarchyData(nodes, edges);
+  const root = d3Hierarchy.hierarchy(hierarchyData);
+
+  const radius = Math.min(width, height) / 2 - PADDING;
+  
+  const radialLayout = d3Hierarchy.tree<any>()
+    .size([2 * Math.PI, radius])
+    .separation((a, b) => (a.parent === b.parent ? 1 : 2) / a.depth);
+
+  radialLayout(root);
+
+  const centerX = width / 2;
+  const centerY = height / 2;
+
+  const layoutedNodes = nodes.map(node => {
+    const hierarchyNode = root.find(d => d.data.id === node.id);
+    if (!hierarchyNode) return node;
+
+    const x = centerX + hierarchyNode.y * Math.cos(hierarchyNode.x - Math.PI / 2);
+    const y = centerY + hierarchyNode.y * Math.sin(hierarchyNode.x - Math.PI / 2);
+
+    return {
+      ...node,
+      position: { x, y },
+      // Calculate natural handle positions based on parent-child relationship
+      data: {
+        ...node.data,
+        sourceHandlePosition: hierarchyNode.parent 
+          ? Math.atan2(
+              y - (centerY + hierarchyNode.parent.y * Math.sin(hierarchyNode.parent.x - Math.PI / 2)),
+              x - (centerX + hierarchyNode.parent.y * Math.cos(hierarchyNode.parent.x - Math.PI / 2))
+            ) * (180 / Math.PI)
+          : 0
+      }
+    };
+  });
+
+  // Update edges with natural curves
+  const layoutedEdges = edges.map(edge => {
+    const sourceNode = layoutedNodes.find(n => n.id === edge.source);
+    const targetNode = layoutedNodes.find(n => n.id === edge.target);
+    
+    if (!sourceNode || !targetNode) return edge;
+
+    return {
+      ...edge,
+      type: 'smoothstep',
+      animated: true
+    };
+  });
+
+  return { nodes: layoutedNodes, edges: layoutedEdges };
 };
 
 export const applyForceLayout = (

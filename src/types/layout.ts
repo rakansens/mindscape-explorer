@@ -1,4 +1,4 @@
-export type LayoutType = 'layered' | 'force' | 'tree' | 'circle' | 'orthogonal' | 'horizontal';
+export type LayoutType = 'layered' | 'force' | 'tree' | 'circle' | 'orthogonal' | 'horizontal' | 'radial';
 
 export interface LayoutConfig {
   type: LayoutType;
