@@ -124,7 +124,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
           getNodeThemeStyle(level, theme),
           data.selected ? "ring-2 ring-primary" : "",
           data.isGenerating ? "animate-pulse scale-105" : "",
-          !data.showBox ? "border-0 shadow-none" : "", // Add this line to handle box visibility
+          !data.showBox ? "border-0 shadow-none bg-transparent" : "", // 修正：背景も透明に
           "hover:shadow-xl transition-all duration-300 transform relative"
         )}
         onMouseEnter={() => setIsHoveringNode(true)}
