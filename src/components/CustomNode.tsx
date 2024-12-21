@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, memo, useCallback } from 'react';
 import { useMindMapStore } from '../store/mindMapStore';
 import { useViewStore } from '../store/viewStore';
 import { getNodeLevel } from '../utils/nodeUtils';
@@ -20,7 +20,7 @@ interface CustomNodeProps {
   yPos: number;
 }
 
-const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
+const CustomNode: React.FC<CustomNodeProps> = memo(({ data, id }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(data.label);
   const [showButton, setShowButton] = useState(false);
@@ -64,9 +64,9 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
         clearTimeout(hideTimeout.current);
       }
     };
-  }, [isHoveringNode, isHoveringMenu]);
+  }, [isHoveringNode, isHoveringMenu, id, store]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Tab') {
       e.preventDefault();
       const currentNode = store.nodes.find(n => n.id === id);
@@ -75,9 +75,9 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
         store.addNode(currentNode, '新しいトピック', newPosition);
       }
     }
-  };
+  }, [id, store]);
 
-  const handleCodePreview = () => {
+  const handleCodePreview = useCallback(() => {
     if (data.detailedText) {
       const codeLines = data.detailedText.split('\n');
       const codes: { html?: string; css?: string; javascript?: string } = {};
@@ -98,24 +98,24 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
       setPreviewCodes(codes);
       setShowCodePreview(true);
     }
-  };
+  }, [data.detailedText]);
+
+  const handleNodeClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    store.selectNode(id);
+  }, [id, store]);
+
+  const handleDoubleClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsEditing(true);
+  }, []);
 
   if (!data) {
     console.warn(`Node ${id} has no data`);
     return null;
   }
-
-  const handleNodeClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    store.selectNode(id);
-  };
-
-  const handleDoubleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsEditing(true);
-  };
 
   return (
     <NodeContextMenu nodeId={id}>
@@ -180,6 +180,8 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id }) => {
       </div>
     </NodeContextMenu>
   );
-};
+});
+
+CustomNode.displayName = 'CustomNode';
 
 export default CustomNode;

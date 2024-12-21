@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { EdgeProps, getBezierPath, getSmoothStepPath, Position } from 'reactflow';
 import { useViewStore } from '../store/viewStore';
 
@@ -10,7 +10,7 @@ interface CustomEdgeProps extends EdgeProps {
   targetHandle?: string;
 }
 
-const CustomEdge: React.FC<CustomEdgeProps> = ({
+const CustomEdge: React.FC<CustomEdgeProps> = memo(({
   id,
   sourceX,
   sourceY,
@@ -25,7 +25,7 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
 }) => {
   const { edgeStyle, lineStyle, theme } = useViewStore();
 
-  const getEdgeColor = () => {
+  const getEdgeColor = useMemo(() => {
     switch(theme) {
       case 'dark':
         return 'rgba(255, 255, 255, 0.7)';
@@ -46,9 +46,9 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
       default:
         return 'rgba(59, 130, 246, 0.7)';
     }
-  };
+  }, [theme]);
 
-  const getHandlePositions = () => {
+  const { sourcePos, targetPos } = useMemo(() => {
     const dx = targetX - sourceX;
     const dy = targetY - sourceY;
     
@@ -74,11 +74,9 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
         ? { sourcePos: Position.Bottom, targetPos: Position.Top }
         : { sourcePos: Position.Top, targetPos: Position.Bottom };
     }
-  };
+  }, [sourceX, sourceY, targetX, targetY, sourceHandle, targetHandle]);
 
-  const { sourcePos, targetPos } = getHandlePositions();
-
-  const getPath = () => {
+  const path = useMemo(() => {
     const params = {
       sourceX,
       sourceY,
@@ -114,11 +112,11 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
           curvature: 0.3,
         })[0];
     }
-  };
+  }, [sourceX, sourceY, targetX, targetY, sourcePos, targetPos, edgeStyle]);
 
-  const getLineStyle = () => {
+  const lineStyleProps = useMemo(() => {
     const baseWidth = 2;
-    const color = getEdgeColor();
+    const color = getEdgeColor;
 
     switch (lineStyle) {
       case 'double':
@@ -156,7 +154,7 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
           opacity: 1,
         };
     }
-  };
+  }, [lineStyle, getEdgeColor]);
 
   return (
     <>
@@ -185,12 +183,14 @@ const CustomEdge: React.FC<CustomEdgeProps> = ({
 
       <path
         id={id}
-        style={getLineStyle()}
+        style={lineStyleProps}
         className={`react-flow__edge-path ${data?.animated ? 'animated' : ''}`}
-        d={getPath()}
+        d={path}
       />
     </>
   );
-};
+});
+
+CustomEdge.displayName = 'CustomEdge';
 
 export default CustomEdge;
