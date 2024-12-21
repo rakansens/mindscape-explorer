@@ -12,6 +12,7 @@ import { useFileStore } from '../store/fileStore';
 import { useViewStore } from '../store/viewStore';
 import CustomNode from './CustomNode';
 import CustomEdge from './CustomEdge';
+import { INITIAL_NODE } from '../constants';
 import 'reactflow/dist/style.css';
 
 const nodeTypes = {
@@ -27,6 +28,13 @@ export const MindMap = () => {
   const { layout, applyLayout } = useLayoutStore();
   const { activeFileId, items } = useFileStore();
   const { theme, showMinimap } = useViewStore();
+
+  // 初期ノードがない場合は追加
+  useEffect(() => {
+    if (nodes.length === 0) {
+      updateNodes([INITIAL_NODE]);
+    }
+  }, []);
 
   const applyLayoutWithFit = (currentNodes: any[], currentEdges: any[]) => {
     try {
