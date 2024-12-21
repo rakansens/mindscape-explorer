@@ -41,23 +41,18 @@ const CustomNode = memo(({ data, id }: CustomNodeProps) => {
   const level = getNodeLevel(store.edges, id);
 
   useEffect(() => {
-    const shouldShowButton = isHoveringNode || isHoveringMenu;
-    
-    if (hideTimeout.current) {
-      clearTimeout(hideTimeout.current);
-    }
-
-    if (shouldShowButton) {
+    if (!isHoveringNode && !isHoveringMenu) {
+      hideTimeout.current = setTimeout(() => {
+        setShowButton(false);
+        store.updateNode(id, { selected: false });
+      }, 1000);
+    } else {
+      if (hideTimeout.current) {
+        clearTimeout(hideTimeout.current);
+      }
       setShowButton(true);
       store.updateNode(id, { selected: true });
     }
-
-    hideTimeout.current = setTimeout(() => {
-      if (!isHoveringNode && !isHoveringMenu) {
-        setShowButton(false);
-        store.updateNode(id, { selected: false });
-      }
-    }, 1000);
 
     return () => {
       if (hideTimeout.current) {

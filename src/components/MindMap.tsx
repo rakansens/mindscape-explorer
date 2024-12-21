@@ -111,7 +111,6 @@ export const MindMap = () => {
   const handleConnect = useCallback((params: Connection) => {
     onConnect({
       ...params,
-      animated: true,
       style: { stroke: theme === 'dark' ? '#ffffff' : '#000000' }
     });
   }, [onConnect, theme]);
