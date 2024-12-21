@@ -15,8 +15,8 @@ interface NodeContextMenuProps {
 
 export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({ children, nodeId }) => {
   const store = useMindMapStore();
-  const nodes = store.nodes;
-  const showBox = nodes.some(node => node.data.showBox !== false); // デフォルトはtrue
+  const node = store.nodes.find(n => n.id === nodeId);
+  const showBox = node?.data.showBox !== false; // デフォルトはtrue
 
   const handleAddDescription = () => {
     const node = store.nodes.find(n => n.id === nodeId);
@@ -29,13 +29,8 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({ children, node
   };
 
   const handleToggleBox = () => {
-    // すべてのノードのボックス表示を切り替え
-    const newShowBox = !showBox;
-    store.nodes.forEach(node => {
-      store.updateNode(node.id, {
-        ...node.data,
-        showBox: newShowBox
-      });
+    store.updateNode(nodeId, {
+      showBox: !showBox
     });
   };
 
