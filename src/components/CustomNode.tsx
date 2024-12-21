@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, memo, useCallback } from 'react';
+import React, { useState, useRef, useCallback, memo } from 'react';
 import { useMindMapStore } from '../store/mindMapStore';
 import { useViewStore } from '../store/viewStore';
 import { getNodeLevel } from '../utils/nodeUtils';
@@ -36,11 +36,7 @@ const CustomNode = memo(({ data, id }: CustomNodeProps) => {
   const level = getNodeLevel(store.edges, id);
 
   const handleNodeVisibility = useCallback((isVisible: boolean) => {
-    if (isVisible) {
-      store.updateNode(id, { selected: true });
-    } else {
-      store.updateNode(id, { selected: false });
-    }
+    store.updateNode(id, { selected: isVisible });
   }, [id, store]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
