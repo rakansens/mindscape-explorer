@@ -1,5 +1,5 @@
 import { Node, Edge } from 'reactflow';
-import { NodeData } from '../types/node';
+import { NodeData } from '../../types/node';
 import { nanoid } from 'nanoid';
 
 export const addNodeOperation = (

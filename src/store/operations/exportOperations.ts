@@ -1,5 +1,5 @@
 import { Node, Edge } from 'reactflow';
-import { NodeData } from '../types/node';
+import { NodeData } from '../../types/node';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 

@@ -1,5 +1,5 @@
 import { Node, Edge } from 'reactflow';
-import { NodeData } from '../types/node';
+import { NodeData } from '../../types/node';
 
 export const saveMapOperation = (nodes: Node<NodeData>[], edges: Edge[]) => {
   localStorage.setItem('mindmap', JSON.stringify({ nodes, edges }));
