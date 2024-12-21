@@ -72,7 +72,7 @@ const CustomNode = memo(({ data, id }: CustomNodeProps) => {
             const siblingNodes = store.nodes.filter(n => 
               store.edges.some(e => e.source === parentNode.id && e.target === n.id)
             );
-            const newPosition = calculateNewNodePosition(parentNode, siblingNodes.length, store.edges);
+            const newPosition = calculateNewNodePosition(parentNode, siblingNodes, store.edges);
             store.addNode(parentNode, '新しいトピック', newPosition);
           }
         }
