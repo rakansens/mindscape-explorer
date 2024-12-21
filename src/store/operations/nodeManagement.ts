@@ -1,71 +1,39 @@
 import { Node, Edge } from 'reactflow';
 import { NodeData } from '../../types/node';
-import { nanoid } from 'nanoid';
 
-export const addNodeOperation = (
-  nodes: Node<NodeData>[],
-  edges: Edge[],
-  parentNode: Node<NodeData>,
-  label: string,
-  position?: { x: number; y: number },
-  additionalData: Partial<NodeData> = {}
-) => {
-  const newNode: Node<NodeData> = {
-    id: nanoid(),
-    type: 'custom',
-    position: position || { x: 0, y: 0 },
-    data: {
-      label,
-      isGenerating: false,
-      isAppearing: false,
-      selected: false,
-      ...additionalData
-    },
+export const addNode = (nodes: Node<NodeData>[], newNode: Node<NodeData>): Node<NodeData>[] => {
+  return [...nodes, newNode];
+};
+
+export const updateNode = (nodes: Node<NodeData>[], updatedNode: Node<NodeData>): Node<NodeData>[] => {
+  return nodes.map(node => (node.id === updatedNode.id ? updatedNode : node));
+};
+
+export const removeNode = (nodes: Node<NodeData>[], edges: Edge[], nodeId: string): { nodes: Node<NodeData>[]; edges: Edge[] } => {
+  const nodesToRemove = new Set<string>();
+  
+  const collectDescendantIds = (currentNodeId: string, visited = new Set<string>()) => {
+    if (visited.has(currentNodeId)) return;
+    
+    visited.add(currentNodeId);
+    nodesToRemove.add(currentNodeId);
+
+    edges.forEach(edge => {
+      if (edge.source === currentNodeId) {
+        collectDescendantIds(edge.target, visited);
+      }
+    });
   };
 
-  const newEdge = parentNode
-    ? {
-        id: `${parentNode.id}-${newNode.id}`,
-        source: parentNode.id,
-        target: newNode.id,
-        type: 'custom',
-      }
-    : null;
+  collectDescendantIds(nodeId);
+
+  const filteredNodes = nodes.filter(node => !nodesToRemove.has(node.id));
+  const filteredEdges = edges.filter(edge => 
+    !nodesToRemove.has(edge.source) && !nodesToRemove.has(edge.target)
+  );
 
   return {
-    nodes: [...nodes, newNode],
-    edges: newEdge ? [...edges, newEdge] : edges,
-    newNode,
+    nodes: filteredNodes,
+    edges: filteredEdges
   };
-};
-
-export const updateNodeOperation = (
-  nodes: Node<NodeData>[],
-  nodeId: string,
-  updates: Partial<NodeData>
-) => {
-  return nodes.map(node =>
-    node.id === nodeId
-      ? {
-          ...node,
-          data: {
-            ...node.data,
-            ...updates
-          }
-        }
-      : node
-  );
-};
-
-export const selectNodeOperation = (
-  nodes: Node<NodeData>[],
-  selectedId: string
-) => {
-  return nodes.map(node => ({
-    ...node,
-    data: {
-      ...node.data,
-      selected: node.id === selectedId
-    }
-  }));
 };
