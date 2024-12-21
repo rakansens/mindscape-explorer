@@ -1,8 +1,9 @@
 import { create } from 'zustand';
-import { Connection, applyNodeChanges, applyEdgeChanges } from 'reactflow';
+import { Connection, applyNodeChanges, applyEdgeChanges, Edge } from 'reactflow';
 import { MindMapStore, ModelConfig } from './mindmap/types';
 import * as nodeOps from './mindmap/nodeOperations';
 import * as fileOps from './mindmap/fileOperations';
+import { v4 as uuidv4 } from 'uuid';
 
 export const useMindMapStore = create<MindMapStore>((set, get) => ({
   // 初期状態
@@ -26,7 +27,18 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
 
   onConnect: (connection: Connection) => {
     set((state) => ({
-      edges: [...state.edges, { ...connection, type: 'custom', animated: true }]
+      edges: [
+        ...state.edges,
+        {
+          id: uuidv4(),
+          source: connection.source || '',
+          target: connection.target || '',
+          sourceHandle: connection.sourceHandle || undefined,
+          targetHandle: connection.targetHandle || undefined,
+          type: 'custom',
+          animated: true
+        } as Edge
+      ]
     }));
   },
 
