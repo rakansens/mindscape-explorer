@@ -13,10 +13,10 @@ import { useGenerateMenuState } from './generate/GenerateMenuState';
 
 interface GenerateMenuProps {
   nodeId: string;
-  onMenuHover?: (isHovering: boolean) => void;
+  onVisibilityChange?: (isVisible: boolean) => void;
 }
 
-export const GenerateMenu = React.memo(({ nodeId, onMenuHover }: GenerateMenuProps) => {
+export const GenerateMenu = React.memo(({ nodeId, onVisibilityChange }: GenerateMenuProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { generateSubTopics } = useOpenAI();
   const { nodes, edges, addNode, updateNode } = useMindMapStore();
@@ -87,18 +87,20 @@ export const GenerateMenu = React.memo(({ nodeId, onMenuHover }: GenerateMenuPro
 
   const handleMouseEnter = useCallback(() => {
     setVisible(true);
-    onMenuHover?.(true);
-  }, [onMenuHover, setVisible]);
+    onVisibilityChange?.(true);
+  }, [onVisibilityChange, setVisible]);
 
   const handleMouseLeave = useCallback(() => {
     setVisible(false);
-    onMenuHover?.(false);
-  }, [onMenuHover, setVisible]);
+    onVisibilityChange?.(false);
+  }, [onVisibilityChange, setVisible]);
 
   return (
     <div 
-      className="relative flex flex-col gap-1 z-50" 
+      className="absolute -right-4 top-1/2 -translate-y-1/2 translate-x-full flex flex-col gap-1 z-50" 
       onClick={e => e.stopPropagation()}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <div className="flex flex-col gap-1">
         <Button
@@ -115,8 +117,6 @@ export const GenerateMenu = React.memo(({ nodeId, onMenuHover }: GenerateMenuPro
           variant="ghost"
           size="icon"
           className="w-8 h-8 p-0 bg-white/80 backdrop-blur-sm shadow-lg border border-gray-200 hover:bg-white"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
         >
           <Sparkles className="w-4 h-4 text-gray-600" />
         </Button>

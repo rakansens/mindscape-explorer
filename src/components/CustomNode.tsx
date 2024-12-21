@@ -23,9 +23,6 @@ interface CustomNodeProps {
 const CustomNode = memo(({ data, id }: CustomNodeProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(data.label);
-  const [showButton, setShowButton] = useState(false);
-  const [isHoveringNode, setIsHoveringNode] = useState(false);
-  const [isHoveringMenu, setIsHoveringMenu] = useState(false);
   const [showCodePreview, setShowCodePreview] = useState(false);
   const [previewCodes, setPreviewCodes] = useState<{
     html?: string;
@@ -33,36 +30,18 @@ const CustomNode = memo(({ data, id }: CustomNodeProps) => {
     javascript?: string;
   }>({});
   
-  const hideTimeout = useRef<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  
   const store = useMindMapStore();
   const { theme } = useViewStore();
   const level = getNodeLevel(store.edges, id);
 
-  const updateNodeVisibility = useCallback(() => {
-    if (!isHoveringNode && !isHoveringMenu) {
-      hideTimeout.current = setTimeout(() => {
-        setShowButton(false);
-        store.updateNode(id, { selected: false });
-      }, 1000);
-    } else {
-      if (hideTimeout.current) {
-        clearTimeout(hideTimeout.current);
-      }
-      setShowButton(true);
+  const handleNodeVisibility = useCallback((isVisible: boolean) => {
+    if (isVisible) {
       store.updateNode(id, { selected: true });
+    } else {
+      store.updateNode(id, { selected: false });
     }
-  }, [isHoveringNode, isHoveringMenu, id, store]);
-
-  useEffect(() => {
-    updateNodeVisibility();
-    return () => {
-      if (hideTimeout.current) {
-        clearTimeout(hideTimeout.current);
-      }
-    };
-  }, [updateNodeVisibility]);
+  }, [id, store]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Tab') {
@@ -124,8 +103,6 @@ const CustomNode = memo(({ data, id }: CustomNodeProps) => {
           data.isGenerating ? "animate-pulse scale-105" : "",
           "hover:shadow-xl transition-all duration-300 transform relative"
         )}
-        onMouseEnter={() => setIsHoveringNode(true)}
-        onMouseLeave={() => setIsHoveringNode(false)}
         onClick={handleNodeClick}
         onDoubleClick={handleDoubleClick}
         onKeyDown={handleKeyDown}
@@ -154,16 +131,10 @@ const CustomNode = memo(({ data, id }: CustomNodeProps) => {
           <NodePreviewButton onClick={handleCodePreview} />
         )}
 
-        {showButton && (
-          <div className="absolute -right-4 top-1/2 -translate-y-1/2 translate-x-full">
-            <GenerateMenu
-              nodeId={id}
-              onMenuHover={(isHovering) => {
-                setIsHoveringMenu(isHovering);
-              }}
-            />
-          </div>
-        )}
+        <GenerateMenu
+          nodeId={id}
+          onVisibilityChange={handleNodeVisibility}
+        />
 
         <CodePreviewModal
           isOpen={showCodePreview}
