@@ -1,18 +1,21 @@
 import { create } from 'zustand';
-import { LayoutType } from '../types/layout';
+import { LayoutType, LayoutConfig } from '../types/layout';
+import { Node, Edge } from 'reactflow';
+import { getLayoutedElements, getCircleLayout, getRadialLayout, applyForceLayout } from '../utils/layoutUtils';
 
 interface LayoutState {
-  layout: {
-    type: LayoutType;
-    isCompact: boolean;
-  };
-  setLayout: (layout: { type: LayoutType }) => void;
+  layout: LayoutConfig;
+  setLayout: (layout: Partial<LayoutConfig>) => void;
   toggleCompactMode: () => void;
+  applyLayout: (nodes: Node[], edges: Edge[], width: number, height: number) => { nodes: Node[]; edges: Edge[] };
 }
 
-export const useLayoutStore = create<LayoutState>((set) => ({
+export const useLayoutStore = create<LayoutState>((set, get) => ({
   layout: {
     type: 'horizontal',
+    direction: 'LR',
+    nodeSpacing: 100,
+    rankSpacing: 200,
     isCompact: false,
   },
   setLayout: (newLayout) =>
@@ -21,6 +24,29 @@ export const useLayoutStore = create<LayoutState>((set) => ({
     })),
   toggleCompactMode: () =>
     set((state) => ({
-      layout: { ...state.layout, isCompact: !state.layout.isCompact },
+      layout: {
+        ...state.layout,
+        isCompact: !state.layout.isCompact,
+        nodeSpacing: !state.layout.isCompact ? 60 : 100,
+        rankSpacing: !state.layout.isCompact ? 120 : 200,
+      },
     })),
+  applyLayout: (nodes, edges, width, height) => {
+    const { layout } = get();
+    
+    switch (layout.type) {
+      case 'circle':
+        return getCircleLayout(nodes, edges, width, height);
+      case 'radial':
+        return getRadialLayout(nodes, edges, width, height);
+      case 'force':
+        return applyForceLayout(nodes, edges, width, height);
+      default:
+        return getLayoutedElements(nodes, edges, {
+          direction: layout.direction || 'LR',
+          nodeSpacing: layout.nodeSpacing,
+          rankSpacing: layout.rankSpacing,
+        });
+    }
+  },
 }));

@@ -79,7 +79,7 @@ export const MindMap = () => {
     if (nodes.length > 0) {
       applyLayoutWithFit(nodes, edges);
     }
-  }, [layout.type, layout.direction, layout.nodeSpacing, layout.rankSpacing]);
+  }, [layout.type, layout.direction, layout.nodeSpacing, layout.rankSpacing, layout.isCompact]);
 
   useEffect(() => {
     if (activeFileId) {

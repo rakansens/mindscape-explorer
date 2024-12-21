@@ -5,4 +5,5 @@ export interface LayoutConfig {
   direction?: 'TB' | 'LR' | 'RL';
   nodeSpacing?: number;
   rankSpacing?: number;
+  isCompact: boolean;
 }
