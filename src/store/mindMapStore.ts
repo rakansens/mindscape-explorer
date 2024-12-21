@@ -1,18 +1,16 @@
 import { create } from 'zustand';
-import { Connection, applyNodeChanges, applyEdgeChanges, Edge } from 'reactflow';
-import { MindMapStore, ModelConfig } from './mindmap/types';
-import * as nodeOps from './mindmap/nodeOperations';
+import { Connection, applyNodeChanges, applyEdgeChanges } from 'reactflow';
+import { MindMapStore } from './mindmap/types';
+import { createEdge } from '../utils/edgeManagement';
+import { addNodeWithPosition, updateNodeWithData } from '../utils/nodeManagement';
 import * as fileOps from './mindmap/fileOperations';
-import { v4 as uuidv4 } from 'uuid';
 
 export const useMindMapStore = create<MindMapStore>((set, get) => ({
-  // 初期状態
   nodes: [],
   edges: [],
   modelConfig: undefined,
   selectedNodeId: null,
 
-  // ノードの基本操作
   onNodesChange: (changes) => {
     set((state) => ({
       nodes: applyNodeChanges(changes, state.nodes)
@@ -26,18 +24,17 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
   },
 
   onConnect: (connection: Connection) => {
+    if (!connection.source || !connection.target) return;
+    
     set((state) => ({
       edges: [
         ...state.edges,
-        {
-          id: uuidv4(),
-          source: connection.source || '',
-          target: connection.target || '',
-          sourceHandle: connection.sourceHandle || undefined,
-          targetHandle: connection.targetHandle || undefined,
-          type: 'custom',
-          animated: true
-        } as Edge
+        createEdge(
+          connection.source,
+          connection.target,
+          connection.sourceHandle,
+          connection.targetHandle
+        )
       ]
     }));
   },
@@ -45,33 +42,44 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
   updateNodes: (nodes) => set({ nodes }),
   updateEdges: (edges) => set({ edges }),
 
-  // 個別ノードの操作
   updateNode: (id, data) => {
-    set((state) => nodeOps.updateNode(state, id, data));
+    set((state) => ({
+      nodes: updateNodeWithData(state.nodes, id, data)
+    }));
   },
 
   updateNodeText: (id, text) => {
-    set((state) => nodeOps.updateNodeText(state, id, text));
+    set((state) => ({
+      nodes: updateNodeWithData(state.nodes, id, { label: text })
+    }));
   },
 
   addNode: (parentNode, label, position) => {
     let newNode;
     set((state) => {
-      const result = nodeOps.addNode(state, parentNode, label, position);
-      newNode = result.newNode;
+      newNode = addNodeWithPosition(state.nodes, parentNode, label, position);
       return {
-        nodes: result.nodes,
-        edges: result.edges,
+        nodes: [...state.nodes, newNode],
+        edges: [
+          ...state.edges,
+          createEdge(parentNode.id, newNode.id)
+        ]
       };
     });
     return newNode!;
   },
 
   selectNode: (id) => {
-    set((state) => nodeOps.selectNode(state, id));
+    set((state) => ({
+      selectedNodeId: id,
+      nodes: state.nodes.map((node) => ({
+        ...node,
+        data: { ...node.data, selected: node.id === id },
+      })),
+    }));
   },
 
-  // ファイル操作
+  // ファイル操作関連のメソッドは既存のものを維持
   saveMap: () => {
     const state = get();
     fileOps.saveMap(state);
@@ -104,6 +112,5 @@ export const useMindMapStore = create<MindMapStore>((set, get) => ({
     }
   },
 
-  // モデル設定
-  setModelConfig: (config: ModelConfig) => set({ modelConfig: config }),
+  setModelConfig: (config) => set({ modelConfig: config }),
 }));
