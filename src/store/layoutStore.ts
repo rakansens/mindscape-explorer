@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { LayoutType, LayoutConfig } from '../types/layout';
-import { getLayoutedElements, getCircleLayout, getOrthogonalLayout, getRadialLayout } from '../utils/layoutUtils';
+import { getLayoutedElements, getCircleLayout, getOrthogonalLayout, getRadialLayout, applyForceLayout } from '../utils/layoutUtils';
 import { Node, Edge } from 'reactflow';
 import { NodeData } from '../types/node';
 
