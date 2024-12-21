@@ -5,7 +5,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { MessageSquare, Square, BoxOff } from 'lucide-react';
+import { MessageSquare, Square, X } from 'lucide-react';
 import { useMindMapStore } from '../../store/mindMapStore';
 
 interface NodeContextMenuProps {
@@ -50,7 +50,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({ children, node
         <ContextMenuItem onClick={handleToggleBox}>
           {showBox ? (
             <>
-              <BoxOff className="mr-2 h-4 w-4" />
+              <X className="mr-2 h-4 w-4" />
               ボックスを非表示
             </>
           ) : (
