@@ -10,7 +10,7 @@ interface CustomEdgeProps extends EdgeProps {
   targetHandle?: string;
 }
 
-const CustomEdge: React.FC<CustomEdgeProps> = memo(({
+const CustomEdge = memo(({
   id,
   sourceX,
   sourceY,
@@ -22,7 +22,7 @@ const CustomEdge: React.FC<CustomEdgeProps> = memo(({
   data,
   sourceHandle,
   targetHandle,
-}) => {
+}: CustomEdgeProps) => {
   const { edgeStyle, lineStyle, theme } = useViewStore();
 
   const getEdgeColor = useMemo(() => {

@@ -20,7 +20,7 @@ interface CustomNodeProps {
   yPos: number;
 }
 
-const CustomNode: React.FC<CustomNodeProps> = memo(({ data, id }) => {
+const CustomNode = memo(({ data, id }: CustomNodeProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(data.label);
   const [showButton, setShowButton] = useState(false);
