@@ -27,8 +27,9 @@ export const useLayoutStore = create<LayoutState>((set, get) => ({
       layout: {
         ...state.layout,
         isCompact: !state.layout.isCompact,
-        nodeSpacing: !state.layout.isCompact ? 60 : 100,
-        rankSpacing: !state.layout.isCompact ? 120 : 200,
+        // コンパクトモード時の間隔をより狭く設定
+        nodeSpacing: !state.layout.isCompact ? 30 : 100,  // 60 -> 30
+        rankSpacing: !state.layout.isCompact ? 80 : 200,  // 120 -> 80
       },
     })),
   applyLayout: (nodes, edges, width, height) => {
